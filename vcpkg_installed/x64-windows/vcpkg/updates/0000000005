@@ -1,7 +1,0 @@
-Package: vcpkg-boost
-Version: 2025-03-29
-Depends: vcpkg-cmake, vcpkg-cmake-config
-Architecture: x64-windows
-Multi-Arch: same
-Abi: b04845e7f6fcded5f50dcd7c8c5cdbea4931a1f8d8500c8f14bbc83e0c48ba03
-Status: install ok installed

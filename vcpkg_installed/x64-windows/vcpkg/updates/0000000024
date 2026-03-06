@@ -1,8 +1,0 @@
-Package: boost-io
-Version: 1.89.0
-Depends: boost-cmake, boost-config, boost-headers
-Architecture: x64-windows
-Multi-Arch: same
-Abi: c4c3076377f87cf6207ea4ded968cfe971e20c8bc7f8db03cb5464c99c449fc2
-Description: Boost io module
-Status: install ok half-installed

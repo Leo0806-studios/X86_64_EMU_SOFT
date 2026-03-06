@@ -1,8 +1,0 @@
-Package: boost-program-options
-Version: 1.89.0
-Depends: boost-any, boost-bind, boost-cmake, boost-config, boost-core, boost-detail, boost-function, boost-headers, boost-iterator, boost-lexical-cast, boost-smart-ptr, boost-static-assert, boost-throw-exception, boost-tokenizer, boost-type-traits
-Architecture: x64-windows
-Multi-Arch: same
-Abi: 70c88c5cb8b5995ff700cc4d2a578979467bf269f6682b45ced2b9f4cc60d2a0
-Description: Boost program_options module
-Status: install ok installed
