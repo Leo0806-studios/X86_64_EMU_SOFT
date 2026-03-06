@@ -1,0 +1,12 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path="Fahrplan.md" />
+  </Folder>
+  <Project Path="X86_64_EMU_SOFT/X86_64_EMU_SOFT.vcxproj" Id="f02503e6-14cc-4863-b0d5-b68aa6ed8743" />
+  <Project Path="X86_64_EMU_SOFT_EXE/X86_64_EMU_SOFT_EXE.vcxproj" Id="0dced375-fe17-499c-acd4-38abc12d2286" />
+  <Project Path="X86_64_EMU_SOFT_TEST/X86_64_EMU_SOFT_TEST.vcxproj" />
+</Solution>
