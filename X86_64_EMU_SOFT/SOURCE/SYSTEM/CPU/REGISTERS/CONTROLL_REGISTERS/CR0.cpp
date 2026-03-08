@@ -6,7 +6,7 @@
 
 namespace X86_64_EMU_SOFT
 {
-	namespace CPU {
+	namespace SYSTEM::CPU {
 		namespace REGISTERS
 		{
 			namespace {

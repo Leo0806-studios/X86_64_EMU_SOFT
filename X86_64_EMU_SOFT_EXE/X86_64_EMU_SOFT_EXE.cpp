@@ -1,11 +1,12 @@
 // X86_64_EMU_SOFT_EXE.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <iostream>
+#include "SYSTEM/SYSTEM_STATE.h"
 
-int main()
+int main(int argc,const char** argv)
 {
-    std::cout << "Hello World!\n";
+	X86_64_EMU_SOFT::SYSTEM::System EmulatorState(argc, argv);
+	EmulatorState.Start();
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\CMD_PARSE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\CPU_STATE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\EXCEPTIONS\GENERAL_PROTECTION_FAULT.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\REGISTERS\CONTROLL_REGISTERS\CR0.h" />
@@ -35,10 +36,15 @@
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\VCORE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\IO_DEVICES\DEVICE_BASE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\IO_DEVICES\MAIN_MEMORY_DEVICE.h" />
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\IO_DEVICES\RESET_ROM.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\MEMORY\MEMORY.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\SYSTEM_STATE.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="SOURCE\HELPERS\CMD_PARSE.cpp" />
+    <ClCompile Include="HEADER\X86_64_EMU_SOFT\SYSTEM\IO_DEVICES\RESET_ROM.cpp" />
+    <ClCompile Include="SOURCE\SYSTEM\MEMORY\MEMORY.cpp" />
+    <ClCompile Include="SOURCE\SYSTEM\CPU\REGISTERS\GPR.cpp" />
     <ClCompile Include="SOURCE\SYSTEM\IO_DEVICES\MAIN_MEMORY_DEVICE.cpp" />
     <ClCompile Include="SOURCE\SYSTEM\CPU\REGISTERS\CONTROLL_REGISTERS\CR0.cpp" />
     <ClCompile Include="SOURCE\STARTUP.cpp" />
@@ -96,6 +102,14 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PublicIncludeDirectories>$(PublicIncludeDirectories)</PublicIncludeDirectories>
+    <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PublicIncludeDirectories>$(PublicIncludeDirectories)</PublicIncludeDirectories>
+    <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
+  </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
   </PropertyGroup>

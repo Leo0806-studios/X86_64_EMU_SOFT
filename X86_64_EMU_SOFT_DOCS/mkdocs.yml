@@ -1,0 +1,28 @@
+site_name: X86_64_EMU_SOFT Documentation
+nav:
+  - Home: index.md
+  - Content: Content.md
+  - About: about.md
+  - 1 Emulator:
+    - 1.2 Comand Line Arguments:
+       - 1.2.1 Basic Syntax: Emulator/Comand_Line_Arguments/Basic_Syntax.md
+       - 1.2.2 Devices: Emulator/Comand_Line_Arguments/Devices.md
+  - 2 API:
+    - 2.0 API: API/API.md
+    - 2.1 X86_64_EMU_SOFT: 
+      - 2.1.0 X86_64_EMU_SOFT namespace: API/X86_64_EMU_SOFT/X86_64_EMU_SOFT.md
+      - 2.1.1 HELPERS:
+        - 2.1.1.0 HELPERS namespace: API/X86_64_EMU_SOFT/HELPERS/HELPERS.md
+        - 2.1.1.9 CmdParse: API/X86_64_EMU_SOFT/HELPERS/CMD_PARSE.md
+      - SYSTEM:
+        - IO_DEVICES:
+          - Device Base: API/X86_64_EMU_SOFT/SYSTEM/IO_DEVICES/DeviceBase.md
+    - 2.2 Device Handlers: API/DeviceHandlers/DeviceHandlers.md
+
+
+theme: readthedocs
+
+
+markdown_extensions:
+  - toc:
+      permalink: "#"

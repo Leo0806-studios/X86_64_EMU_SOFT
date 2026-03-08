@@ -5,6 +5,13 @@
   </Configurations>
   <Folder Name="/Solution Items/">
     <File Path="Fahrplan.md" />
+    <File Path="TEST_REAL.asm" />
+  </Folder>
+  <Folder Name="/Solution Items/RESET_BYTES/">
+    <File Path="RESET_BYTES16.asm" />
+  </Folder>
+  <Folder Name="/Solution Items/TESTS/">
+    <File Path="TEST_REAL.asm" />
   </Folder>
   <Project Path="X86_64_EMU_SOFT/X86_64_EMU_SOFT.vcxproj" Id="f02503e6-14cc-4863-b0d5-b68aa6ed8743" />
   <Project Path="X86_64_EMU_SOFT_EXE/X86_64_EMU_SOFT_EXE.vcxproj" Id="0dced375-fe17-499c-acd4-38abc12d2286" />

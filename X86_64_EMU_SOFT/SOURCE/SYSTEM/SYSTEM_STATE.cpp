@@ -1,53 +1,156 @@
+#include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
+#include <unordered_map>
+
 #include <filesystem>
+#include <fstream>
+#include <iostream>
 #include <limits>
+#include <print>
+#include <string>
+#include "SYSTEM/IO_DEVICES/MAIN_MEMORY_DEVICE.h"
+#include "SYSTEM/IO_DEVICES/RESET_ROM.h"
 #include "SYSTEM/SYSTEM_STATE.h"
 
 namespace X86_64_EMU_SOFT::SYSTEM {
 	namespace {
-		/// <summary>
-		/// parses the command line and returns the variable map
-		/// </summary>
-		/// <param name="argc"></param>
-		/// <param name="argv"></param>
-		/// <returns></returns>
-		boost::program_options::variables_map ParseCMD(int argc, const char** argv) {
-			 namespace bo =boost::program_options;
-			 const char* DeviceDescriptionHelp =
-				 R"(this option describes IO devices in the system
-the format of such descriptors is :
-either
-a filepath to a .deviceInfo file (the data in the file mirrors the normal syntax for the device descriptor)
-or the following
-DeviceName,DeviceType,HandlerBinary,DeviceArg1,DeviceArg2,DeviceArg3,DeviceArg4,DeviceArg5,DeviceArg6
-the whole string must be in qoutes.
-more info to the individual parts
-DeviceName : simply the device wich wil be used to diferentiate defices. might be visible to the guest. must be unique
-DeviceType: : describes which inbuild device type it is or custom. allowed values: RAM, GPU, USB, STORAGE, AUDIO, CRYPT, NETWORK, CUSTOM. for more information consult the manual (1.5.2 DeviceTypes)
-HandlerBinary : custom binary that handles device interaction insted of inbuild versions. For requirements for the handlers pleas consult the manual (2.4.1 Custom Handlers)
-DeviceArg1-6 : information about the device that the emulator must know. for information what those are for the types please consult the manual (2.4.0 Device Identity)
-)";
-			boost::program_options::options_description desc("alowed options");
-			desc.add_options()
-				("StartupMode,M", bo::value<int>()->default_value(16), "sets the startup mode of the emulator,valid options are: 16(real mode), 32(protected mode) and 64(long mode)")
-				("ResetVector,R", bo::value<uint64_t>()->default_value(0xFFFFFFF0), "specefies the adress at wich execution starts. has to be less than UINT32_MAX")
-				("Firmware,F", bo::value<std::filesystem::path>(), "the firmware binary. has to be a flat binary")
-				("ResetBytes,B", bo::value < std::filesystem::path>(), "path to a small flat binary tha gets copied to the reset vector (r) to r+15 . only the first 16 bytes of the binary are copied")
-				("Features,X", bo::value<std::vector<std::string>>(), "specefies wich additional CPU features should be enabled(eg avx, sse,vmx,...). will set the coresponding cpuid bits and enable the registers and instructions")
-				("Device,D", bo::value<std::vector<std::string>>(), DeviceDescriptionHelp)
-				("Preset",bo::value<std::filesystem::path>(),"path to a .cpuPreset file. follows the exact same syntax as CMD arguments. do not recursively pass the same file");
-			bo::variables_map ArgMap;
-			bo::store(bo::parse_command_line(argc, argv, desc), ArgMap);
-			return ArgMap;
-		}
-		[[nodiscard]] bool ValidateCMD(const boost::program_options::variables_map map) {
 
+
+		void PrintDevices(const boost::program_options::variables_map& map) {
+			if (map.count("Device") > 0) {
+				std::print("Printing Devices...\n");
+				for (const auto& device : map["Device"].as<std::vector<std::string>>()) {
+					std::cout << "Device Descriptor: " << device << std::endl;
+				}
+			}
 		}
 
-	}	
-	System::System(int argc, const char* argv[])
+	}
+	bool System::ConstructAndRegisterDevices(const std::vector< std::unordered_map<DeviceDescriptorParts, std::string>>& deviceDescriptors)
 	{
-		boost::program_options::variables_map cmdArgs = ParseCMD(argc,argv)
+		for (const auto& deviceDescriptor : deviceDescriptors) {
 
+
+			if (deviceDescriptor.at(DeviceDescriptorParts::DeviceType) == "MEMORY") {
+				if (!RegisterMemoryDevice(deviceDescriptor)) {
+					std::cerr << "failed to register memory device: ";
+					for (const auto& [part, value] : deviceDescriptor) {
+						std::cerr << value << " ";
+					}
+					std::cerr << std::endl;
+					return false;
+				}
+			}
+			else if (deviceDescriptor.at(DeviceDescriptorParts::DeviceType) == "RESET_ROM") {
+				if (!RegisterResetROMDevice(deviceDescriptor)) {
+					std::cerr << "failed to register reset rom device: ";
+					for (const auto& [part, value] : deviceDescriptor) {
+						std::cerr << value << " ";
+					}
+					std::cerr << std::endl;
+					return false;
+				}
+				
+			}
+			else {
+				std::cerr << "unknown device type: " << deviceDescriptor.at(DeviceDescriptorParts::DeviceType) << std::endl;
+				return false;
+			}
+		}
+		if (!memoryBus->BuildPageTable()) {
+			std::cerr << "failed to build page table" << std::endl;
+			return false;
+		}
+		return true;
+	}
+
+
+	bool System::RegisterMemoryDevice(const std::unordered_map<DeviceDescriptorParts, std::string>& deviceDescriptor)
+	{
+		const uint64_t sizeKB = std::stoull(deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2));
+		std::shared_ptr<IO_DEVICEs::DeviceBase> device = std::make_shared<IO_DEVICEs::MainMemoryDevice>(sizeKB);
+		RegisteredDevices.push_back(device);
+		if (!memoryBus->RegisterIODevice(device, sizeKB * 1024, 0x0)) {
+			return false;
+		}
+		return true;
+	}
+
+	bool System::RegisterResetROMDevice(const std::unordered_map<DeviceDescriptorParts, std::string>& deviceDescriptor)
+	{
+		std::fstream RomFile(deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2), std::ios::binary);
+		if (!RomFile.is_open()) {
+			std::cerr << "failed to open reset rom file: " << deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2) << std::endl;
+			return false;
+		}
+		std::vector<uint8_t> RomData((std::istreambuf_iterator<char>(RomFile)), std::istreambuf_iterator<char>());
+		if (RomData.size() > 0xF) {
+			std::cerr << "reset rom size exceeds 16 bytes: " << RomData.size() << " bytes" << std::endl;
+			return false;
+		}
+		std::shared_ptr<IO_DEVICEs::DeviceBase> device = std::make_shared<IO_DEVICEs::ResetROMDevice>(RomData);
+		RegisteredDevices.push_back(device);
+		if (!memoryBus->RegisterIODevice(device, 0xF, this->cmdArgs.GetArgMap()["ResetVector"].as<uint32_t>())) {
+			return false;
+		}
+
+
+		return true;
+	}
+
+
+
+	System::System(int argc, const char* argv[]) :cmdArgs(argc, argv)
+	{
+		if (!cmdArgs.Validate()) {
+			std::cerr << "invalid command line arguments" << std::endl;
+			exit(1);
+		}
+
+		PrintDevices(cmdArgs.GetArgMap());
+		cpu = std::make_shared<CPU::CPU>();
+		if (!cpu) {
+			std::cerr << "failed to create CPU" << std::endl;
+			exit(1);
+		}
+		std::cout << "CPU created successfully" << std::endl;
+		memoryBus = std::make_shared<MEMORY::MemoryBus>();
+		if (!memoryBus) {
+			std::cerr << "failed to create Memory Bus" << std::endl;
+			exit(1);
+		}
+		std::cout << "Memory Bus created successfully" << std::endl;
+		std::vector< std::unordered_map<DeviceDescriptorParts, std::string>> DeviceDescriptors;
+		for (const auto& descriptor : cmdArgs.GetArgMap()["Device"].as<std::vector<std::string>>()) {
+			std::vector<std::string> parts;
+
+			boost::split(parts, descriptor, boost::is_any_of(","));
+			if (parts.size() != 9) {
+				std::cerr << "invalid device descriptor: " << descriptor << std::endl;
+				exit(1);
+			}
+			std::unordered_map<DeviceDescriptorParts, std::string> deviceDescriptorMap;
+			for (size_t i = 0; i < parts.size() && i < 9; i++) {
+				deviceDescriptorMap[static_cast<DeviceDescriptorParts>(i)] = parts[i];
+			}
+			DeviceDescriptors.push_back(deviceDescriptorMap);
+
+		}
+		if(!ConstructAndRegisterDevices(DeviceDescriptors)){
+			std::cerr << "failed to construct and register devices" << std::endl;
+			exit(1);
+		}
+		std::cout << "Devices constructed and registered successfully" << std::endl;
+		memoryBus->PrintMemoryMap();
+
+
+
+	}
+	bool System::Start()
+	{
+		return false;
+	}
+	System::~System() noexcept
+	{
 	}
 }

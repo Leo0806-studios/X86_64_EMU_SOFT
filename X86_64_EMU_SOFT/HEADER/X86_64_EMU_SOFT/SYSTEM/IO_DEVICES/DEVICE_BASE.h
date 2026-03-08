@@ -4,6 +4,10 @@
 #include <intrin.h>
 namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICEs
 {
+	struct MMOIInfo{
+		uint64_t PreferedBaseAddress;
+		uint64_t PageCount;
+	};
 	class DeviceBase
 	{
 	public:

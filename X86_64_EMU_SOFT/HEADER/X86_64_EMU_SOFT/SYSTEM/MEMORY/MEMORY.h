@@ -1,35 +1,53 @@
 #pragma once
 #include <cstdint>
 #include <memory>
+#include <tuple>
 #include <vector>
 #include "SYSTEM/IO_DEVICES/DEVICE_BASE.h"
 namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 {
 	class MemoryBus {
 	private:
+
+
 		struct PageEntry
 		{
-			IO_DEVICEs::DeviceBase* device;
-			uint64_t pageOffset;//offset inside the current device (this allows for devices with multiple regions to be mapped to the memory bus)
+			struct PageSection {
+				IO_DEVICEs::DeviceBase* device = nullptr;
+				uint64_t DeviceOffset = 0;
+				uint32_t pageOffset = 0;
+				uint32_t size = 0;
+			};
+			std::vector<PageSection> Sections;
+			bool IsPageContiguous()const noexcept;
+			uint64_t GetFrreBytesInPage()const noexcept;
+			std::pair<uint64_t, uint64_t> GetNextFreeSection()const noexcept;
+
 
 		};
-		std::vector<PageEntry> MemoryPages;
-		PageEntry* FindAccesedDevice(uint64_t address) const noexcept;
-		std::vector<std::shared_ptr<IO_DEVICEs::DeviceBase>> RegisteredDevices;
 
+
+
+		std::vector<PageEntry> MemoryPages;
+
+		struct DeviceInfos
+		{
+			std::shared_ptr<IO_DEVICEs::DeviceBase> device;
+			uint64_t sizeBytes = 0;
+			uint64_t baseAdress = 0;//holds prefered base adress untill BuildPageTable is called. after that it holds the actual base adress of the device
+		};
+		std::vector<DeviceInfos> RegisteredDevices;
 	public:
 		/// <summary>
-		/// registers a io device to the Memory Bus. The device will be mapped to the memory bus starting at preferedBaseAdress and will occupy pageCount pages. 
-		/// If preferedBaseAdress is already occupied by another device, the function will try to find the next available address. 
-		/// If no available address is found, the function will return false. The function returns true if the device was successfully registered, false otherwise.
-		/// if not enough consecutive pages are availible it will spill the devices region. the device will get readWrites as if it were a single region
 		/// </summary>
 		/// <param name="device"></param>
 		/// <param name="pageCount"></param>
 		/// <param name="preferedBaseAdress">has to be page aligned </param>
 		/// <returns></returns>
-		[[nodiscard]] bool RegisterIODevice(std::shared_ptr<IO_DEVICEs::DeviceBase> device, uint64_t pageCount,uint64_t preferedBaseAdress);
-		[[nodsicard]] bool UnregisterIODevice(std::shared_ptr<IO_DEVICEs::DeviceBase> device) noexcept;
+		[[nodiscard]] bool RegisterIODevice(std::shared_ptr<IO_DEVICEs::DeviceBase> device, uint64_t sizeBytes, uint64_t preferedBaseAdress);
+
+		[[nodiscard]] bool BuildPageTable() noexcept;
+		[[nodiscard]] bool UnregisterIODevice(std::shared_ptr<IO_DEVICEs::DeviceBase> device) noexcept;
 
 		uint8_t Read8(uint64_t address) const noexcept;
 		uint16_t Read16(uint64_t address) const noexcept;
@@ -39,5 +57,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 		void Write16(uint64_t address, uint16_t value) noexcept;
 		void Write32(uint64_t address, uint32_t value) noexcept;
 		void Write64(uint64_t address, uint64_t value) noexcept;
+
+
+		void PrintMemoryMap() const noexcept;
 	};
 }
