@@ -65,6 +65,45 @@ all MMIO devices have to be registered here and all memory access goes trough it
                 <li>true on success</li>
             </ul>
         </dd>
+    <dt>Read8(uint64_t address)</dt>
+        <dd>
+        <p>Signature: <code> [[nodiscard]] uint8_t Read8(uint64_t address) const noexcept;</code></p>
+        <p>Reads a byte from the specified adress</p>
+        <strong>Parameters</strong>
+            <ul>
+            <li><code> adress </code> - the adress to be read from</li>
+            </ul>
+        </dd>
+    <dt>Read16(uint64_t address)</dt>
+        <dd>
+        <p>Signature: <code> [[nodiscard]] uint16_t Read8(uint64_t address) const noexcept;</code></p>
+        <p>Reads a word from the specified adress</p>
+        <p>bytes crossing into different mmio reagions will be read from the coresponding devices</p>
+        <strong>Parameters</strong>
+            <ul>
+            <li><code> adress </code> - the adress to be read from</li>
+            </ul>
+        </dd>
+    <dt>Read32(uint64_t address)</dt>
+        <dd>
+        <p>Signature: <code> [[nodiscard]] uint32_t Read8(uint64_t address) const noexcept;</code></p>
+        <p>Reads a double word from the specified adress</p>
+        <p>bytes crossing into different mmio reagions will be read from the coresponding devices</p>
+        <strong>Parameters</strong>
+            <ul>
+            <li><code> adress </code> - the adress to be read from</li>
+            </ul>
+        </dd>
+    <dt>Read64(uint64_t address)</dt>
+        <dd>
+        <p>Signature: <code> [[nodiscard]] uint64_t Read8(uint64_t address) const noexcept;</code></p>
+        <p>Reads a quad word from the specified adress</p>
+        <p>bytes crossing into different mmio reagions will be read from the coresponding devices</p>
+        <strong>Parameters</strong>
+            <ul>
+            <li><code> adress </code> - the adress to be read from</li>
+            </ul>
+        </dd>
 </dl>
 
 ###### Private Members

@@ -30,11 +30,17 @@ bool X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::BuildPageTable() noexcept
 	MemoryPages.resize(TotalAddressSpacePages);
 
 	for (uint64_t deviceIndex = 1/*we skip main memory for now*/; deviceIndex < RegisteredDevices.size(); deviceIndex++) {
+		auto& currentDevice = RegisteredDevices[deviceIndex];
 		uint64_t RemainingDeviceBytes = RegisteredDevices[deviceIndex].sizeBytes;
 		const uint64_t PreferedBasePage = GetPageNumber(RegisteredDevices[deviceIndex].baseAdress);
 		//now we forward scan from the prefered base to see if all would fit
-		uint64_t FreePagesCount = 0;
+		uint64_t FreeBytes = 0;
 		for (uint64_t page = PreferedBasePage; page < MemoryPages.size(); page++) {
+			PageEntry& currentPage = MemoryPages[page];
+			uint64_t BytesFreeInPage = currentPage.GetFrreBytesInPage();
+			bool isContiguose = currentPage.IsPageContiguous();
+
+
 		}
 
 	}
