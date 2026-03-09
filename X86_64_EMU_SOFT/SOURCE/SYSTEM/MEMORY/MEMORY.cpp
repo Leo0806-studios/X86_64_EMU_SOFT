@@ -92,3 +92,35 @@ uint64_t X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::PageEntry::GetFrreBytesInPa
 	}
 	return 4096 - usedBytes;
 }
+
+std::pair<uint64_t, uint64_t> X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::PageEntry::GetNextFreeSection() const noexcept
+{
+	for(uint64_t SectionIndex=0;SectionIndex<Sections.size();SectionIndex++){
+		const auto& thisSection = Sections[SectionIndex];
+		if (SectionIndex == Sections.size() - 1) {
+			//last section handeling
+			const uint32_t freeBytes = 4096-(thisSection.pageOffset + thisSection.size);
+			if(freeBytes >0){
+				return { thisSection.pageOffset + thisSection.size, freeBytes };
+			}
+			else {
+				return { 0,0 };
+			}
+		}
+		const auto& nextSection = Sections[SectionIndex + 1];
+		const uint32_t freeBytes = nextSection.pageOffset - (thisSection.pageOffset + thisSection.size);
+		if (freeBytes > 0) {
+			return { thisSection.pageOffset + thisSection.size, freeBytes };
+		}
+
+
+	}
+	return { 0,0 };
+}
+
+void X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::PageEntry::SortSections() noexcept
+{
+	std::sort(Sections.begin(), Sections.end(), [](const PageSection& a, const PageSection& b) {
+		return a.pageOffset < b.pageOffset;
+			  });
+}

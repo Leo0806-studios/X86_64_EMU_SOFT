@@ -18,11 +18,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 				uint32_t pageOffset = 0;
 				uint32_t size = 0;
 			};
-			std::vector<PageSection> Sections;
+			std::vector<PageSection> Sections = std::vector<PageSection>(1);
 			bool IsPageContiguous()const noexcept;
 			uint64_t GetFrreBytesInPage()const noexcept;
-			std::pair<uint64_t, uint64_t> GetNextFreeSection()const noexcept;
-
+			std::pair<uint64_t/*in page offset*/, uint64_t/*size Bytes*/> GetNextFreeSection()const noexcept;
+			void SortSections() noexcept;
 
 		};
 
@@ -38,12 +38,6 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 		};
 		std::vector<DeviceInfos> RegisteredDevices;
 	public:
-		/// <summary>
-		/// </summary>
-		/// <param name="device"></param>
-		/// <param name="pageCount"></param>
-		/// <param name="preferedBaseAdress">has to be page aligned </param>
-		/// <returns></returns>
 		[[nodiscard]] bool RegisterIODevice(std::shared_ptr<IO_DEVICEs::DeviceBase> device, uint64_t sizeBytes, uint64_t preferedBaseAdress);
 
 		[[nodiscard]] bool BuildPageTable() noexcept;

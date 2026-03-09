@@ -10,13 +10,19 @@ nav:
   - 2 API:
     - 2.0 API: API/API.md
     - 2.1 X86_64_EMU_SOFT: 
-      - 2.1.0 X86_64_EMU_SOFT namespace: API/X86_64_EMU_SOFT/X86_64_EMU_SOFT.md
-      - 2.1.1 HELPERS:
-        - 2.1.1.0 HELPERS namespace: API/X86_64_EMU_SOFT/HELPERS/HELPERS.md
-        - 2.1.1.9 CmdParse: API/X86_64_EMU_SOFT/HELPERS/CMD_PARSE.md
+      -  X86_64_EMU_SOFT namespace: API/X86_64_EMU_SOFT/X86_64_EMU_SOFT.md
+      - HELPERS:
+        - HELPERS namespace: API/X86_64_EMU_SOFT/HELPERS/HELPERS.md
+        - CmdParse: API/X86_64_EMU_SOFT/HELPERS/CMD_PARSE.md
+        - Diff: API/X86_64_EMU_SOFT/HELPERS/DIFF.md
+        - GetBit: API/X86_64_EMU_SOFT/HELPERS/GET_BIT.md
+        - Set Bit: API/X86_64_EMU_SOFT/HELPERS/SET_BIT.md
       - SYSTEM:
         - IO_DEVICES:
           - Device Base: API/X86_64_EMU_SOFT/SYSTEM/IO_DEVICES/DeviceBase.md
+        - MEMORY:
+          - MEMORY namespace: API/X86_64_EMU_SOFT/SYSTEM/MEMORY/MEMORY_NAMESPACE.md
+          - Memory Bus: API/X86_64_EMU_SOFT/SYSTEM/MEMORY/MEMORY.md
     - 2.2 Device Handlers: API/DeviceHandlers/DeviceHandlers.md
 
 
@@ -26,3 +32,4 @@ theme: readthedocs
 markdown_extensions:
   - toc:
       permalink: "#"
+  - def_list:
