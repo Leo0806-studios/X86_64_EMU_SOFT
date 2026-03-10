@@ -92,34 +92,21 @@ bool X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::PageEntry::IsPageContiguous() c
 
 uint64_t X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::PageEntry::GetFrreBytesInPage() const noexcept
 {
-	uint64_t usedBytes = 0;
+	uint64_t FreeBytes = 0;
 	for (const auto& section : Sections) {
-		usedBytes += section.size;
+		if (section.device == nullptr) {
+			FreeBytes += section.size;
+		}
 	}
-	return 4096 - usedBytes;
+	return FreeBytes;	
 }
 
 std::pair<uint64_t, uint64_t> X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::PageEntry::GetNextFreeSection() const noexcept
 {
-	for(uint64_t SectionIndex=0;SectionIndex<Sections.size();SectionIndex++){
-		const auto& thisSection = Sections[SectionIndex];
-		if (SectionIndex == Sections.size() - 1) {
-			//last section handeling
-			const uint32_t freeBytes = 4096-(thisSection.pageOffset + thisSection.size);
-			if(freeBytes >0){
-				return { thisSection.pageOffset + thisSection.size, freeBytes };
-			}
-			else {
-				return { 0,0 };
-			}
+	for (const auto& section : Sections) {
+		if(section.device == nullptr){
+			return { section.pageOffset, section.size };
 		}
-		const auto& nextSection = Sections[SectionIndex + 1];
-		const uint32_t freeBytes = nextSection.pageOffset - (thisSection.pageOffset + thisSection.size);
-		if (freeBytes > 0) {
-			return { thisSection.pageOffset + thisSection.size, freeBytes };
-		}
-
-
 	}
 	return { 0,0 };
 }
