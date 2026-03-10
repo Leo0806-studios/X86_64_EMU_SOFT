@@ -1,5 +1,5 @@
 #include "SYSTEM/IO_DEVICES/MAIN_MEMORY_DEVICE.h"
-namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICEs {
+namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 	MainMemoryDevice::MainMemoryDevice(size_t sizeKB) noexcept
 	{
 		memory.resize(sizeKB * 1024, 0);

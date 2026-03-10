@@ -4,7 +4,7 @@ import <bitset>;
 namespace X86_64_EMU_SOFT
 {
 	namespace HELPERS {
-		[[noidiscard]]uint64_t Diff(uint64_t a, uint64_t b) noexcept {
+		[[nodiscard]]uint64_t Diff(uint64_t a, uint64_t b) noexcept {
 			return a > b ? a - b : b - a;
 		}
 		[[nodiscard]] uint32_t Diff(uint32_t a, uint32_t b) noexcept {

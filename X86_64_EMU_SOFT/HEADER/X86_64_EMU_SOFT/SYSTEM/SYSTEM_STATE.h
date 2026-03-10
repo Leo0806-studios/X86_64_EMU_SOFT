@@ -13,7 +13,7 @@ namespace X86_64_EMU_SOFT
 	namespace SYSTEM{
 
 		class System {
-			std::vector<std::shared_ptr<IO_DEVICEs::DeviceBase>> RegisteredDevices;
+			std::vector<std::shared_ptr<IO_DEVICES::DeviceBase>> RegisteredDevices;
 			std::shared_ptr<CPU::CPU> cpu;
 			std::shared_ptr<MEMORY::MemoryBus> memoryBus;
 			const HELPERS::CmdArgs cmdArgs;
@@ -42,7 +42,10 @@ namespace X86_64_EMU_SOFT
 			/// </summary>
 			/// <returns></returns>
 			[[nodiscard]] bool Start();
-
+			System(const System& other) = delete;
+			System(System&& other) = delete;
+			System& operator= (const System & other) = delete;
+			System& operator=(System&& other) = delete;
 			~System()noexcept;
 		};
 	}

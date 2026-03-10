@@ -9,6 +9,7 @@
 #include <print>
 #include <string>
 #include "SYSTEM/IO_DEVICES/MAIN_MEMORY_DEVICE.h"
+#include "SYSTEM/IO_DEVICES/FIRMWARE.h"
 #include "SYSTEM/IO_DEVICES/RESET_ROM.h"
 #include "SYSTEM/SYSTEM_STATE.h"
 
@@ -52,6 +53,16 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 				}
 				
 			}
+			else if (deviceDescriptor.at(DeviceDescriptorParts::DeviceType) == "FIRMWARE") {
+				if (!RegisterFirmwareDevice(deviceDescriptor)) {
+					std::cerr << "failed to register firmware rom device: ";
+					for (const auto& [part, value] : deviceDescriptor) {
+						std::cerr << value << " ";
+					}
+					std::cerr << std::endl;
+					return false;
+				}
+			}
 			else {
 				std::cerr << "unknown device type: " << deviceDescriptor.at(DeviceDescriptorParts::DeviceType) << std::endl;
 				return false;
@@ -68,7 +79,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 	bool System::RegisterMemoryDevice(const std::unordered_map<DeviceDescriptorParts, std::string>& deviceDescriptor)
 	{
 		const uint64_t sizeKB = std::stoull(deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2));
-		std::shared_ptr<IO_DEVICEs::DeviceBase> device = std::make_shared<IO_DEVICEs::MainMemoryDevice>(sizeKB);
+		std::shared_ptr<IO_DEVICES::DeviceBase> device = std::make_shared<IO_DEVICES::MainMemoryDevice>(sizeKB);
 		RegisteredDevices.push_back(device);
 		if (!memoryBus->RegisterIODevice(device, sizeKB * 1024, 0x0)) {
 			return false;
@@ -78,7 +89,9 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 
 	bool System::RegisterResetROMDevice(const std::unordered_map<DeviceDescriptorParts, std::string>& deviceDescriptor)
 	{
-		std::fstream RomFile(deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2), std::ios::binary);
+		std::ifstream RomFile(deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2), std::ios::binary);
+		const auto& path = deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2);
+		RomFile.open(path, std::ios::binary);
 		if (!RomFile.is_open()) {
 			std::cerr << "failed to open reset rom file: " << deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2) << std::endl;
 			return false;
@@ -88,9 +101,32 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 			std::cerr << "reset rom size exceeds 16 bytes: " << RomData.size() << " bytes" << std::endl;
 			return false;
 		}
-		std::shared_ptr<IO_DEVICEs::DeviceBase> device = std::make_shared<IO_DEVICEs::ResetROMDevice>(RomData);
+		std::shared_ptr<IO_DEVICES::DeviceBase> device = std::make_shared<IO_DEVICES::ResetROMDevice>(RomData);
 		RegisteredDevices.push_back(device);
-		if (!memoryBus->RegisterIODevice(device, 0xF, this->cmdArgs.GetArgMap()["ResetVector"].as<uint32_t>())) {
+		auto reset_vector = this->cmdArgs.GetArgMap()["ResetVector"].as<uint64_t>();
+		if (!memoryBus->RegisterIODevice(device, 0xF, reset_vector)) {
+			return false;
+		}
+
+
+		return true;
+	}
+
+	bool System::RegisterFirmwareDevice(const std::unordered_map<DeviceDescriptorParts, std::string>& deviceDescriptor)
+	{
+		std::ifstream RomFile(deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2), std::ios::binary);
+		const auto& path = deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2);
+		RomFile.open(path, std::ios::binary);
+		if (!RomFile.is_open()) {
+			std::cerr << "failed to open Firmware rom file: " << deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2) << std::endl;
+			return false;
+		}
+		std::vector<uint8_t> RomData((std::istreambuf_iterator<char>(RomFile)), std::istreambuf_iterator<char>());
+
+		std::shared_ptr<IO_DEVICES::DeviceBase> device = std::make_shared<IO_DEVICES::FirmwareRomDevice>(RomData);
+		RegisteredDevices.push_back(device);
+		auto preferedBase = std::stoull(deviceDescriptor.at(DeviceDescriptorParts::DeviceArg3));
+		if (!memoryBus->RegisterIODevice(device, RomData.size(), preferedBase)) {
 			return false;
 		}
 

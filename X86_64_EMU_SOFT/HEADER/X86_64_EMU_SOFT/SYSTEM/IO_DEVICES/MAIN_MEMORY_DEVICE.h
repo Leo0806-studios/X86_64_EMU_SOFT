@@ -2,7 +2,7 @@
 #include <vector>
 #include <cstdint>
 #include "DEVICE_BASE.h"
-namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICEs {
+namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 	class MainMemoryDevice :public DeviceBase{
 		std::vector <uint8_t> memory;
 	public:

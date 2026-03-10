@@ -2,12 +2,12 @@
 #include <boost/program_options.hpp>
 namespace X86_64_EMU_SOFT::HELPERS {
 	class CmdArgs {
-		 boost::program_options::variables_map ArgMap;
+		 boost::program_options::variables_map argMap;
 		public:
 		[[nodiscard]] explicit CmdArgs(int argc, const char** argv);
 		[[nodiscard]] bool Validate() const noexcept;
 		const boost::program_options::variables_map& GetArgMap() const noexcept {
-			return ArgMap;
+			return argMap;
 		}
 		CmdArgs(const CmdArgs&) = delete;
 		CmdArgs& operator=(const CmdArgs&) = delete;

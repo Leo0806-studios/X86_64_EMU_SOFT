@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <print>
 #include <intrin.h>
-namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICEs
+namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES
 {
 	struct MMOIInfo{
 		uint64_t PreferedBaseAddress;

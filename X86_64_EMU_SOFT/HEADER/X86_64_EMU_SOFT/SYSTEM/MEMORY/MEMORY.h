@@ -13,10 +13,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 		struct PageEntry
 		{
 			struct PageSection {
-				IO_DEVICEs::DeviceBase* device = nullptr;
+				IO_DEVICES::DeviceBase* device = nullptr;
 				uint64_t DeviceOffset = 0;
 				uint32_t pageOffset = 0;
-				uint32_t size = 0;
+				uint32_t size = 4096;
 			};
 			std::vector<PageSection> Sections = std::vector<PageSection>(1);
 			bool IsPageContiguous()const noexcept;
@@ -32,16 +32,16 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 
 		struct DeviceInfos
 		{
-			std::shared_ptr<IO_DEVICEs::DeviceBase> device;
+			std::shared_ptr<IO_DEVICES::DeviceBase> device;
 			uint64_t sizeBytes = 0;
 			uint64_t baseAdress = 0;//holds prefered base adress untill BuildPageTable is called. after that it holds the actual base adress of the device
 		};
 		std::vector<DeviceInfos> RegisteredDevices;
 	public:
-		[[nodiscard]] bool RegisterIODevice(std::shared_ptr<IO_DEVICEs::DeviceBase> device, uint64_t sizeBytes, uint64_t preferedBaseAdress);
+		[[nodiscard]] bool RegisterIODevice(std::shared_ptr<IO_DEVICES::DeviceBase> device, uint64_t sizeBytes, uint64_t preferedBaseAdress);
 
 		[[nodiscard]] bool BuildPageTable() noexcept;
-		[[nodiscard]] bool UnregisterIODevice(std::shared_ptr<IO_DEVICEs::DeviceBase> device) noexcept;
+		[[nodiscard]] bool UnregisterIODevice(std::shared_ptr<IO_DEVICES::DeviceBase> device) noexcept;
 
 		[[nodiscard]] uint8_t Read8(uint64_t address) const noexcept;
 		[[nodiscard]] uint16_t Read16(uint64_t address) const noexcept;

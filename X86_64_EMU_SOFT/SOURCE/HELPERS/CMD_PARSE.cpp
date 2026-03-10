@@ -61,7 +61,7 @@ DeviceArg1-6 : information about the device that the emulator must know. for inf
 		bo::store(bo::parse_command_line(static_cast<int>(PresetArgs.size() + 1), PresetArgsCHR, desc), ArgMap);
 		delete[] PresetArgsCHR;
 	}
-	this->ArgMap = std::move(ArgMap);
+	this->argMap = std::move(ArgMap);
 }
 
 bool X86_64_EMU_SOFT::HELPERS::CmdArgs::Validate() const noexcept

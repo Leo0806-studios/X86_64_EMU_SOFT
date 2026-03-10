@@ -1,6 +1,5 @@
 [bits 16]
-[org 0x1000]
-start:
+[org 0x10]
 mov ax, 1
 mov bx, 2
 mov cx, 3
@@ -17,8 +16,6 @@ sub dx, ax
 sub ax, 10
 
 
-mul  ax, ax
-mul ax, 10
 
 
 
@@ -35,5 +32,3 @@ not ax
 shr ax, 1
 
 shl ax, 1
-end:
-times 4096 - ($ - $$) nop

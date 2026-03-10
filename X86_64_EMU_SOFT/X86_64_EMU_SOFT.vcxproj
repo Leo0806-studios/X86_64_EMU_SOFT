@@ -35,14 +35,16 @@
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\REGISTERS\RIP.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\VCORE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\IO_DEVICES\DEVICE_BASE.h" />
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\IO_DEVICES\FIRMWARE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\IO_DEVICES\MAIN_MEMORY_DEVICE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\IO_DEVICES\RESET_ROM.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\MEMORY\MEMORY.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\SYSTEM_STATE.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="SOURCE\SYSTEM\IO_DEVICES\FIRMWARE.cpp" />
     <ClCompile Include="SOURCE\HELPERS\CMD_PARSE.cpp" />
-    <ClCompile Include="HEADER\X86_64_EMU_SOFT\SYSTEM\IO_DEVICES\RESET_ROM.cpp" />
+    <ClCompile Include="SOURCE\SYSTEM\IO_DEVICES\RESET_ROM.cpp" />
     <ClCompile Include="SOURCE\SYSTEM\MEMORY\MEMORY.cpp" />
     <ClCompile Include="SOURCE\SYSTEM\CPU\REGISTERS\GPR.cpp" />
     <ClCompile Include="SOURCE\SYSTEM\IO_DEVICES\MAIN_MEMORY_DEVICE.cpp" />

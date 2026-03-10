@@ -1,13 +1,12 @@
 #pragma once
-#include <cstdint>
 #include <vector>
-#include "SYSTEM/IO_DEVICES/DEVICE_BASE.h"
+#include <cstdint>
+#include "DEVICE_BASE.h"
 namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
-	class ResetROMDevice : public DeviceBase
-	{
+	class FirmwareRomDevice :public DeviceBase {
 		std::vector<uint8_t> memory;
 	public:
-		[[nodiscard]] explicit ResetROMDevice(std::vector<uint8_t> data) noexcept;
+		[[nodiscard]] explicit FirmwareRomDevice(std::vector<uint8_t> data) noexcept;
 
 		// Inherited via DeviceBase
 		uint8_t Read8(uint64_t offset) const noexcept override;
@@ -29,6 +28,5 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 		void Write32(uint64_t offset, uint32_t value) noexcept override;
 
 		void Write64(uint64_t offset, uint64_t value) noexcept override;
-
 	};
 }

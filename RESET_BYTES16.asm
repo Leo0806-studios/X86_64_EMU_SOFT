@@ -1,2 +1,2 @@
 [bits 16]
-times 4096 nop
+times 15 nop
