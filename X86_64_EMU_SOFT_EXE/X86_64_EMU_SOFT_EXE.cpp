@@ -2,25 +2,12 @@
 //
 
 #include "SYSTEM/SYSTEM_STATE.h"
-#include<iostream>
-int A(int n, int m) {
-	if (m == 0) {
-		return n + 1;
 
-	}
-	else if (n == 0) {
-		return A(m - 1, 1);
-	}
-	else {
-		return A(m - 1, A(m, n - 1));
-	}
-}
 
 int main(int argc,const char** argv)
 {
-	std::cout << A(4, 1) << std::endl;
-	//X86_64_EMU_SOFT::SYSTEM::System EmulatorState(argc, argv);
-	//EmulatorState.Start();
+	X86_64_EMU_SOFT::SYSTEM::System EmulatorState(argc, argv);
+	EmulatorState.Start();
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
