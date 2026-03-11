@@ -39,7 +39,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 		std::vector<DeviceInfos> RegisteredDevices;
 	public:
 		[[nodiscard]] bool RegisterIODevice(std::shared_ptr<IO_DEVICES::DeviceBase> device, uint64_t sizeBytes, uint64_t preferedBaseAdress);
-
+		[[nodiscard]] bool MapResetRom(std::shared_ptr<IO_DEVICES::DeviceBase> device, uint64_t sizeBytes, uint64_t resetVector);
+		[[nodiscard]] bool MapFirmwareRom(std::shared_ptr<IO_DEVICES::DeviceBase> device, uint64_t sizeBytes, uint64_t FirmwareEntry);
 		[[nodiscard]] bool BuildPageTable() noexcept;
 		[[nodiscard]] bool UnregisterIODevice(std::shared_ptr<IO_DEVICES::DeviceBase> device) noexcept;
 
