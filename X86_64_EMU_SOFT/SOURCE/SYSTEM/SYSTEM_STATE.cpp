@@ -68,10 +68,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 				return false;
 			}
 		}
-		if (!memoryBus->BuildPageTable()) {
-			std::cerr << "failed to build page table" << std::endl;
-			return false;
-		}
+
 		return true;
 	}
 
@@ -81,7 +78,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 		const uint64_t sizeKB = std::stoull(deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2));
 		std::shared_ptr<IO_DEVICES::DeviceBase> device = std::make_shared<IO_DEVICES::MainMemoryDevice>(sizeKB);
 		RegisteredDevices.push_back(device);
-		if (!memoryBus->RegisterIODevice(device, sizeKB * 1024, 0x0)) {
+		if (!memoryBus->MapMainMemory(device, sizeKB * 1024, 0x0)) {
 			return false;
 		}
 		return true;
@@ -104,7 +101,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 		std::shared_ptr<IO_DEVICES::DeviceBase> device = std::make_shared<IO_DEVICES::ResetROMDevice>(RomData);
 		RegisteredDevices.push_back(device);
 		auto reset_vector = this->cmdArgs.GetArgMap()["ResetVector"].as<uint64_t>();
-		if (!memoryBus->RegisterIODevice(device, 0xF, reset_vector)) {
+		if (!memoryBus->MapResetRom(device, 0xF, reset_vector)) {
 			return false;
 		}
 
@@ -126,7 +123,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 		std::shared_ptr<IO_DEVICES::DeviceBase> device = std::make_shared<IO_DEVICES::FirmwareRomDevice>(RomData);
 		RegisteredDevices.push_back(device);
 		auto preferedBase = std::stoull(deviceDescriptor.at(DeviceDescriptorParts::DeviceArg3));
-		if (!memoryBus->RegisterIODevice(device, RomData.size(), preferedBase)) {
+		if (!memoryBus->MapFirmwareRom(device, RomData.size(), preferedBase)) {
 			return false;
 		}
 

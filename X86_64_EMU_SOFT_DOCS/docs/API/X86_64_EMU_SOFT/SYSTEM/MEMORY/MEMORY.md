@@ -23,46 +23,13 @@ all MMIO devices have to be registered here and all memory access goes trough it
 ###### Members
 
 <dl class="MemoryBusAPI">
-    <dt>RegisterIODevice(std::shared_ptr<IO_DEVICEs::DeviceBase> device, uint64_t sizeBytes, uint64_t preferedBaseAdress)</dt>
+    <dt> MapMainMemory(std::shared_ptr<IO_DEVICES::DeviceBase> device, uint64_t sizeBytes, uint64_t Base)</dt>
         <dd>
-            <p>Signature: <code>[[nodiscard]] bool RegisterIODevice(std::shared_ptr<IO_DEVICEs::DeviceBase> device, uint64_t sizeBytes, uint64_t preferedBaseAdress);</code></p>
-            <p>Registers a device to the Memory Bus and stores the provided information<br>
-            if it can be mapped at the preferred base adress it will shift up as much as neccesary to fit.
-            returns false on failure
-            </p>
-            <strong>Parameters</strong>
-            <ul >
-                <li><code>device</code> – Shared pointer to the device to be registered </li>
-                <li><code>sizeBytes</code> – the size in bytes that the device requests to be mapped </li>
-                <li><code>preferedBaseAdress</code> – the prefered base adress of the device.</li>
-            </ul>
-            <strong>Return</strong>
+        <p>Signature: <code>[[nodiscard]] bool MapMainMemory(std::shared_ptr<IO_DEVICES::DeviceBase> device, uint64_t sizeBytes, uint64_t Base);</code></p>
+        <p>Registers the Main Memory device and maps all pages to it.</p>
+        <strong>Parameters</strong>
             <ul>
-                <li>true on success</li>
-            </ul>
-        </dd>
-    <dt>BuildPageTable()</dt>
-        <dd>
-            <p>Signature: <code>[[nodiscard]] bool BuildPageTable() noexcept;</code></p>
-            <p>
-                Builds the PageTable from all registered devices.<br>
-            </p>
-            <strong>Return</strong> 
-            <ul>
-                <li>true on success</li>
-            </ul>
-        </dd>
-    <dt>UnregisterIODevice(std::shared_ptr<IO_DEVICEs::DeviceBase> device)</dt>
-        <dd>
-            <p>Signature: <code>[[nodiscard]] bool UnregisterIODevice(std::shared_ptr<IO_DEVICEs::DeviceBase> device) noexcept</code></p>
-            <p> unregisters a device from the memory bus. un-maps it from all pages and leaves open bus in its place.<br> warning! potentialy very slow</p>
-            <strong>Parameters</strong>
-            <ul>
-                <li><code>device</code> - The device to un-map</li>
-            </ul>
-            <strong>Return</strong>
-            <ul>
-                <li>true on success</li>
+            <li></li>
             </ul>
         </dd>
     <dt>Read8(uint64_t address)</dt>
