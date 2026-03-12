@@ -54,5 +54,6 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 
 
 		void PrintMemoryMap() const noexcept;
+		void DumpMemoryToStdout() const noexcept;
 	};
 }

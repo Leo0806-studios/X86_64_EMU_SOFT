@@ -28,6 +28,7 @@ DeviceArg1-6 : information about the device that the emulator must know. for inf
 		("StartupMode,M", bo::value<int>()->default_value(16), "sets the startup mode of the emulator,valid options are: 16(real mode), 32(protected mode) and 64(long mode)")
 		("ResetVector,R", bo::value<uint64_t>()->default_value(0xFFFFFFF0), "specifies the adress at wich execution starts. has to be less than UINT32_MAX")
 		("Features,X", bo::value<std::vector<std::string>>(), "specefies wich additional CPU features should be enabled(eg avx, sse,vmx,...). will set the coresponding cpuid bits and enable the registers and instructions")
+		("Cores,C", bo::value<uint16_t>()->default_value(1), "sets the number of cores the emulated CPU should have. has to be between 1 and 255")
 		("Device,D", bo::value<std::vector<std::string>>(), DeviceDescriptionHelp)
 		("Preset", bo::value<std::filesystem::path>(), "path to a .cpuPreset file. follows the exact same syntax as CMD arguments except that different args are seperated by newlines. do not recursively pass the same file. if a preset file is passed all other options are ignored");
 	bo::variables_map ArgMap;

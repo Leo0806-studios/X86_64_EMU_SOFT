@@ -141,18 +141,19 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 		}
 
 		PrintDevices(cmdArgs.GetArgMap());
-		cpu = std::make_shared<CPU::CPU>();
-		if (!cpu) {
-			std::cerr << "failed to create CPU" << std::endl;
-			exit(1);
-		}
-		std::cout << "CPU created successfully" << std::endl;
 		memoryBus = std::make_shared<MEMORY::MemoryBus>();
 		if (!memoryBus) {
 			std::cerr << "failed to create Memory Bus" << std::endl;
 			exit(1);
 		}
 		std::cout << "Memory Bus created successfully" << std::endl;
+		uint16_t Cores = cmdArgs.GetArgMap()["Cores"].as<uint16_t>();
+		cpu = std::make_shared<CPU::CPU>(Cores,cmdArgs.GetArgMap()["ResetVector"].as<uint64_t>(),memoryBus);
+		if (!cpu) {
+			std::cerr << "failed to create CPU" << std::endl;
+			exit(1);
+		}
+		std::cout << "CPU created successfully" << std::endl;
 		std::vector< std::unordered_map<DeviceDescriptorParts, std::string>> DeviceDescriptors;
 		for (const auto& descriptor : cmdArgs.GetArgMap()["Device"].as<std::vector<std::string>>()) {
 			std::vector<std::string> parts;
@@ -175,13 +176,14 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 		}
 		std::cout << "Devices constructed and registered successfully" << std::endl;
 		memoryBus->PrintMemoryMap();
-
+		memoryBus->DumpMemoryToStdout();
 
 
 	}
 	bool System::Start()
 	{
-		return false;
+		this->cpu->Start();
+		return true;
 	}
 	System::~System() noexcept
 	{

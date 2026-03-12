@@ -78,6 +78,12 @@
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\IO_DEVICES\FIRMWARE.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\INSTRUCTIONS\INSTRUCTION.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\INSTRUCTIONS\OPCODE_BYTES.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SOURCE\STARTUP.cpp">
@@ -105,6 +111,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SOURCE\SYSTEM\IO_DEVICES\FIRMWARE.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SOURCE\SYSTEM\CPU\CPU_STATE.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\VCORE.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

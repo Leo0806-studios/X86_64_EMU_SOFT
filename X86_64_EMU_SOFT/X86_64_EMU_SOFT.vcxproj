@@ -22,6 +22,8 @@
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\CMD_PARSE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\CPU_STATE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\EXCEPTIONS\GENERAL_PROTECTION_FAULT.h" />
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\INSTRUCTIONS\INSTRUCTION.h" />
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\INSTRUCTIONS\OPCODE_BYTES.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\REGISTERS\CONTROLL_REGISTERS\CR0.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\REGISTERS\CONTROLL_REGISTERS\CR0\CR0_DEC.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\REGISTERS\CONTROLL_REGISTERS\CR0\CR0_INL.h" />
@@ -42,6 +44,8 @@
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\SYSTEM_STATE.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\VCORE.cpp" />
+    <ClCompile Include="SOURCE\SYSTEM\CPU\CPU_STATE.cpp" />
     <ClCompile Include="SOURCE\SYSTEM\IO_DEVICES\FIRMWARE.cpp" />
     <ClCompile Include="SOURCE\HELPERS\CMD_PARSE.cpp" />
     <ClCompile Include="SOURCE\SYSTEM\IO_DEVICES\RESET_ROM.cpp" />
@@ -167,7 +171,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
-      <DisableSpecificWarnings>4514;5045</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4514;5045;4820</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -195,7 +199,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
-      <DisableSpecificWarnings>4514;5045</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4514;5045;4820</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>

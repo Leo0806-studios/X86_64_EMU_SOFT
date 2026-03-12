@@ -18,7 +18,14 @@ namespace {
 void X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::PrintMemoryMap() const noexcept
 {
 	for (const auto& deviceInfo : RegisteredDevices) {
+		if(deviceInfo.sizeBytes<1024){
+			std::print("Device: {}, Base Address: {}, Size: {}B\n", typeid(*deviceInfo.device).name(), deviceInfo.baseAdress, deviceInfo.sizeBytes);
+		}
+		else
+		{
+
 		std::print("Device: {}, Base Address: {}, Size: {}KB\n", typeid(*deviceInfo.device).name(), deviceInfo.baseAdress, deviceInfo.sizeBytes / 1024);
+		}
 	}
 	uint64_t pagenum = 0;
 	for (const auto& page : MemoryPages) {
@@ -26,13 +33,33 @@ void X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::PrintMemoryMap() const noexcept
 		for (const auto& section : page.Sections) {
 
 			if (section.device) {
-				std::print("Page Section from pageoffset {} to {} mapped to device: {}, Device Offset: {}\n", section.pageOffset, section.pageOffset + section.size, typeid(*section.device).name(), section.DeviceOffset);
+				std::print("Page Section from pageoffset {} to {} mapped to device: {}, Device Offset: {}\n", section.pageOffset, section.pageOffset + (section.size-1), typeid(*section.device).name(), section.DeviceOffset);
 			}
 			else {
 				std::print("Page section  not mapped to any device\n");
 			}
 		}
 		pagenum++;
+	}
+}
+
+void X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::DumpMemoryToStdout() const noexcept
+{
+	for (const auto& page : MemoryPages) {
+		for (const auto& section : page.Sections) {
+			if (section.device) {
+				for (uint64_t i = 0; i < section.size; i++) {
+					uint8_t value = section.device->Read8(section.DeviceOffset + i);
+					std::print("{:02X} ", value);
+				}
+			}
+			else {
+				for (uint64_t i = 0; i < section.size; i++) {
+					std::print("?? ");
+				}
+			}
+		}
+		std::print("\n");
 	}
 }
 
@@ -103,7 +130,7 @@ bool X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::MapResetRom(std::shared_ptr<IO_
 		PageEntry& currentPage = MemoryPages[page];
 		if (inPageOffet == 0) {
 
-			PageEntry::PageSection newSection{ .device = currentPage.Sections[0].device,.DeviceOffset = 0,.pageOffset = static_cast<uint32_t>(sizeBytes+1),.size = static_cast<uint32_t>(4096 - sizeBytes) };
+			PageEntry::PageSection newSection{ .device = currentPage.Sections[0].device,.DeviceOffset = 0,.pageOffset = static_cast<uint32_t>(sizeBytes),.size = static_cast<uint32_t>(4096 - sizeBytes) };
 			currentPage.Sections[0].device = device.get();
 			currentPage.Sections[0].DeviceOffset = 0;
 			currentPage.Sections[0].pageOffset = 0;
@@ -170,7 +197,7 @@ bool X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::MapFirmwareRom(std::shared_ptr<
 
 
 					//PageEntry::PageSection newSectionBefore{ .device = section.device,.DeviceOffset = 0,.pageOffset = 0,.size = static_cast<uint32_t>(4096ULL - inPageOffet) };
-					PageEntry::PageSection newSectionAfter{ .device = section.device,.DeviceOffset = 0,.pageOffset = static_cast<uint32_t>(inPageOffet + sizeBytes+1),.size = static_cast<uint32_t>(4096ULL - (inPageOffet + sizeBytes)) };
+					PageEntry::PageSection newSectionAfter{ .device = section.device,.DeviceOffset = 0,.pageOffset = static_cast<uint32_t>(inPageOffet + sizeBytes),.size = static_cast<uint32_t>(4096ULL - (inPageOffet + sizeBytes)) };
 					section.device = device.get();
 					section.DeviceOffset = 0;
 					section.pageOffset = static_cast<uint32_t>(inPageOffet);
@@ -193,6 +220,8 @@ bool X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::MapMainMemory(std::shared_ptr<I
 {
 	uint64_t amountPages = (sizeBytes + 4095) / 4096;
 	uint64_t deviceOffset = 0;
+	DeviceInfos info{ .device = device, .sizeBytes = sizeBytes,.baseAdress = Base };
+	RegisteredDevices.push_back(info);
 	std::ignore = Base;
 	MemoryPages.resize(amountPages);
 	for (auto& page : MemoryPages) {
@@ -214,7 +243,7 @@ bool X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::MapIODevice(std::shared_ptr<IO_
 
 uint8_t X86_64_EMU_SOFT::SYSTEM::MEMORY::MemoryBus::Read8(uint64_t address) const noexcept
 {
-	const uint64_t PageNumber(address);
+	const uint64_t PageNumber = GetPageNumber(address);
 	const uint64_t inPageOffset = address & 0xFFFULL;
 	auto& page = MemoryPages[PageNumber];
 	for (auto& section : page.Sections) {
