@@ -53,7 +53,7 @@ RET
 ## Phase 7
 CPUID
 ## Phase 8
-interupts and IDT
+interupts and IDT (this also introduces the concept of different cpu privileges)
 ## Phase 9
 Paging and page tables
 ## Phase 10

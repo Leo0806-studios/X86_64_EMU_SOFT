@@ -1,18 +1,22 @@
-#include <utility>
-#include <string.h>
 #include <bit>
 #include <cstdint>
-#include <memory>
-#include <sstream>
 #include <ios>
+#include <memory>
 #include <print>
-#include "SYSTEM/CPU/EXCEPTIONS/UNDEFINED_OPCODE.h"
+#include <sstream>
+#include <string.h>
+#include <utility>
+#include <exception>
 #include "INSTRUCTIONS/INSTRUCTION.h"
+#include "SYSTEM/CPU/EXCEPTIONS/UNDEFINED_OPCODE.h"
 #include "SYSTEM/MEMORY/MEMORY.h"
 #include "VCORE.h"
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	namespace {
+
+
+
 
 		bool isPrefix[256] = { 0 };
 		const bool PrefixeListSetupDone = []() {
@@ -31,6 +35,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 			return true;
 			}();
+
 
 		void DigestPrefixes(uint64_t& address, const MEMORY::MemoryBus& memoryBus, INSTRUCTIONS::Instruction& instruction) {
 
@@ -121,6 +126,39 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			}
 
 		}
+
+
+
+		INSTRUCTIONS::TargetRegister DecodeRegisterFromModRMRegField(uint8_t regField) {
+			switch (regField) {
+				case 0: return INSTRUCTIONS::TargetRegister::RAX;
+				case 1: return INSTRUCTIONS::TargetRegister::RCX;
+				case 2: return INSTRUCTIONS::TargetRegister::RDX;
+				case 3: return INSTRUCTIONS::TargetRegister::RBX;
+				case 4: return INSTRUCTIONS::TargetRegister::RSP;
+				case 5: return INSTRUCTIONS::TargetRegister::RBP;
+				case 6: return INSTRUCTIONS::TargetRegister::RSI;
+				case 7: return INSTRUCTIONS::TargetRegister::RDI;
+				default: {
+					__assume(false);
+				}
+			}
+		}
+		INSTRUCTIONS::TargetRegister DecodeRegisterFromModRMRMField(uint8_t rmField) {
+			switch (rmField) {
+				case 0: return INSTRUCTIONS::TargetRegister::RAX;
+				case 1: return INSTRUCTIONS::TargetRegister::RCX;
+				case 2: return INSTRUCTIONS::TargetRegister::RDX;
+				case 3: return INSTRUCTIONS::TargetRegister::RBX;
+				case 4: return INSTRUCTIONS::TargetRegister::RSP;
+				case 5: return INSTRUCTIONS::TargetRegister::RBP;
+				case 6: return INSTRUCTIONS::TargetRegister::RSI;
+				case 7: return INSTRUCTIONS::TargetRegister::RDI;
+				default: {
+					__assume(false);
+				}
+			}
+		}
 	}
 
 	INSTRUCTIONS::Instruction VirtualCore::decodeInstruction()
@@ -130,15 +168,31 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		const MEMORY::MemoryBus& memBus = *this->memoryBus;
 		DigestPrefixes(address, memBus, instruction);
 		uint8_t fistOpcodeByte = memBus.Read8(address);
+		address++;
+		instruction.OpcodeBytes[0] = fistOpcodeByte;
+		instruction.OpcodeSizeBytes = 1;
+		instruction.InstructionLengthBytes++;
 		switch (fistOpcodeByte) {
-
-			case 0xB8: //mov ax imm16
-			case 0xBB: {//mov bx imm16
-				instruction.OpcodeSizeBytes = 1;
-				instruction.OpcodeBytes[0] = fistOpcodeByte;
+			case 01:{//ADD r/m16, r16
+				instruction.hasModRM = true;
+				const uint8_t modrmByte = memBus.Read8(address);
+				instruction.ModRM = std::bit_cast<INSTRUCTIONS::ModRM>(modrmByte);
 				instruction.InstructionLengthBytes += 1;
+				instruction.SourceRegister = DecodeRegisterFromModRMRegField(instruction.ModRM.reg);
+				if (instruction.ModRM.mod == 3) {
+					instruction.DestinationRegister = DecodeRegisterFromModRMRMField(instruction.ModRM.rm);
+				}
+				break;
+			}
+			case 0xB8 + 0: //mov ax imm16
+			case 0xB8 + 1:
+			case 0xB8 + 2:
+			case 0xB8 + 3:
+			case 0xB8 + 4:
+			case 0xB8 + 5:
+			case 0xB8 + 6:
+			case 0xB8 + 7: {//mov bx imm16
 				instruction.ImmediateSizeBytes = 2;
-				address++;
 				instruction.ImmediateBytes[0] = memBus.Read8(address);
 				address++;
 				instruction.ImmediateBytes[1] = memBus.Read8(address);
@@ -148,10 +202,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			}
 			case 0x90: {
 				//decode NOP
-				instruction.OpcodeSizeBytes = 1;
-				instruction.OpcodeBytes[0] = fistOpcodeByte;
-				instruction.InstructionLengthBytes += 1;
-				address++;
+
 				break;
 			}
 			default: {
@@ -167,66 +218,200 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 		return instruction;
 	}
+	uint64_t VirtualCore::GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const 
+	{
+		switch (reg) {
+			case INSTRUCTIONS::TargetRegister::RAX: return RAX.GetValue();
+			case INSTRUCTIONS::TargetRegister::RBX: return RBX.GetValue();
+			case INSTRUCTIONS::TargetRegister::RCX: return RCX.GetValue();
+			case INSTRUCTIONS::TargetRegister::RDX: return RDX.GetValue();
+			case INSTRUCTIONS::TargetRegister::RSI: return RSI.GetValue();
+			case INSTRUCTIONS::TargetRegister::RDI: return RDI.GetValue();
+			case INSTRUCTIONS::TargetRegister::RSP: return RSP.GetValue();
+			case INSTRUCTIONS::TargetRegister::RBP: return RBP.GetValue();
+			case INSTRUCTIONS::TargetRegister::R8: return R8.GetValue();
+			case INSTRUCTIONS::TargetRegister::R9: return R9.GetValue();
+			case INSTRUCTIONS::TargetRegister::R10: return R10.GetValue();
+			case INSTRUCTIONS::TargetRegister::R11: return R11.GetValue();
+			case INSTRUCTIONS::TargetRegister::R12: return R12.GetValue();
+			case INSTRUCTIONS::TargetRegister::R13: return R13.GetValue();
+			case INSTRUCTIONS::TargetRegister::R14: return R14.GetValue();
+			case INSTRUCTIONS::TargetRegister::R15: return R15.GetValue();
+			case INSTRUCTIONS::TargetRegister::None: throw std::runtime_error("invalid value during register get");
+		}
+		return 0xffffffffFFFFFFFFULL;
+
+	}
+	uint64_t VirtualCore::GetRegisterValue(RegisterID reg) const noexcept
+	{
+		switch (reg) {
+			case RegisterID::RAX: return RAX.GetValue();
+			case RegisterID::RCX: return RCX.GetValue();
+			case RegisterID::RDX: return RDX.GetValue();
+			case RegisterID::RBX: return RBX.GetValue();
+			case RegisterID::RSP: return RSP.GetValue();
+			case RegisterID::RBP: return RBP.GetValue();
+			case RegisterID::RSI: return RSI.GetValue();
+			case RegisterID::RDI: return RDI.GetValue();
+		}
+		return 0xffffffffFFFFFFFFULL;
+	}
+	void VirtualCore::SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value) 
+	{
+		switch (reg) {
+			case INSTRUCTIONS::TargetRegister::RAX: RAX.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::RBX: RBX.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::RCX: RCX.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::RDX: RDX.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::RSI: RSI.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::RDI: RDI.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::RSP: RSP.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::RBP: RBP.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::R8: R8.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::R9: R9.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::R10: R10.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::R11: R11.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::R12: R12.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::R13: R13.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::R14: R14.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::R15: R15.SetValue(value); break;
+			case INSTRUCTIONS::TargetRegister::None: throw std::runtime_error("invalid value during register set");
+		}
+	}
+	void VirtualCore::SetRegisterValue(RegisterID reg, uint64_t value) noexcept
+	{
+		switch (reg) {
+			case RegisterID::RAX: RAX.SetValue(value);break;
+			case RegisterID::RCX: RCX.SetValue(value);break;
+			case RegisterID::RDX: RDX.SetValue(value);break;
+			case RegisterID::RBX: RBX.SetValue(value);break;
+			case RegisterID::RSP: RSP.SetValue(value);break;
+			case RegisterID::RBP: RBP.SetValue(value);break;
+			case RegisterID::RSI: RSI.SetValue(value);break;
+			case RegisterID::RDI: RDI.SetValue(value); break;
+	}
+	
+	}
+	void VirtualCore::ExecuteInstructionGroup0xB8(const INSTRUCTIONS::Instruction& instruction, const uint8_t primaryOpcodeByte)
+	{
+		uint16_t val = 0;
+		memcpy(&val, instruction.ImmediateBytes.data(), sizeof(uint16_t));
+
+		const uint8_t regSelector = static_cast<uint8_t>(primaryOpcodeByte & static_cast<uint8_t>(0b111));
+		__assume(regSelector <= 0b111);
+		switch (regSelector) {
+			case 0: {//ax
+				std::print("Executing instruction: MOV RAX|EAX|AX, {:#X}\n", val);
+				std::print("Reg Value Before: {:#X}\n", RAX.GetValue());
+				const uint64_t finalVal = (RAX.GetValue() & ~(0xFFFFULL)) | val;
+				RAX.SetValue(finalVal);
+				std::print("Reg Value after: {:#X}\n", RAX.GetValue());
+				break;
+			}
+			case 1: {//cx
+				std::print("Executing instruction: MOV RCX|ECX|CX, {:#X}\n", val);
+				std::print("Reg Value Before: {:#X}\n", RCX.GetValue());
+				const uint64_t finalVal = (RCX.GetValue() & ~(0xFFFFULL)) | val;
+				RCX.SetValue(finalVal);
+				std::print("Reg Value after: {:#X}\n", RCX.GetValue());
+				break;
+			}
+			case 2: {//dx
+				std::print("Executing instruction: MOV RDX|EDX|DX, {:#X}\n", val);
+				std::print("Reg Value Before: {:#X}\n", RDX.GetValue());
+				const uint64_t finalVal = (RDX.GetValue() & ~(0xFFFFULL)) | val;
+				RDX.SetValue(finalVal);
+				std::print("Reg Value after: {:#X}\n", RDX.GetValue());
+				break;
+			}
+			case 3: {//bx
+				std::print("Executing instruction: MOV RBX|EBX|BX, {:#X}\n", val);
+				std::print("Reg Value Before: {:#X}\n", RBX.GetValue());
+				const uint64_t finalVal = (RBX.GetValue() & ~(0xFFFFULL)) | val;
+				RBX.SetValue(finalVal);
+				std::print("Reg Value after: {:#X}\n", RBX.GetValue());
+				break;
+			}
+			case 4: {//sp
+				std::print("Executing instruction: MOV RSP|ESP|SP, {:#X}\n", val);
+				std::print("Reg Value Before: {:#X}\n", RSP.GetValue());
+				const uint64_t finalVal = (RSP.GetValue() & ~(0xFFFFULL)) | val;
+				RSP.SetValue(finalVal);
+				std::print("Reg Value after: {:#X}\n", RSP.GetValue());
+				break;
+			}
+			case 5: {//bp
+				std::print("Executing instruction: MOV RBP|EBP|BP, {:#X}\n", val);
+				std::print("Reg Value Before: {:#X}\n", RBP.GetValue());
+				const uint64_t finalVal = (RBP.GetValue() & ~(0xFFFFULL)) | val;
+				RBP.SetValue(finalVal);
+				std::print("Reg Value after: {:#X}\n", RBP.GetValue());
+				break;
+			}
+			case 6: {//si
+				std::print("Executing instruction: MOV RSI|ESI|SI, {:#X}\n", val);
+				std::print("Reg Value Before: {:#X}\n", RSI.GetValue());
+				const uint64_t finalVal = (RSI.GetValue() & ~(0xFFFFULL)) | val;
+				RSI.SetValue(finalVal);
+				std::print("Reg Value after: {:#X}\n", RSI.GetValue());
+				break;
+			}
+			case 7: {//di
+				std::print("Executing instruction: MOV RDI|EDI|DI, {:#X}\n", val);
+				std::print("Reg Value Before: {:#X}\n", RDI.GetValue());
+				const uint64_t finalVal = (RDI.GetValue() & ~(0xFFFFULL)) | val;
+				RDI.SetValue(finalVal);
+				std::print("Reg Value after: {:#X}\n", RDI.GetValue());
+				break;
+			}
+			default: {
+				__assume(false);
+				break;
+			}
+
+		}
+
+	}
+	void VirtualCore::ExecuteInstructionAdd0x1(const INSTRUCTIONS::Instruction& instruction)
+	{
+		std::print("Executing instruction: ADD r/m16, r16\n");
+		std::print("Source Register: {}\n", RegisterToString(instruction.SourceRegister));
+		uint64_t sourceVal = GetRegisterValue(instruction.SourceRegister);
+	std::print("Source Value: {:#X}\n", sourceVal);
+		if (instruction.ModRM.mod == 3) {
+			std::print("Destination Register: {}\n", RegisterToString(instruction.DestinationRegister));
+			uint64_t destVal = GetRegisterValue(instruction.DestinationRegister);
+			SetRegisterValue(instruction.DestinationRegister, destVal + sourceVal);
+
+			std::print("Destination Value after: {:#X}\n", GetRegisterValue(instruction.DestinationRegister));
+
+		}
+		else {
+			std::print("Destination is a memory operand\n");
+			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not supported yet");
+		}
+	}
 	void VirtualCore::executeInstruction(INSTRUCTIONS::Instruction instruction)
 	{
 		const uint8_t primaryOpcodeByte = instruction.OpcodeBytes[0];
 		switch (primaryOpcodeByte) {
-
-			case 0xB8: //mov ax imm16
-			case 0xBB: {//mov bx imm16
-
-				uint16_t val = 0;
-				memcpy(&val, instruction.ImmediateBytes.data(), sizeof(uint16_t));
-				uint8_t regSelector = primaryOpcodeByte & 0b111;
-				__assume(regSelector <= 0b111);
-				switch (regSelector) {
-					case 0: {//ax
-						const uint64_t finalVal = (RAX.GetValue() & ~(0xFFFFULL)) | val;
-						RAX.SetValue(finalVal);
-						break;
-					}
-					case 1: {//cx
-						const uint64_t finalVal = (RCX.GetValue() & ~(0xFFFFULL)) | val;
-						RCX.SetValue(finalVal);
-						break;
-					}
-					case 2: {//dx
-						const uint64_t finalVal = (RDX.GetValue() & ~(0xFFFFULL)) | val;
-						RDX.SetValue(finalVal);
-						break;
-					}
-					case 3: {//bx
-						const uint64_t finalVal = (RBX.GetValue() & ~(0xFFFFULL)) | val;
-						RBX.SetValue(finalVal);
-						break;
-					}
-					case 4: {//sp
-						const uint64_t finalVal = (RSP.GetValue() & ~(0xFFFFULL)) | val;
-						RSP.SetValue(finalVal);
-						break;
-					}
-					case 5: {//bp
-						const uint64_t finalVal = (RBP.GetValue() & ~(0xFFFFULL)) | val;
-						RBP.SetValue(finalVal);
-						break;
-					}
-					case 6: {//si
-						const uint64_t finalVal = (RSI.GetValue() & ~(0xFFFFULL)) | val;
-						RSI.SetValue(finalVal);
-						break;
-					}
-					case 7: {//di
-						const uint64_t finalVal = (RDI.GetValue() & ~(0xFFFFULL)) | val;
-						RDI.SetValue(finalVal);
-						break;
-					}
-
-				}
-
+			case 01: {//ADD r/m16, r16
+				ExecuteInstructionAdd0x1(instruction);
+				break;
+			}
+			case 0xB8 + 0: //mov ax imm16
+			case 0xB8 + 1:
+			case 0xB8 + 2:
+			case 0xB8 + 3:
+			case 0xB8 + 4:
+			case 0xB8 + 5:
+			case 0xB8 + 6:
+			case 0xB8 + 7: {//mov bx imm16
+				ExecuteInstructionGroup0xB8(instruction, primaryOpcodeByte);
 				break;
 			}
 			case 0x90: {//NOP
-
+				std::print("Executing instruction: NOP\n");
 				break;
 			}
 

@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <array>
 #include <vector>
+#include <string>
 #include "OPCODE_BYTES.h"
 namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 
@@ -26,14 +27,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 	};
 
 	struct ModRM {
-		uint8_t mod : 2;
-		uint8_t reg : 3;
 		uint8_t rm : 3;
+		uint8_t reg : 3;
+		uint8_t mod : 2;
 	};
 	struct SIB {
-		uint8_t scale : 2;
-		uint8_t index : 3;
 		uint8_t base : 3;
+		uint8_t index : 3;
+		uint8_t scale : 2;
 	};
 	
 
@@ -57,7 +58,28 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		R15,
 		None = 0xFF
 	};
-
+	[[nodiscard]] inline std::string RegisterToString(TargetRegister reg) {
+		switch (reg) {
+			case TargetRegister::RAX: return "RAX";
+			case TargetRegister::RBX: return "RBX";
+			case TargetRegister::RCX: return "RCX";
+			case TargetRegister::RDX: return "RDX";
+			case TargetRegister::RSI: return "RSI";
+			case TargetRegister::RDI: return "RDI";
+			case TargetRegister::RSP: return "RSP";
+			case TargetRegister::RBP: return "RBP";
+			case TargetRegister::R8: return "R8";
+			case TargetRegister::R9: return "R9";
+			case TargetRegister::R10: return "R10";
+			case TargetRegister::R11: return "R11";
+			case TargetRegister::R12: return "R12";
+			case TargetRegister::R13: return "R13";
+			case TargetRegister::R14: return "R14";
+			case TargetRegister::R15: return "R15";
+			case TargetRegister::None: return "None";
+			default: return "None";
+		}
+	}
 
 
 	struct Instruction {

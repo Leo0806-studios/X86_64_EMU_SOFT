@@ -14,6 +14,16 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		
 			class VirtualCore
 			{
+				enum class RegisterID:uint8_t {
+					RAX = 0b000,
+					RCX = 0b001,
+					RDX = 0b010,
+					RBX = 0b011,
+					RSP = 0b100,
+					RBP = 0b101,
+					RSI = 0b110,
+					RDI = 0b111,
+				};
 				REGISTERS::GPR RAX;
 				REGISTERS::GPR RBX;
 				REGISTERS::GPR RCX;
@@ -38,7 +48,13 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 				std::atomic_bool isEnabled;
 
 				std::shared_ptr<MEMORY::MemoryBus> memoryBus;
-				INSTRUCTIONS::Instruction decodeInstruction();
+				[[nodiscard]]INSTRUCTIONS::Instruction decodeInstruction();
+				[[nodiscard]]uint64_t GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const ;
+				[[nodiscard]]uint64_t GetRegisterValue(RegisterID reg) const noexcept;
+				void SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value) ;
+				void SetRegisterValue(RegisterID reg, uint64_t value) noexcept;
+				void ExecuteInstructionGroup0xB8(const INSTRUCTIONS::Instruction& instruction,const uint8_t primaryOpcodeByte);
+				void ExecuteInstructionAdd0x1(const INSTRUCTIONS::Instruction& instruction);
 				void executeInstruction(INSTRUCTIONS::Instruction instruction);
 				void PrintCoreState()const;
 			public:
