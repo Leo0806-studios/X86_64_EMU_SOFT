@@ -90,16 +90,17 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 	};
 
 
-	struct OpcodeInfo {
-		bool hasSBI = false;
-		bool hasMODRM = false;
-		uint8_t immediateSizeBytes = 0;
-	};
-	inline OpcodeInfo OpcodeInfos[256] = {0	};
-	inline const   bool InitializeOpcodeInfos = []() {
-		OpcodeInfos[0x90] = { .hasSBI = false, .hasMODRM = false, .immediateSizeBytes = 0 };//NOP
-		OpcodeInfos[0xB8] = { .hasSBI = false, .hasMODRM = false, .immediateSizeBytes = 2 };//MOV RAX, imm64
-
-		return true;
-		}();
+//	struct OpcodeInfo {
+//		bool isImplemented = false;
+//		bool hasSBI = false;
+//		bool hasMODRM = false;
+//		uint8_t immediateSizeBytes = 0;
+//	};
+//	inline OpcodeInfo OpcodeInfos[256] = {0	};
+//	inline const   bool InitializeOpcodeInfos = []() {
+//		OpcodeInfos[0x90] = { .isImplemented = true,.hasSBI = false, .hasMODRM = false, .immediateSizeBytes = 0 };//NOP
+//		OpcodeInfos[0xB8] = { .isImplemented= true,.hasSBI = false, .hasMODRM = false, .immediateSizeBytes = 2 };//MOV RAX, imm64
+//
+//		return true;
+//		}();
 }

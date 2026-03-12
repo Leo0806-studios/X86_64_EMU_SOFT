@@ -39,6 +39,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 
 				std::shared_ptr<MEMORY::MemoryBus> memoryBus;
 				INSTRUCTIONS::Instruction decodeInstruction();
+				void executeInstruction(INSTRUCTIONS::Instruction instruction);
+				void PrintCoreState()const;
 			public:
 				explicit VirtualCore(uint64_t resetVector,std::shared_ptr<MEMORY::MemoryBus> memoryBus)noexcept;
 				VirtualCore(const VirtualCore&other);

@@ -22,6 +22,7 @@
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\CMD_PARSE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\CPU_STATE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\EXCEPTIONS\GENERAL_PROTECTION_FAULT.h" />
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\EXCEPTIONS\UNDEFINED_OPCODE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\INSTRUCTIONS\INSTRUCTION.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\INSTRUCTIONS\OPCODE_BYTES.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\REGISTERS\CONTROLL_REGISTERS\CR0.h" />
@@ -171,7 +172,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
-      <DisableSpecificWarnings>4514;5045;4820</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4514;5045;4820;5245</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -199,7 +200,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
-      <DisableSpecificWarnings>4514;5045;4820</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4514;5045;4820;5245</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>

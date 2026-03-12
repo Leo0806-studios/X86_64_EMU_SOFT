@@ -94,7 +94,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 			return false;
 		}
 		std::vector<uint8_t> RomData((std::istreambuf_iterator<char>(RomFile)), std::istreambuf_iterator<char>());
-		if (RomData.size() > 0xF) {
+		if (RomData.size() > 0x10) {
 			std::cerr << "reset rom size exceeds 16 bytes: " << RomData.size() << " bytes" << std::endl;
 			return false;
 		}

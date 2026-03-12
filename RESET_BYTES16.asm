@@ -1,2 +1,2 @@
 [bits 16]
-times 15 nop
+times 16na nop
