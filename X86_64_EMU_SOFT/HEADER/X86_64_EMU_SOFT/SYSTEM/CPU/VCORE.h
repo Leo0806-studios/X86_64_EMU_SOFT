@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include <atomic>
 #include <memory>
 #include "SYSTEM/CPU/REGISTERS/GPR.h"
@@ -14,6 +15,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		
 			class VirtualCore
 			{
+				friend class DecodeingEngine;
+				friend class ExecutionEngine;
 				enum class RegisterID:uint8_t {
 					RAX = 0b000,
 					RCX = 0b001,
@@ -48,7 +51,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 				std::atomic_bool isEnabled;
 
 				std::shared_ptr<MEMORY::MemoryBus> memoryBus;
-				[[nodiscard]]INSTRUCTIONS::Instruction decodeInstruction();
+				[[nodiscard]]INSTRUCTIONS::Instruction decodeInstruction() const;
 				[[nodiscard]]uint64_t GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const ;
 				[[nodiscard]]uint64_t GetRegisterValue(RegisterID reg) const noexcept;
 				void SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value) ;

@@ -1,95 +1,53 @@
 #include <bit>
 #include <cstdint>
+#include <cstring>
 #include <ios>
 #include <memory>
 #include <print>
 #include <sstream>
-#include <string.h>
+#include <stdexcept>
 #include <utility>
-#include <exception>
 #include "INSTRUCTIONS/INSTRUCTION.h"
+#include "INSTRUCTIONS/OPCODE_BYTES.h"
 #include "SYSTEM/CPU/EXCEPTIONS/UNDEFINED_OPCODE.h"
+#include "SYSTEM/CPU/VCORE.h"
 #include "SYSTEM/MEMORY/MEMORY.h"
-#include "VCORE.h"
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
+		class ExecutionEngine {
+		private:
+			
+		public:
+			static inline void ExecuteInstruction(VirtualCore& core, const INSTRUCTIONS::Instruction& instruction);
+		};
+		class DecodeingEngine {
+		private:
+			static bool isPrefix[256];;
+			const static  bool PrefixeListSetupDone;
+
+			/// <summary>
+			/// always digests the MODRM byte and then conditionaly based on the modrm byte it also digests the SIB byte
+			/// </summary>
+			/// <param name="address"></param>
+			/// <param name="memoryBus"></param>
+			/// <param name="instruction"></param>
+			static inline void digestModRMAndSIB(uint64_t& address, const MEMORY::MemoryBus& memoryBus, INSTRUCTIONS::Instruction& instruction)noexcept;
+			static inline void digestPrefixes(uint64_t& address, const MEMORY::MemoryBus& memoryBus, INSTRUCTIONS::Instruction& instruction)noexcept;
+
+		public:
+			[[nodiscard]] static inline INSTRUCTIONS::Instruction DecodeInstruction(const VirtualCore& core);
+		};
 	namespace {
 
 
 
 
-		bool isPrefix[256] = { 0 };
-		const bool PrefixeListSetupDone = []() {
-			memset(isPrefix, 0, sizeof(isPrefix));
-			isPrefix[0xF0] = true; //LOCK
-			isPrefix[0xF2] = true; //REPNE/REPNZ
-			isPrefix[0xF3] = true; //REP/REPE/REPZ
-			isPrefix[0x2E] = true; //CS segment override
-			isPrefix[0x36] = true; //SS segment override
-			isPrefix[0x3E] = true; //DS segment override
-			isPrefix[0x26] = true; //ES segment override
-			isPrefix[0x64] = true; //FS segment override
-			isPrefix[0x65] = true; //GS segment override
-			isPrefix[0x66] = true; //Operand-size override
-			isPrefix[0x67] = true; //Address-size override
-
-			return true;
-			}();
 
 
-		void DigestPrefixes(uint64_t& address, const MEMORY::MemoryBus& memoryBus, INSTRUCTIONS::Instruction& instruction) {
-
-			uint8_t byte = 0;
-			while (byte = memoryBus.Read8(address), isPrefix[byte]) {
-				switch (byte) {
-					case INSTRUCTIONS::PrefixGroup1::LOCK:
-					case INSTRUCTIONS::PrefixGroup1::REPNE_REPNZ:
-					case INSTRUCTIONS::PrefixGroup1::REP_REPE_REPZ: {
-						instruction.Prefix1 = static_cast<INSTRUCTIONS::PrefixGroup1>(byte);
-						break;
-					}
-					case INSTRUCTIONS::PrefixGroup2::CS_SEGMENT_OVERRIDE:
-					case INSTRUCTIONS::PrefixGroup2::SS_SEGMENT_OVERRIDE:
-					case INSTRUCTIONS::PrefixGroup2::DS_SEGMENT_OVERRIDE:
-					case INSTRUCTIONS::PrefixGroup2::ES_SEGMENT_OVERRIDE:
-					case INSTRUCTIONS::PrefixGroup2::FS_SEGMENT_OVERRIDE:
-					case INSTRUCTIONS::PrefixGroup2::GS_SEGMENT_OVERRIDE: {
-						instruction.Prefix2 = static_cast<INSTRUCTIONS::PrefixGroup2>(byte);
-						break;
-					}
-					case INSTRUCTIONS::PrefixGroup3::OPERAND_SIZE_OVERRIDE: {
-						instruction.OperandOverride = true;
-						break;
-					}
-					case INSTRUCTIONS::PrefixGroup4::ADDRESS_SIZE_OVERRIDE: {
-						instruction.AddressOverride = true;
-						break;
-					}
-					default: {
-						__assume(false);
-						break;
-					}
-
-				}
-				address++;
-				instruction.InstructionLengthBytes++;
-			}
-		}
 
 
-		void DigestModRMAndSIB(uint64_t address, const MEMORY::MemoryBus& memoryBus, INSTRUCTIONS::Instruction& instruction) {
-			const uint8_t modrmByte = memoryBus.Read8(address);
-			instruction.ModRM = std::bit_cast<INSTRUCTIONS::ModRM>(modrmByte);
-			instruction.InstructionLengthBytes++;
-			address++;
-			if (instruction.ModRM.mod != 3 && instruction.ModRM.rm == 4) {
-				instruction.hasSIB = true;
-				const uint8_t sibByte = memoryBus.Read8(address);
-				instruction.SIB = std::bit_cast<INSTRUCTIONS::SIB>(sibByte);
-				instruction.InstructionLengthBytes++;
-				address++;
-			}
-		}
+
+
 		void PrintInstruction(const INSTRUCTIONS::Instruction& instruction) {
 			std::print("Instruction Length: {} bytes\n", instruction.InstructionLengthBytes);
 			if (instruction.Prefix1) {
@@ -159,64 +117,29 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				}
 			}
 		}
-	}
 
-	INSTRUCTIONS::Instruction VirtualCore::decodeInstruction()
-	{
-		uint64_t address = RIP.GetValue();
-		INSTRUCTIONS::Instruction instruction = {};
-		const MEMORY::MemoryBus& memBus = *this->memoryBus;
-		DigestPrefixes(address, memBus, instruction);
-		uint8_t fistOpcodeByte = memBus.Read8(address);
-		address++;
-		instruction.OpcodeBytes[0] = fistOpcodeByte;
-		instruction.OpcodeSizeBytes = 1;
-		instruction.InstructionLengthBytes++;
-		switch (fistOpcodeByte) {
-			case 01:{//ADD r/m16, r16
-				instruction.hasModRM = true;
-				const uint8_t modrmByte = memBus.Read8(address);
-				instruction.ModRM = std::bit_cast<INSTRUCTIONS::ModRM>(modrmByte);
-				instruction.InstructionLengthBytes += 1;
-				instruction.SourceRegister = DecodeRegisterFromModRMRegField(instruction.ModRM.reg);
-				if (instruction.ModRM.mod == 3) {
-					instruction.DestinationRegister = DecodeRegisterFromModRMRMField(instruction.ModRM.rm);
-				}
-				break;
-			}
-			case 0xB8 + 0: //mov ax imm16
-			case 0xB8 + 1:
-			case 0xB8 + 2:
-			case 0xB8 + 3:
-			case 0xB8 + 4:
-			case 0xB8 + 5:
-			case 0xB8 + 6:
-			case 0xB8 + 7: {//mov bx imm16
-				instruction.ImmediateSizeBytes = 2;
-				instruction.ImmediateBytes[0] = memBus.Read8(address);
-				address++;
-				instruction.ImmediateBytes[1] = memBus.Read8(address);
-				instruction.InstructionLengthBytes += 2;
+		INSTRUCTIONS::TargetRegister GetTargetRegisterfromAdditiveID(uint8_t regSelector) {
+			__assume(regSelector <= 0b111);
+			switch (regSelector) {
+				using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
+				case 0:return RAX;
+				case 1: return RCX;
+				case 2:return RDX;
+				case 3:return  RBX;
+				case 4:return  RSP;
+				case 5:return  RBP;
+				case 6:return RSI;
+				case 7:return  RDI;
+				default: __assume(false);
 
-				break;
-			}
-			case 0x90: {
-				//decode NOP
-
-				break;
-			}
-			default: {
-				//std::string msg = "byte: {:#X} at RIP: {:#X} coresponds to no valid opcode.", fistOpcodeByte, address;
-
-				std::stringstream msg;
-				const uint16_t asIntegerType = static_cast<uint16_t>(fistOpcodeByte);
-				msg << "\n\n #UD exception \n \n byte: 0x" << std::hex << asIntegerType << " at RIP: 0x" << std::hex << address << " corresponds to no valid opcode " << std::dec;
-				throw EXCEPTIONS::UNDEFINED_OPCODE(msg.str());
-				break;
 			}
 		}
+	}
 
-		return instruction;
+	INSTRUCTIONS::Instruction VirtualCore::decodeInstruction() const
+	{
+		return DecodeingEngine::DecodeInstruction(*this);
+		
 	}
 	uint64_t VirtualCore::GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const 
 	{
@@ -253,8 +176,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case RegisterID::RBP: return RBP.GetValue();
 			case RegisterID::RSI: return RSI.GetValue();
 			case RegisterID::RDI: return RDI.GetValue();
+			default: return 0xffffffffFFFFFFFFULL;
 		}
-		return 0xffffffffFFFFFFFFULL;
+		
 	}
 	void VirtualCore::SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value) 
 	{
@@ -276,6 +200,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case INSTRUCTIONS::TargetRegister::R14: R14.SetValue(value); break;
 			case INSTRUCTIONS::TargetRegister::R15: R15.SetValue(value); break;
 			case INSTRUCTIONS::TargetRegister::None: throw std::runtime_error("invalid value during register set");
+			default: __assume(false);
 		}
 	}
 	void VirtualCore::SetRegisterValue(RegisterID reg, uint64_t value) noexcept
@@ -393,29 +318,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	void VirtualCore::executeInstruction(INSTRUCTIONS::Instruction instruction)
 	{
-		const uint8_t primaryOpcodeByte = instruction.OpcodeBytes[0];
-		switch (primaryOpcodeByte) {
-			case 01: {//ADD r/m16, r16
-				ExecuteInstructionAdd0x1(instruction);
-				break;
-			}
-			case 0xB8 + 0: //mov ax imm16
-			case 0xB8 + 1:
-			case 0xB8 + 2:
-			case 0xB8 + 3:
-			case 0xB8 + 4:
-			case 0xB8 + 5:
-			case 0xB8 + 6:
-			case 0xB8 + 7: {//mov bx imm16
-				ExecuteInstructionGroup0xB8(instruction, primaryOpcodeByte);
-				break;
-			}
-			case 0x90: {//NOP
-				std::print("Executing instruction: NOP\n");
-				break;
-			}
+		ExecutionEngine::ExecuteInstruction(*this, instruction);
 
-		}
 	}
 	void VirtualCore::PrintCoreState() const
 	{
@@ -518,6 +422,221 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 		hasShutdown.store(true);
 		return true;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	bool DecodeingEngine::isPrefix[256] = { 0 };
+	const bool DecodeingEngine::PrefixeListSetupDone = []() noexcept{
+		memset(&isPrefix[0], 0, sizeof(isPrefix));
+		isPrefix[0xF0] = true; //LOCK
+		isPrefix[0xF2] = true; //REPNE/REPNZ
+		isPrefix[0xF3] = true; //REP/REPE/REPZ
+		isPrefix[0x2E] = true; //CS segment override
+		isPrefix[0x36] = true; //SS segment override
+		isPrefix[0x3E] = true; //DS segment override
+		isPrefix[0x26] = true; //ES segment override
+		isPrefix[0x64] = true; //FS segment override
+		isPrefix[0x65] = true; //GS segment override
+		isPrefix[0x66] = true; //Operand-size override
+		isPrefix[0x67] = true; //Address-size override
+
+		return true;
+		}();
+
+
+
+
+	inline void DecodeingEngine::digestModRMAndSIB(uint64_t& address, const MEMORY::MemoryBus& memoryBus, INSTRUCTIONS::Instruction& instruction) noexcept
+	{
+		const uint8_t modrmByte = memoryBus.Read8(address);
+		instruction.ModRM = std::bit_cast<INSTRUCTIONS::ModRM>(modrmByte);
+		instruction.InstructionLengthBytes++;
+
+		address++;
+		if (instruction.ModRM.mod != 3 && instruction.ModRM.rm == 4) {
+			instruction.hasSIB = true;
+			const uint8_t sibByte = memoryBus.Read8(address);
+			instruction.SIB = std::bit_cast<INSTRUCTIONS::SIB>(sibByte);
+			instruction.InstructionLengthBytes++;
+			address++;
+		}
+	}
+
+	inline void DecodeingEngine::digestPrefixes(uint64_t& address, const MEMORY::MemoryBus& memoryBus, INSTRUCTIONS::Instruction& instruction) noexcept
+	{
+		uint8_t byte = 0;
+		while (byte = memoryBus.Read8(address), isPrefix[byte]) {//NOSONAR 
+			switch (byte) {
+				case INSTRUCTIONS::PrefixGroup1::LOCK:
+				case INSTRUCTIONS::PrefixGroup1::REPNE_REPNZ:
+				case INSTRUCTIONS::PrefixGroup1::REP_REPE_REPZ: {
+					instruction.Prefix1 = static_cast<INSTRUCTIONS::PrefixGroup1>(byte);
+					break;
+				}
+				case INSTRUCTIONS::PrefixGroup2::CS_SEGMENT_OVERRIDE:
+				case INSTRUCTIONS::PrefixGroup2::SS_SEGMENT_OVERRIDE:
+				case INSTRUCTIONS::PrefixGroup2::DS_SEGMENT_OVERRIDE:
+				case INSTRUCTIONS::PrefixGroup2::ES_SEGMENT_OVERRIDE:
+				case INSTRUCTIONS::PrefixGroup2::FS_SEGMENT_OVERRIDE:
+				case INSTRUCTIONS::PrefixGroup2::GS_SEGMENT_OVERRIDE: {
+					instruction.Prefix2 = static_cast<INSTRUCTIONS::PrefixGroup2>(byte);
+					break;
+				}
+				case INSTRUCTIONS::PrefixGroup3::OPERAND_SIZE_OVERRIDE: {
+					instruction.OperandOverride = true;
+					break;
+				}
+				case INSTRUCTIONS::PrefixGroup4::ADDRESS_SIZE_OVERRIDE: {
+					instruction.AddressOverride = true;
+					break;
+				}
+				default: {
+					__assume(false);
+					break;
+				}
+
+			}
+			address++;
+			instruction.InstructionLengthBytes++;
+		}
+	}
+
+	inline INSTRUCTIONS::Instruction DecodeingEngine::DecodeInstruction(const VirtualCore& core)
+	{
+
+
+		uint64_t address = core.RIP.GetValue();
+		INSTRUCTIONS::Instruction instruction = {};
+		const MEMORY::MemoryBus& memBus = *core.memoryBus;
+		digestPrefixes(address, memBus, instruction);
+		const uint8_t fistOpcodeByte = memBus.Read8(address);
+		address++;
+		instruction.OpcodeBytes[0] = fistOpcodeByte;
+		instruction.OpcodeSizeBytes = 1;
+		instruction.InstructionLengthBytes++;
+		switch (fistOpcodeByte) {
+			using enum INSTRUCTIONS::PrimaryOpcodeByteValue;
+			case ADDrm16r16: {//ADD r/m16, r16
+				instruction.SourceSize = 16;
+				instruction.DestinationSize = 16;
+				instruction.hasModRM = true;
+				instruction.Type = INSTRUCTIONS::InstructionType::ADD;
+				digestModRMAndSIB(address,memBus,instruction);
+				instruction.SourceRegister = DecodeRegisterFromModRMRegField(instruction.ModRM.reg);
+				if (instruction.ModRM.mod == 3) {
+					instruction.DestinationRegister = DecodeRegisterFromModRMRMField(instruction.ModRM.rm);
+				}
+				break;
+			}
+			case MOVr16r32imm16imm32_BASE + 0: //mov ax imm16
+			case MOVr16r32imm16imm32_BASE + 1:
+			case MOVr16r32imm16imm32_BASE + 2:
+			case MOVr16r32imm16imm32_BASE + 3:
+			case MOVr16r32imm16imm32_BASE + 4:
+			case MOVr16r32imm16imm32_BASE + 5:
+			case MOVr16r32imm16imm32_BASE + 6:
+			case MOVr16r32imm16imm32_BASE + 7: {
+				if (instruction.OperandOverride) {
+					instruction.SourceSize = 32;
+					instruction.DestinationSize = 32;
+				}
+				else {
+					instruction.SourceSize = 16;
+					instruction.DestinationSize = 16;
+				}
+				instruction.Type = INSTRUCTIONS::InstructionType::MOV;
+				instruction.ImmediateSizeBytes = 2;
+				instruction.ImmediateBytes[0] = memBus.Read8(address);
+				instruction.DestinationRegister = GetTargetRegisterfromAdditiveID(static_cast<uint8_t>(instruction.OpcodeBytes[0] & static_cast<uint8_t>(0b111)));
+				address++;
+				instruction.ImmediateBytes[1] = memBus.Read8(address);
+				instruction.InstructionLengthBytes += 2;
+
+				break;
+			}
+			case NOP: {
+				instruction.Type = INSTRUCTIONS::InstructionType::NOP;
+				//decode NOP
+
+				break;
+			}
+			case UD: {
+				instruction.Type = INSTRUCTIONS::InstructionType::UD;
+				break;
+			}
+			default: {
+
+				std::stringstream msg;
+				const uint16_t asIntegerType = static_cast<uint16_t>(fistOpcodeByte);
+				msg << "\n\n #UD exception \n \n byte: 0x" << std::hex << asIntegerType << " at RIP: 0x" << std::hex << address << " corresponds to no valid opcode " << std::dec;
+				throw EXCEPTIONS::UNDEFINED_OPCODE(msg.str());
+				break;
+			}
+		}
+
+		return instruction;
+	}
+
+	inline void ExecutionEngine::ExecuteInstruction(VirtualCore& core, const INSTRUCTIONS::Instruction& instruction)
+	{
+		switch (instruction.Type) {
+			using enum INSTRUCTIONS::InstructionType;
+			case MOV: {
+				if (instruction.ImmediateSizeBytes > 0) {
+					std::print("Executing instruction: ADD r/m{}, imm{}\n", instruction.DestinationSize, instruction.SourceSize);
+				uint64_t val = 0;
+				memcpy(&val, instruction.ImmediateBytes.data(), sizeof(uint64_t));
+				uint64_t tmpval =core.GetRegisterValue(instruction.DestinationRegister);
+				tmpval &= ~val;
+				tmpval &= val;
+				tmpval |= val;
+				std::print("value of destination register");
+				core.SetRegisterValue(instruction.DestinationRegister, tmpval);
+				break;
+				}
+				break;
+			}
+			case ADD: {
+				if (instruction.ImmediateSizeBytes > 0) {
+					throw EXCEPTIONS::UNDEFINED_OPCODE("immediat operands are not supported yet for ADD");
+				}
+
+
+					if (instruction.ModRM.mod != 0b11) {
+					throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not supported yet for ADD");
+					}
+
+				std::print("Executing instruction: ADD r/m{}, r{}\n",instruction.DestinationSize,instruction.SourceSize);
+				const uint64_t sourceVal = core.GetRegisterValue(instruction.SourceRegister);
+				const uint64_t destVal = core.GetRegisterValue(instruction.DestinationRegister);
+				std::print("value of Destintion register: {:#X}, value of Source Register {:#X} before execution\n", destVal, sourceVal);
+				core.SetRegisterValue(instruction.DestinationRegister, destVal + sourceVal);
+				std::print("value of Destiontion Register: {:#X} after execution\n",core.GetRegisterValue(instruction.DestinationRegister));
+				
+
+
+				break;
+
+			}
+			case UD: {
+				throw EXCEPTIONS::UNDEFINED_OPCODE("UD instruction executed at RIP: " + core.RIP.GetValue());
+			}
+			case NOP: {
+				break;
+			}
+		}
 	}
 
 }

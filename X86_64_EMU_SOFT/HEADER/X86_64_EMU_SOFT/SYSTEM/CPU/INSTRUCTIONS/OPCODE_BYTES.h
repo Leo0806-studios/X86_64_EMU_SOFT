@@ -3,15 +3,25 @@
 namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 {
 	enum class InstructionType{
+		MOV,
+
 		ADD,
-		SUB,
-		MUL,
-		DIV,
-		MOD,
-		OR ,
-		AND,
-		NOT,
-		SHR,
-		SHL,
+
+
+		UD,
+		NOP,
+
+	};
+	enum PrimaryOpcodeByteValue :uint8_t {
+		ADDrm16r16 = 0x1,
+
+
+		NOP = 0x90,
+
+
+		MOVr16r32imm16imm32_BASE = 0xB8,
+
+
+		UD = 0xD6,
 	};
 }

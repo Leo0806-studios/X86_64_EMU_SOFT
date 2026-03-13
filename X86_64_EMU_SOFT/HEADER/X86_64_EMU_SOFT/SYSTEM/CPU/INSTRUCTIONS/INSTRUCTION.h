@@ -76,7 +76,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 			case TargetRegister::R13: return "R13";
 			case TargetRegister::R14: return "R14";
 			case TargetRegister::R15: return "R15";
-			case TargetRegister::None: return "None";
+			case TargetRegister::None:
 			default: return "None";
 		}
 	}
@@ -90,39 +90,23 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		PrefixGroup2 Prefix2;
 		bool OperandOverride = false;
 		bool AddressOverride = false;
-
-
-		uint8_t OpcodeSizeBytes;
-		std::array<uint8_t, 3> OpcodeBytes;
-
-		bool hasModRM = false;;
+		bool hasModRM = false;
 		ModRM ModRM;
-
-		bool hasSIB = false;;
+		bool hasSIB = false;
 		SIB SIB ;
-
-		TargetRegister SourceRegister;
-		TargetRegister DestinationRegister;
-
 		uint8_t ImmediateSizeBytes = 0;
-		std::array<uint8_t, 8> ImmediateBytes;
+		uint8_t OpcodeSizeBytes;
 		uint8_t DisplacementSizeBytes = 0;
-		std::array<uint8_t, 8> DisplacementBytes;
+		uint8_t SourceSize=0;
+		uint8_t DestinationSize=0;
+		TargetRegister SourceRegister=TargetRegister::None;
+		TargetRegister DestinationRegister=TargetRegister::None;
+		InstructionType Type = InstructionType::UD;
+		std::array<uint8_t, sizeof(uint64_t)> ImmediateBytes ;
+		std::array<uint8_t, sizeof(uint64_t)> DisplacementBytes ;
+		std::array<uint8_t, 3> OpcodeBytes;
 
 	};
 
 
-//	struct OpcodeInfo {
-//		bool isImplemented = false;
-//		bool hasSBI = false;
-//		bool hasMODRM = false;
-//		uint8_t immediateSizeBytes = 0;
-//	};
-//	inline OpcodeInfo OpcodeInfos[256] = {0	};
-//	inline const   bool InitializeOpcodeInfos = []() {
-//		OpcodeInfos[0x90] = { .isImplemented = true,.hasSBI = false, .hasMODRM = false, .immediateSizeBytes = 0 };//NOP
-//		OpcodeInfos[0xB8] = { .isImplemented= true,.hasSBI = false, .hasMODRM = false, .immediateSizeBytes = 2 };//MOV RAX, imm64
-//
-//		return true;
-//		}();
 }
