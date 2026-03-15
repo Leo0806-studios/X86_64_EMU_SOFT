@@ -8,14 +8,20 @@
 #include "SYSTEM/CPU/REGISTERS/RIP.h"
 #include "SYSTEM/MEMORY/MEMORY.h"
 #include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h"
-
+#include "SYSTEM/CPU/REGISTERS/MSR/EFER.h"
 namespace X86_64_EMU_SOFT::SYSTEM::CPU
 {
 		
 		
-			class VirtualCore
+	enum class vCoreMode {
+		realMode,
+		protectedMode,
+		longMode,
+		vmxRootMode,
+	};
+	class VirtualCore
 			{
-				friend class DecodeingEngine;
+				friend class DecodingEngine;
 				friend class ExecutionEngine;
 				enum class RegisterID:uint8_t {
 					RAX = 0b000,
@@ -27,9 +33,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 					RSI = 0b110,
 					RDI = 0b111,
 				};
-				REGISTERS::GPR RAX;
-				REGISTERS::GPR RBX;
-				REGISTERS::GPR RCX;
+				REGISTERS::GPR RAX  ;
+				REGISTERS::GPR RBX ;
+				REGISTERS::GPR RCX ;
 				REGISTERS::GPR RDX;
 				REGISTERS::GPR RSI;
 				REGISTERS::GPR RDI;
@@ -56,14 +62,20 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 				[[nodiscard]]uint64_t GetRegisterValue(RegisterID reg) const noexcept;
 				void SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value) ;
 				void SetRegisterValue(RegisterID reg, uint64_t value) noexcept;
-				void ExecuteInstructionGroup0xB8(const INSTRUCTIONS::Instruction& instruction,const uint8_t primaryOpcodeByte);
-				void ExecuteInstructionAdd0x1(const INSTRUCTIONS::Instruction& instruction);
-				void executeInstruction(INSTRUCTIONS::Instruction instruction);
+				void executeInstruction(const INSTRUCTIONS::Instruction& instruction);
 				void PrintCoreState()const;
+
 			public:
-				explicit VirtualCore(uint64_t resetVector,std::shared_ptr<MEMORY::MemoryBus> memoryBus)noexcept;
-				VirtualCore(const VirtualCore&other);
-				VirtualCore& operator=(const VirtualCore&other);
+				explicit VirtualCore(uint64_t resetVector, std::shared_ptr<MEMORY::MemoryBus> memoryBus)noexcept;
+				VirtualCore(const VirtualCore& other)noexcept;
+				VirtualCore& operator=(const VirtualCore& other)noexcept;
+				VirtualCore(VirtualCore&& other)noexcept;
+				VirtualCore& operator=(VirtualCore&& other)noexcept;
+				~VirtualCore();
+				[[nodiscard]] bool isCoreRunning() const noexcept {
+					return isRunning.load();
+				}
+				[[nodiscard]]
 				bool hasShutdownCore() const noexcept {
 					return hasShutdown.load();
 				}

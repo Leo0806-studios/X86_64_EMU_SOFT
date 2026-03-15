@@ -7,26 +7,25 @@
 #include <sstream>
 #include <stdexcept>
 #include <utility>
-#include "INSTRUCTIONS/INSTRUCTION.h"
-#include "INSTRUCTIONS/OPCODE_BYTES.h"
+#include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h"
+#include "SYSTEM/CPU/INSTRUCTIONS/OPCODE_BYTES.h"
 #include "SYSTEM/CPU/EXCEPTIONS/UNDEFINED_OPCODE.h"
 #include "SYSTEM/CPU/VCORE.h"
 #include "SYSTEM/MEMORY/MEMORY.h"
-namespace X86_64_EMU_SOFT::SYSTEM::CPU {
+namespace X86_64_EMU_SOFT::SYSTEM::CPU { 
 
 		class ExecutionEngine {
-		private:
 			
 		public:
-			static inline void ExecuteInstruction(VirtualCore& core, const INSTRUCTIONS::Instruction& instruction);
+			static  void ExecuteInstruction(VirtualCore& core, const INSTRUCTIONS::Instruction& instruction);
 		};
-		class DecodeingEngine {
+		class DecodingEngine {
 		private:
-			static bool isPrefix[256];;
-			const static  bool PrefixeListSetupDone;
+			static std::array<bool,256> isPrefix;
+			const static  bool PrefixListSetupDone;
 
 			/// <summary>
-			/// always digests the MODRM byte and then conditionaly based on the modrm byte it also digests the SIB byte
+			/// always digests the MODRM byte and then conditionally based on the ModRM byte it also digests the SIB byte
 			/// </summary>
 			/// <param name="address"></param>
 			/// <param name="memoryBus"></param>
@@ -35,7 +34,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			static inline void digestPrefixes(uint64_t& address, const MEMORY::MemoryBus& memoryBus, INSTRUCTIONS::Instruction& instruction)noexcept;
 
 		public:
-			[[nodiscard]] static inline INSTRUCTIONS::Instruction DecodeInstruction(const VirtualCore& core);
+			[[nodiscard]] static  INSTRUCTIONS::Instruction DecodeInstruction(const VirtualCore& core);
 		};
 	namespace {
 
@@ -50,11 +49,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 		void PrintInstruction(const INSTRUCTIONS::Instruction& instruction) {
 			std::print("Instruction Length: {} bytes\n", instruction.InstructionLengthBytes);
-			if (instruction.Prefix1) {
+			if (std::to_underlying(instruction.Prefix1)) {
 				std::print("Prefix Group 1: {:#X}\n", std::to_underlying(instruction.Prefix1));
 			}
-			if (instruction.Prefix2) {
-				std::print("Prefix Group 2: {:#X}\n", static_cast<uint8_t>(instruction.Prefix2));
+			if (std::to_underlying(instruction.Prefix2)) {
+				std::print("Prefix Group 2: {:#X}\n", std::to_underlying(instruction.Prefix2));
 			}
 			if (instruction.OperandOverride) {
 				std::print("Operand-size override prefix is present\n");
@@ -77,8 +76,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			}
 			if (instruction.ImmediateSizeBytes > 0) {
 				std::print("Immediate Bytes: ");
-				for (int64_t i = 0; i < instruction.ImmediateSizeBytes; i++) {
-					std::print("{:#X} ", instruction.ImmediateBytes[static_cast<uint64_t>(i)]);
+				for (uint64_t i = 0; i < instruction.ImmediateSizeBytes; i++) {
+					std::print("{:#X} ", instruction.ImmediateBytes[i]);
 				}
 				std::print("\n");
 			}
@@ -87,38 +86,40 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 
-		INSTRUCTIONS::TargetRegister DecodeRegisterFromModRMRegField(uint8_t regField) {
+		INSTRUCTIONS::TargetRegister DecodeRegisterFromModRMRegField(uint8_t regField)noexcept {
 			switch (regField) {
-				case 0: return INSTRUCTIONS::TargetRegister::RAX;
-				case 1: return INSTRUCTIONS::TargetRegister::RCX;
-				case 2: return INSTRUCTIONS::TargetRegister::RDX;
-				case 3: return INSTRUCTIONS::TargetRegister::RBX;
-				case 4: return INSTRUCTIONS::TargetRegister::RSP;
-				case 5: return INSTRUCTIONS::TargetRegister::RBP;
-				case 6: return INSTRUCTIONS::TargetRegister::RSI;
-				case 7: return INSTRUCTIONS::TargetRegister::RDI;
+				using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
+				case 0: return RAX;
+				case 1: return RCX;
+				case 2: return RDX;
+				case 3: return RBX;
+				case 4: return RSP;
+				case 5: return RBP;
+				case 6: return RSI;
+				case 7: return RDI;
 				default: {
 					__assume(false);
 				}
 			}
 		}
-		INSTRUCTIONS::TargetRegister DecodeRegisterFromModRMRMField(uint8_t rmField) {
+		INSTRUCTIONS::TargetRegister DecodeRegisterFromModRMRMField(uint8_t rmField)noexcept {
 			switch (rmField) {
-				case 0: return INSTRUCTIONS::TargetRegister::RAX;
-				case 1: return INSTRUCTIONS::TargetRegister::RCX;
-				case 2: return INSTRUCTIONS::TargetRegister::RDX;
-				case 3: return INSTRUCTIONS::TargetRegister::RBX;
-				case 4: return INSTRUCTIONS::TargetRegister::RSP;
-				case 5: return INSTRUCTIONS::TargetRegister::RBP;
-				case 6: return INSTRUCTIONS::TargetRegister::RSI;
-				case 7: return INSTRUCTIONS::TargetRegister::RDI;
+				using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
+				case 0: return RAX;
+				case 1: return RCX;
+				case 2: return RDX;
+				case 3: return RBX;
+				case 4: return RSP;
+				case 5: return RBP;
+				case 6: return RSI;
+				case 7: return RDI;
 				default: {
 					__assume(false);
 				}
 			}
 		}
 
-		INSTRUCTIONS::TargetRegister GetTargetRegisterfromAdditiveID(uint8_t regSelector) {
+		INSTRUCTIONS::TargetRegister GetTargetRegisterfromAdditiveID(uint8_t regSelector)noexcept {
 			__assume(regSelector <= 0b111);
 			switch (regSelector) {
 				using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
@@ -134,14 +135,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 			}
 		}
-	}
+	}// namespace X86_64_EMU_SOFT::SYSTEM::CPU::
 
 	INSTRUCTIONS::Instruction VirtualCore::decodeInstruction() const
 	{
-		return DecodeingEngine::DecodeInstruction(*this);
+		return DecodingEngine::DecodeInstruction(*this);
 		
 	}
-	uint64_t VirtualCore::GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const 
+	uint64_t VirtualCore::GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const
 	{
 		switch (reg) {
 			case INSTRUCTIONS::TargetRegister::RAX: return RAX.GetValue();
@@ -160,9 +161,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case INSTRUCTIONS::TargetRegister::R13: return R13.GetValue();
 			case INSTRUCTIONS::TargetRegister::R14: return R14.GetValue();
 			case INSTRUCTIONS::TargetRegister::R15: return R15.GetValue();
-			case INSTRUCTIONS::TargetRegister::None: throw std::runtime_error("invalid value during register get");
+			case INSTRUCTIONS::TargetRegister::None:return 0xffffffffFFFFFFFFULL; 
+			default: throw std::runtime_error("invalid value during register get");
 		}
-		return 0xffffffffFFFFFFFFULL;
 
 	}
 	uint64_t VirtualCore::GetRegisterValue(RegisterID reg) const noexcept
@@ -180,7 +181,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 		
 	}
-	void VirtualCore::SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value) 
+	void VirtualCore::SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value)
 	{
 		switch (reg) {
 			case INSTRUCTIONS::TargetRegister::RAX: RAX.SetValue(value); break;
@@ -199,8 +200,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case INSTRUCTIONS::TargetRegister::R13: R13.SetValue(value); break;
 			case INSTRUCTIONS::TargetRegister::R14: R14.SetValue(value); break;
 			case INSTRUCTIONS::TargetRegister::R15: R15.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::None: throw std::runtime_error("invalid value during register set");
-			default: __assume(false);
+			case INSTRUCTIONS::TargetRegister::None: break;
+			default: throw std::runtime_error("invalid value during register set");
 		}
 	}
 	void VirtualCore::SetRegisterValue(RegisterID reg, uint64_t value) noexcept
@@ -214,109 +215,13 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case RegisterID::RBP: RBP.SetValue(value);break;
 			case RegisterID::RSI: RSI.SetValue(value);break;
 			case RegisterID::RDI: RDI.SetValue(value); break;
+			default: break;
 	}
 	
 	}
-	void VirtualCore::ExecuteInstructionGroup0xB8(const INSTRUCTIONS::Instruction& instruction, const uint8_t primaryOpcodeByte)
-	{
-		uint16_t val = 0;
-		memcpy(&val, instruction.ImmediateBytes.data(), sizeof(uint16_t));
-
-		const uint8_t regSelector = static_cast<uint8_t>(primaryOpcodeByte & static_cast<uint8_t>(0b111));
-		__assume(regSelector <= 0b111);
-		switch (regSelector) {
-			case 0: {//ax
-				std::print("Executing instruction: MOV RAX|EAX|AX, {:#X}\n", val);
-				std::print("Reg Value Before: {:#X}\n", RAX.GetValue());
-				const uint64_t finalVal = (RAX.GetValue() & ~(0xFFFFULL)) | val;
-				RAX.SetValue(finalVal);
-				std::print("Reg Value after: {:#X}\n", RAX.GetValue());
-				break;
-			}
-			case 1: {//cx
-				std::print("Executing instruction: MOV RCX|ECX|CX, {:#X}\n", val);
-				std::print("Reg Value Before: {:#X}\n", RCX.GetValue());
-				const uint64_t finalVal = (RCX.GetValue() & ~(0xFFFFULL)) | val;
-				RCX.SetValue(finalVal);
-				std::print("Reg Value after: {:#X}\n", RCX.GetValue());
-				break;
-			}
-			case 2: {//dx
-				std::print("Executing instruction: MOV RDX|EDX|DX, {:#X}\n", val);
-				std::print("Reg Value Before: {:#X}\n", RDX.GetValue());
-				const uint64_t finalVal = (RDX.GetValue() & ~(0xFFFFULL)) | val;
-				RDX.SetValue(finalVal);
-				std::print("Reg Value after: {:#X}\n", RDX.GetValue());
-				break;
-			}
-			case 3: {//bx
-				std::print("Executing instruction: MOV RBX|EBX|BX, {:#X}\n", val);
-				std::print("Reg Value Before: {:#X}\n", RBX.GetValue());
-				const uint64_t finalVal = (RBX.GetValue() & ~(0xFFFFULL)) | val;
-				RBX.SetValue(finalVal);
-				std::print("Reg Value after: {:#X}\n", RBX.GetValue());
-				break;
-			}
-			case 4: {//sp
-				std::print("Executing instruction: MOV RSP|ESP|SP, {:#X}\n", val);
-				std::print("Reg Value Before: {:#X}\n", RSP.GetValue());
-				const uint64_t finalVal = (RSP.GetValue() & ~(0xFFFFULL)) | val;
-				RSP.SetValue(finalVal);
-				std::print("Reg Value after: {:#X}\n", RSP.GetValue());
-				break;
-			}
-			case 5: {//bp
-				std::print("Executing instruction: MOV RBP|EBP|BP, {:#X}\n", val);
-				std::print("Reg Value Before: {:#X}\n", RBP.GetValue());
-				const uint64_t finalVal = (RBP.GetValue() & ~(0xFFFFULL)) | val;
-				RBP.SetValue(finalVal);
-				std::print("Reg Value after: {:#X}\n", RBP.GetValue());
-				break;
-			}
-			case 6: {//si
-				std::print("Executing instruction: MOV RSI|ESI|SI, {:#X}\n", val);
-				std::print("Reg Value Before: {:#X}\n", RSI.GetValue());
-				const uint64_t finalVal = (RSI.GetValue() & ~(0xFFFFULL)) | val;
-				RSI.SetValue(finalVal);
-				std::print("Reg Value after: {:#X}\n", RSI.GetValue());
-				break;
-			}
-			case 7: {//di
-				std::print("Executing instruction: MOV RDI|EDI|DI, {:#X}\n", val);
-				std::print("Reg Value Before: {:#X}\n", RDI.GetValue());
-				const uint64_t finalVal = (RDI.GetValue() & ~(0xFFFFULL)) | val;
-				RDI.SetValue(finalVal);
-				std::print("Reg Value after: {:#X}\n", RDI.GetValue());
-				break;
-			}
-			default: {
-				__assume(false);
-				break;
-			}
-
-		}
-
-	}
-	void VirtualCore::ExecuteInstructionAdd0x1(const INSTRUCTIONS::Instruction& instruction)
-	{
-		std::print("Executing instruction: ADD r/m16, r16\n");
-		std::print("Source Register: {}\n", RegisterToString(instruction.SourceRegister));
-		uint64_t sourceVal = GetRegisterValue(instruction.SourceRegister);
-	std::print("Source Value: {:#X}\n", sourceVal);
-		if (instruction.ModRM.mod == 3) {
-			std::print("Destination Register: {}\n", RegisterToString(instruction.DestinationRegister));
-			uint64_t destVal = GetRegisterValue(instruction.DestinationRegister);
-			SetRegisterValue(instruction.DestinationRegister, destVal + sourceVal);
-
-			std::print("Destination Value after: {:#X}\n", GetRegisterValue(instruction.DestinationRegister));
-
-		}
-		else {
-			std::print("Destination is a memory operand\n");
-			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not supported yet");
-		}
-	}
-	void VirtualCore::executeInstruction(INSTRUCTIONS::Instruction instruction)
+	
+	
+	void VirtualCore::executeInstruction(const INSTRUCTIONS::Instruction& instruction)
 	{
 		ExecutionEngine::ExecuteInstruction(*this, instruction);
 
@@ -344,38 +249,26 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		std::print("*****************************************************************\n");
 
 	}
-	VirtualCore::VirtualCore(uint64_t resetVector, std::shared_ptr<MEMORY::MemoryBus> memoryBus) noexcept
+	VirtualCore::VirtualCore(uint64_t resetVector, std::shared_ptr<MEMORY::MemoryBus> memoryBus) noexcept :
+		RAX(), RBX(), RCX(), RDX(), RSI(), RDI(), RSP(), RBP(), R8(), R9(), R10(), R11(), R12(), R13(), R14(), R15(),
+		RIP(),
+		isRunning(false), hasShutdown(false), isEnabled(false), memoryBus(std::move(memoryBus))
+
 	{
 		RIP.SetValue(resetVector);
-		this->memoryBus = std::move(memoryBus);
 	}
-	VirtualCore::VirtualCore(const VirtualCore& other)
+	VirtualCore::VirtualCore(const VirtualCore& other)noexcept :
+		RAX(other.RAX), RBX(other.RBX), RCX(other.RCX), RDX(other.RDX), RSI(other.RDX), RDI(other.RDI), RSP(other.RSP), RBP(other.RBP),
+		R8(other.R8), R9(other.R9), R10(other.R10), R11(other.R11), R12(other.R12), R13(other.R13), R14(other.R14), R15(other.R15),
+		RIP(other.RIP),
+		isRunning(other.isRunning.load()), hasShutdown(other.hasShutdown.load()), isEnabled(other.isEnabled.load()), memoryBus(other.memoryBus)
 	{
-		RAX = other.RAX;
-		RBX = other.RBX;
-		RCX = other.RCX;
-		RDX = other.RDX;
-		RSI = other.RSI;
-		RDI = other.RDI;
-		RSP = other.RSP;
-		RBP = other.RBP;
-		R8 = other.R8;
-		R9 = other.R9;
-		R10 = other.R10;
-		R11 = other.R11;
-		R12 = other.R12;
-		R13 = other.R13;
-		R14 = other.R14;
-		R15 = other.R15;
-		RIP = other.RIP;
-		isRunning = other.isRunning.load();
-		hasShutdown = other.hasShutdown.load();
-		isEnabled = other.isEnabled.load();
-		memoryBus = other.memoryBus;
-
 	}
-	VirtualCore& VirtualCore::operator=(const VirtualCore& other)
+	VirtualCore& VirtualCore::operator=(const VirtualCore& other)noexcept
 	{
+		if (this == &other) {
+			return *this;
+		}
 		RAX = other.RAX;
 		RBX = other.RBX;
 		RCX = other.RCX;
@@ -398,6 +291,47 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		isEnabled = other.isEnabled.load();
 		memoryBus = other.memoryBus;
 		return *this;
+
+	}
+	VirtualCore::VirtualCore(VirtualCore&& other)noexcept :
+		RAX(std::move(other.RAX)), RBX(std::move(other.RBX)), RCX(std::move(other.RCX)), RDX(std::move(other.RDX)), RSI(std::move(other.RSI)), RDI(std::move(other.RDI)),
+		RSP(std::move(other.RSP)), RBP(std::move(other.RBP)), R8(std::move(other.R8)), R9(std::move(other.R9)), R10(std::move(other.R10)), R11(std::move(other.R11)),
+		R12(std::move(other.R12)), R13(std::move(other.R13)), R14(std::move(other.R14)), R15(std::move(other.R15)),
+		RIP(std::move(other.RIP)),
+		isRunning(other.isRunning.load()), hasShutdown(other.hasShutdown.load()), isEnabled(other.isEnabled.load()), memoryBus(std::move(other.memoryBus))
+	{}
+	VirtualCore& VirtualCore::operator=(VirtualCore&& other) noexcept
+	{
+		if (this == &other) {
+			return *this;
+		}
+		RAX = std::move(other.RAX);
+		RBX = std::move(other.RBX);
+		RCX = std::move(other.RCX);
+		RDX = std::move(other.RDX);
+		RSI = std::move(other.RSI);
+		RDI = std::move(other.RDI);
+		RSP = std::move(other.RSP);
+		RBP = std::move(other.RBP);
+		R8 = std::move(other.R8);
+		R9 = std::move(other.R9);
+		R10 = std::move(other.R10);
+		R11 = std::move(other.R11);
+		R12 = std::move(other.R12);
+		R13 = std::move(other.R13);
+		R14 = std::move(other.R14);
+		R15 = std::move(other.R15);
+		RIP = std::move(other.RIP);
+		isRunning = other.isRunning.load();
+		hasShutdown = other.hasShutdown.load();
+		isEnabled = other.isEnabled.load();
+		memoryBus = std::move(other.memoryBus);
+		return *this;
+	}
+	VirtualCore::~VirtualCore()
+	{
+		isRunning.store(false);
+		hasShutdown.store(true);
 
 	}
 	bool VirtualCore::StartCore() noexcept
@@ -437,8 +371,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 
-	bool DecodeingEngine::isPrefix[256] = { 0 };
-	const bool DecodeingEngine::PrefixeListSetupDone = []() noexcept{
+	std::array<bool, 256> DecodingEngine::isPrefix = { };
+	const bool DecodingEngine::PrefixListSetupDone = []() noexcept{
 		memset(&isPrefix[0], 0, sizeof(isPrefix));
 		isPrefix[0xF0] = true; //LOCK
 		isPrefix[0xF2] = true; //REPNE/REPNZ
@@ -458,7 +392,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 
-	inline void DecodeingEngine::digestModRMAndSIB(uint64_t& address, const MEMORY::MemoryBus& memoryBus, INSTRUCTIONS::Instruction& instruction) noexcept
+	inline void DecodingEngine::digestModRMAndSIB(uint64_t& address, const MEMORY::MemoryBus& memoryBus, INSTRUCTIONS::Instruction& instruction) noexcept
 	{
 		const uint8_t modrmByte = memoryBus.Read8(address);
 		instruction.ModRM = std::bit_cast<INSTRUCTIONS::ModRM>(modrmByte);
@@ -474,31 +408,35 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 	}
 
-	inline void DecodeingEngine::digestPrefixes(uint64_t& address, const MEMORY::MemoryBus& memoryBus, INSTRUCTIONS::Instruction& instruction) noexcept
+	inline void DecodingEngine::digestPrefixes(uint64_t& address, const MEMORY::MemoryBus& memoryBus, INSTRUCTIONS::Instruction& instruction) noexcept
 	{
 		uint8_t byte = 0;
 		while (byte = memoryBus.Read8(address), isPrefix[byte]) {//NOSONAR 
 			switch (byte) {
-				case INSTRUCTIONS::PrefixGroup1::LOCK:
-				case INSTRUCTIONS::PrefixGroup1::REPNE_REPNZ:
-				case INSTRUCTIONS::PrefixGroup1::REP_REPE_REPZ: {
+				using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::PrefixGroup2;
+				using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::PrefixGroup1;
+				using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::PrefixGroup3;
+				using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::PrefixGroup4;
+				case std::to_underlying(LOCK):
+				case std::to_underlying(REPNE_REPNZ):
+				case std::to_underlying(REP_REPE_REPZ): {
 					instruction.Prefix1 = static_cast<INSTRUCTIONS::PrefixGroup1>(byte);
 					break;
 				}
-				case INSTRUCTIONS::PrefixGroup2::CS_SEGMENT_OVERRIDE:
-				case INSTRUCTIONS::PrefixGroup2::SS_SEGMENT_OVERRIDE:
-				case INSTRUCTIONS::PrefixGroup2::DS_SEGMENT_OVERRIDE:
-				case INSTRUCTIONS::PrefixGroup2::ES_SEGMENT_OVERRIDE:
-				case INSTRUCTIONS::PrefixGroup2::FS_SEGMENT_OVERRIDE:
-				case INSTRUCTIONS::PrefixGroup2::GS_SEGMENT_OVERRIDE: {
+				case std::to_underlying(CS_SEGMENT_OVERRIDE):
+				case std::to_underlying(SS_SEGMENT_OVERRIDE):
+				case std::to_underlying(DS_SEGMENT_OVERRIDE):
+				case std::to_underlying(ES_SEGMENT_OVERRIDE):
+				case std::to_underlying(FS_SEGMENT_OVERRIDE):
+				case std::to_underlying(GS_SEGMENT_OVERRIDE): {
 					instruction.Prefix2 = static_cast<INSTRUCTIONS::PrefixGroup2>(byte);
 					break;
 				}
-				case INSTRUCTIONS::PrefixGroup3::OPERAND_SIZE_OVERRIDE: {
+				case std::to_underlying(OPERAND_SIZE_OVERRIDE): {
 					instruction.OperandOverride = true;
 					break;
 				}
-				case INSTRUCTIONS::PrefixGroup4::ADDRESS_SIZE_OVERRIDE: {
+				case std::to_underlying(ADDRESS_SIZE_OVERRIDE): {
 					instruction.AddressOverride = true;
 					break;
 				}
@@ -513,7 +451,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 	}
 
-	inline INSTRUCTIONS::Instruction DecodeingEngine::DecodeInstruction(const VirtualCore& core)
+	inline INSTRUCTIONS::Instruction DecodingEngine::DecodeInstruction(const VirtualCore& core)
 	{
 
 
@@ -528,7 +466,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		instruction.InstructionLengthBytes++;
 		switch (fistOpcodeByte) {
 			using enum INSTRUCTIONS::PrimaryOpcodeByteValue;
-			case ADDrm16r16: {//ADD r/m16, r16
+			case std::to_underlying(ADDrm16r16): {//ADD r/m16, r16
 				instruction.SourceSize = 16;
 				instruction.DestinationSize = 16;
 				instruction.hasModRM = true;
@@ -540,14 +478,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				}
 				break;
 			}
-			case MOVr16r32imm16imm32_BASE + 0: //mov ax imm16
-			case MOVr16r32imm16imm32_BASE + 1:
-			case MOVr16r32imm16imm32_BASE + 2:
-			case MOVr16r32imm16imm32_BASE + 3:
-			case MOVr16r32imm16imm32_BASE + 4:
-			case MOVr16r32imm16imm32_BASE + 5:
-			case MOVr16r32imm16imm32_BASE + 6:
-			case MOVr16r32imm16imm32_BASE + 7: {
+			case std::to_underlying(MOVr16r32imm16imm32_BASE) + 0: //mov ax imm16
+			case std::to_underlying(MOVr16r32imm16imm32_BASE) + 1:
+			case std::to_underlying(MOVr16r32imm16imm32_BASE) + 2:
+			case std::to_underlying(MOVr16r32imm16imm32_BASE) + 3:
+			case std::to_underlying(MOVr16r32imm16imm32_BASE) + 4:
+			case std::to_underlying(MOVr16r32imm16imm32_BASE) + 5:
+			case std::to_underlying(MOVr16r32imm16imm32_BASE) + 6:
+			case std::to_underlying(MOVr16r32imm16imm32_BASE) + 7: {
 				if (instruction.OperandOverride) {
 					instruction.SourceSize = 32;
 					instruction.DestinationSize = 32;
@@ -566,20 +504,20 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 				break;
 			}
-			case NOP: {
+			case std::to_underlying(NOP): {
 				instruction.Type = INSTRUCTIONS::InstructionType::NOP;
 				//decode NOP
 
 				break;
 			}
-			case UD: {
+			case std::to_underlying(UD): {
 				instruction.Type = INSTRUCTIONS::InstructionType::UD;
 				break;
 			}
 			default: {
 
 				std::stringstream msg;
-				const uint16_t asIntegerType = static_cast<uint16_t>(fistOpcodeByte);
+				const auto asIntegerType = static_cast<uint16_t>(fistOpcodeByte);
 				msg << "\n\n #UD exception \n \n byte: 0x" << std::hex << asIntegerType << " at RIP: 0x" << std::hex << address << " corresponds to no valid opcode " << std::dec;
 				throw EXCEPTIONS::UNDEFINED_OPCODE(msg.str());
 				break;
@@ -597,12 +535,13 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				if (instruction.ImmediateSizeBytes > 0) {
 					std::print("Executing instruction: ADD r/m{}, imm{}\n", instruction.DestinationSize, instruction.SourceSize);
 				uint64_t val = 0;
+				__assume(instruction.ImmediateBytes.data());
 				memcpy(&val, instruction.ImmediateBytes.data(), sizeof(uint64_t));
 				uint64_t tmpval =core.GetRegisterValue(instruction.DestinationRegister);
-				tmpval &= ~val;
-				tmpval &= val;
+				const uint64_t mask = (1ULL << instruction.DestinationSize) - 1;
+				tmpval &= ~mask;
 				tmpval |= val;
-				std::print("value of destination register");
+				std::print("value of destination register before\n");
 				core.SetRegisterValue(instruction.DestinationRegister, tmpval);
 				break;
 				}
@@ -631,9 +570,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 			}
 			case UD: {
-				throw EXCEPTIONS::UNDEFINED_OPCODE("UD instruction executed at RIP: " + core.RIP.GetValue());
+				throw EXCEPTIONS::UNDEFINED_OPCODE(std::format("UD instruction executed at RIP: {:#X}", core.RIP.GetValue()));
 			}
 			case NOP: {
+				std::print("Executing instruction NOP\n");
 				break;
 			}
 		}

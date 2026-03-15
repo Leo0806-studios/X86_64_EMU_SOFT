@@ -8,7 +8,7 @@
 namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
 {
 			inline void CR0::SetValue(uint64_t value)  {
-				CR0::InputValidityCR0 isValid= ValidateInput(value);
+				const CR0::InputValidityCR0 isValid= ValidateInput(value);
 				if(isValid !=InputValidityCR0::Valid)
 				{
 					throw  EXCEPTIONS::GENERAL_PROTECTION_FAULT("Invalid value for CR0");
@@ -19,7 +19,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
 
 
 			[[nodiscard]]
-			inline uint64_t CR0::GetValue() const  {
+			inline uint64_t CR0::GetValue() const noexcept {
 				return storage;
 			}
 

@@ -1,6 +1,6 @@
 #pragma once
-import <cstdint>;
-import <bitset>;
+#include <cstdint>
+#include <bitset>
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS {
 	class GPR {

@@ -10,7 +10,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU{
 			cores.push_back(std::move(core));
 		}
 	}
-	bool CPU::Start() noexcept
+	bool CPU::Start() 
 	{
 		std::print("Starting CPU with {} cores\n", cores.size());
 		std::print("selectet BSP: 0\n");

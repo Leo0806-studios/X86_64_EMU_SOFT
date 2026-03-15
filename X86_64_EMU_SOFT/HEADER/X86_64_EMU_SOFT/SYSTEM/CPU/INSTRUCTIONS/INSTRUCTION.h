@@ -6,12 +6,12 @@
 #include "OPCODE_BYTES.h"
 namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 
-	enum  PrefixGroup1 : uint8_t {
+	enum class PrefixGroup1 : uint8_t {
 		LOCK = 0xF0,
 		REPNE_REPNZ = 0xF2,
 		REP_REPE_REPZ = 0xF3
 	};
-	enum  PrefixGroup2 : uint8_t {
+	enum  class PrefixGroup2 : uint8_t {
 		CS_SEGMENT_OVERRIDE = 0x2E,
 		SS_SEGMENT_OVERRIDE = 0x36,
 		DS_SEGMENT_OVERRIDE = 0x3E,
@@ -19,10 +19,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		FS_SEGMENT_OVERRIDE = 0x64,
 		GS_SEGMENT_OVERRIDE = 0x65
 	};
-	enum  PrefixGroup3 : uint8_t {
+	enum class  PrefixGroup3 : uint8_t {
 		OPERAND_SIZE_OVERRIDE = 0x66,
 	};
-	enum  PrefixGroup4 : uint8_t {
+	enum class PrefixGroup4 : uint8_t {
 		ADDRESS_SIZE_OVERRIDE = 0x67
 	};
 

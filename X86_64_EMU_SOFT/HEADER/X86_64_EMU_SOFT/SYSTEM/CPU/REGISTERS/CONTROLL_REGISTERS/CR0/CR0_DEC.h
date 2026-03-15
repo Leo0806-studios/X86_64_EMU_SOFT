@@ -19,7 +19,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
 		[[nodiscard]] InputValidityCR0 ValidateInput(uint64_t value) const noexcept ;
 	public:
 		 void SetValue(uint64_t value) ;
-		[[nodiscard]]  uint64_t GetValue() const ;
+		[[nodiscard]]  uint64_t GetValue() const noexcept;
 
 
 		//CR0 specific methods

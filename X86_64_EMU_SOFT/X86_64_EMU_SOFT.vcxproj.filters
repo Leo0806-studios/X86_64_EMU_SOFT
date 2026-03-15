@@ -87,6 +87,15 @@
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\EXCEPTIONS\UNDEFINED_OPCODE.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\REGISTERS\MSR\EFER\EFER_DEC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\REGISTERS\MSR\EFER\EFER_INL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\MACROS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SOURCE\STARTUP.cpp">
@@ -119,11 +128,12 @@
     <ClCompile Include="SOURCE\SYSTEM\CPU\CPU_STATE.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\VCORE.cpp">
+    <ClCompile Include="SOURCE\SYSTEM\CPU\VCORE.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
+    <None Include="very_strict.ruleset" />
   </ItemGroup>
 </Project>

@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\CMD_PARSE.h" />
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\MACROS.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\CPU_STATE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\EXCEPTIONS\GENERAL_PROTECTION_FAULT.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\EXCEPTIONS\UNDEFINED_OPCODE.h" />
@@ -35,6 +36,8 @@
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\GET_BIT.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\SET_BIT.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\STARTUP.h" />
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\REGISTERS\MSR\EFER\EFER_DEC.h" />
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\REGISTERS\MSR\EFER\EFER_INL.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\REGISTERS\RIP.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\VCORE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\IO_DEVICES\DEVICE_BASE.h" />
@@ -45,7 +48,7 @@
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\SYSTEM_STATE.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\VCORE.cpp" />
+    <ClCompile Include="SOURCE\SYSTEM\CPU\VCORE.cpp" />
     <ClCompile Include="SOURCE\SYSTEM\CPU\CPU_STATE.cpp" />
     <ClCompile Include="SOURCE\SYSTEM\IO_DEVICES\FIRMWARE.cpp" />
     <ClCompile Include="SOURCE\HELPERS\CMD_PARSE.cpp" />
@@ -59,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
+    <None Include="very_strict.ruleset" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
@@ -117,12 +121,20 @@
     <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <MaxNumberOfProcesses>0</MaxNumberOfProcesses>
+    <CodeAnalysisRuleSet>very_strict.ruleset</CodeAnalysisRuleSet>
+    <ClangTidyExtraArgs>
+    </ClangTidyExtraArgs>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PublicIncludeDirectories>$(PublicIncludeDirectories)</PublicIncludeDirectories>
     <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <MaxNumberOfProcesses>0</MaxNumberOfProcesses>
+    <CodeAnalysisRuleSet>very_strict.ruleset</CodeAnalysisRuleSet>
+    <ClangTidyExtraArgs>
+    </ClangTidyExtraArgs>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
@@ -169,7 +181,8 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(ProjectDir)HEADER\X86_64_EMU_SOFT;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -180,6 +193,9 @@
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <DisableSpecificWarnings>4514;5045;4820;5245</DisableSpecificWarnings>
+      <EnablePREfast>true</EnablePREfast>
+      <DisableAnalyzeExternal>true</DisableAnalyzeExternal>
+      <TranslateIncludes>false</TranslateIncludes>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -197,7 +213,8 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(ProjectDir)HEADER\X86_64_EMU_SOFT;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -208,6 +225,9 @@
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <DisableSpecificWarnings>4514;5045;4820;5245</DisableSpecificWarnings>
+      <EnablePREfast>true</EnablePREfast>
+      <DisableAnalyzeExternal>true</DisableAnalyzeExternal>
+      <TranslateIncludes>false</TranslateIncludes>
     </ClCompile>
     <Link>
       <SubSystem>

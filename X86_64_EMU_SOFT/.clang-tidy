@@ -6,7 +6,8 @@ Checks: '*,
 
 
 -cppcoreguidelines-pro-type-union-access,
-
+-cppcoreguidelines-avoid-magic-numbers,
+-cppcoreguidelines-pro-bounds-constant-array-index,
 
 -hicpp-move-const-arg,performance-move-const-arg,
 
@@ -27,17 +28,20 @@ Checks: '*,
 -clang-diagnostic-pre-c++14-compat,
 -clang-diagnostic-covered-switch-default, 
 -clang-diagnostic-c++98-compat-local-type-template-args,
-
+-clang-diagnostic-pre-c++23-cpmpat,
+-clang-diagnostic-c++98-c++11-compat-binary-literal,
 
 -readability-enum-initial-value,
+-readability-implicit-bool-conversion,
 -readability-convert-member-functions-to-static,
+-readability-magic-numbers,
 
 
 -llvmlibc-restrict-system-libc-headers,
 -llvmlibc-inline-function-decl,
 -llvmlibc-callee-namespace,
 -llvmlibc-implementation-in-namespace,
-
+-llvm-include-order,
 
 -misc-use-anonymous-namespace,
 -misc-no-recursion,
@@ -51,5 +55,5 @@ Checks: '*,
 -fuchsia-default-arguments-calls,
 -fuchsia-default-arguments-declarations'
 
-HeaderFilterRegex: 'C:\Users\leo08\source\repos\X86_64_EMU_SOFT\*'
+HeaderFilterRegex: '*'
 

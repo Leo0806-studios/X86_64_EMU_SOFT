@@ -12,7 +12,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 		NOP,
 
 	};
-	enum PrimaryOpcodeByteValue :uint8_t {
+	enum class PrimaryOpcodeByteValue :uint8_t {
 		ADDrm16r16 = 0x1,
 
 
