@@ -6,7 +6,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 		MOV,
 
 		ADD,
-
+		SUB,
 
 		UD,
 		NOP,
@@ -14,8 +14,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 	};
 	enum class PrimaryOpcodeByteValue :uint8_t {
 		ADDrm16r16 = 0x1,
-
-
+		SUBrm16rm32r16r32 = 0x29,
+		GROUP1 = 0x83,
 		NOP = 0x90,
 
 

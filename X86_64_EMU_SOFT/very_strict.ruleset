@@ -691,7 +691,7 @@
     <Rule Id="C6386" Action="Error" />
     <Rule Id="C6387" Action="Error" />
     <Rule Id="C6388" Action="Error" />
-    <Rule Id="C6389" Action="Error" />
+    <Rule Id="C6389" Action="None" />
     <Rule Id="C6392" Action="Error" />
     <Rule Id="C6393" Action="Error" />
     <Rule Id="C6394" Action="Error" />

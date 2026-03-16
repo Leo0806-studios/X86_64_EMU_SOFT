@@ -8,7 +8,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			
 		public:
 			CPU() = delete;
-			explicit CPU(size_t numCores, uint64_t ResetVector,std::shared_ptr<MEMORY::MemoryBus> memoryBus);
+			explicit CPU(size_t numCores, uint64_t ResetVector,std::shared_ptr<MEMORY::MemoryBus> memoryBus, vCoreMode startupMode);
 			bool Start();
 		};
 }

@@ -58,7 +58,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		R15,
 		None = 0xFF
 	};
-	[[nodiscard]] inline std::string RegisterToString(TargetRegister reg) {
+	[[nodiscard]] constexpr std::string RegisterToString(TargetRegister reg) {
 		switch (reg) {
 			case TargetRegister::RAX: return "RAX";
 			case TargetRegister::RBX: return "RBX";

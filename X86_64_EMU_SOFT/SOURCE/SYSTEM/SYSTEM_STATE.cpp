@@ -7,11 +7,20 @@
 #include <iostream>
 #include <limits>
 #include <print>
+#include <cstdint>
 #include <string>
+#include <cstdlib>
+#include <iterator>
+#include <memory>
+#include <vector>
 #include "SYSTEM/IO_DEVICES/MAIN_MEMORY_DEVICE.h"
 #include "SYSTEM/IO_DEVICES/FIRMWARE.h"
 #include "SYSTEM/IO_DEVICES/RESET_ROM.h"
 #include "SYSTEM/SYSTEM_STATE.h"
+#include <SYSTEM/CPU/CPU_STATE.h>
+#include <SYSTEM/CPU/VCORE.h>
+#include <SYSTEM/IO_DEVICES/DEVICE_BASE.h>
+#include <SYSTEM/MEMORY/MEMORY.h>
 
 namespace X86_64_EMU_SOFT::SYSTEM {
 	namespace {
@@ -148,7 +157,8 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 		}
 		std::cout << "Memory Bus created successfully" << std::endl;
 		uint16_t Cores = cmdArgs.GetArgMap()["Cores"].as<uint16_t>();
-		cpu = std::make_shared<CPU::CPU>(Cores,cmdArgs.GetArgMap()["ResetVector"].as<uint64_t>(),memoryBus);
+		CPU::vCoreMode startupMode = CPU::IntToMode(cmdArgs.GetArgMap()["StartupMode"].as<int>());
+		cpu = std::make_shared<CPU::CPU>(Cores,cmdArgs.GetArgMap()["ResetVector"].as<uint64_t>(),memoryBus,startupMode);
 		if (!cpu) {
 			std::cerr << "failed to create CPU" << std::endl;
 			exit(1);

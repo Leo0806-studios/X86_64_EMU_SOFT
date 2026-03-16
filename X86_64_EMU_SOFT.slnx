@@ -5,6 +5,7 @@
   </Configurations>
   <Folder Name="/Solution Items/">
     <File Path="Fahrplan.md" />
+    <File Path="TEST_PROTECTED.asm" />
     <File Path="TEST_REAL.asm" />
   </Folder>
   <Folder Name="/Solution Items/RESET_BYTES/">

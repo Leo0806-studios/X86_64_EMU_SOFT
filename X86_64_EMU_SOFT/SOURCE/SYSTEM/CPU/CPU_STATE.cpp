@@ -3,10 +3,10 @@
 #include "SYSTEM/CPU/CPU_STATE.h"
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU{
-	CPU::CPU(size_t numCores, uint64_t ResetVector,std::shared_ptr<MEMORY::MemoryBus>memoryBus)
+	CPU::CPU(size_t numCores, uint64_t ResetVector,std::shared_ptr<MEMORY::MemoryBus>memoryBus,vCoreMode startupMode)
 	{
 		for (uint64_t i = 0; i < numCores; i++) {
-			VirtualCore core(ResetVector, memoryBus);
+			VirtualCore core(ResetVector, memoryBus,startupMode);
 			cores.push_back(std::move(core));
 		}
 	}
