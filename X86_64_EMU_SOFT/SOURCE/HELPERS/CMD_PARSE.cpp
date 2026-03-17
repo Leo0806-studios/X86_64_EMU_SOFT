@@ -3,6 +3,11 @@
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <iostream>
+#include <cstdint>
+#include <cstdlib>
+#include <string>
+#include <utility>
+#include <vector>
 #include "HELPERS/CMD_PARSE.h"
 
 X86_64_EMU_SOFT::HELPERS::CmdArgs::CmdArgs(int argc, const char** argv)

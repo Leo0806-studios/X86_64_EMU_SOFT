@@ -2,12 +2,17 @@ Checks: '*,
 -modernize-use-trailing-return-type, 
 
 
+-bugprone-easily-swappable-parameters,
+
 -altera-unroll-loops,
+-altera-struct-pack-align,
+-altera-id-dependent-backward-branch,
 
 
 -cppcoreguidelines-pro-type-union-access,
 -cppcoreguidelines-avoid-magic-numbers,
 -cppcoreguidelines-pro-bounds-constant-array-index,
+
 
 -hicpp-move-const-arg,performance-move-const-arg,
 
@@ -47,6 +52,8 @@ Checks: '*,
 -misc-no-recursion,
 -misc-include-cleaner,
 -misc-unused-parameters,
+-misc-use-internal-linkage,
+
 
 -concurrency-mt-unsafe,
 

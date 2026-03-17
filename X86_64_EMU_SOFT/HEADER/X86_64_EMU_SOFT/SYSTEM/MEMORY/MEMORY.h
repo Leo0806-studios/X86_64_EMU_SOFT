@@ -3,6 +3,7 @@
 #include <memory>
 #include <tuple>
 #include <vector>
+#include <utility>
 #include "SYSTEM/IO_DEVICES/DEVICE_BASE.h"
 namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 {
@@ -18,10 +19,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 				uint32_t pageOffset = 0;
 				uint32_t size = 4096;
 			};
-			std::vector<PageSection> Sections = std::vector<PageSection>(1);
-			bool IsPageContiguous()const noexcept;
-			uint64_t GetFrreBytesInPage()const noexcept;
-			std::pair<uint64_t/*in page offset*/, uint64_t/*size Bytes*/> GetNextFreeSection()const noexcept;
+			std::vector<PageSection> Sections = std::vector<PageSection>(1);//NOLINT(misc-non-private-member-variables-in-classes)
+			[[nodiscard ]] bool IsPageContiguous()const noexcept;
+			[[nodiscard ]] uint64_t GetFrreBytesInPage()const noexcept;
+			[[nodiscard ]]  std::pair<uint64_t/*in page offset*/, uint64_t/*size Bytes*/> GetNextFreeSection()const noexcept;
 			void SortSections() noexcept;
 			void PruneEmptySections();
 		};
@@ -56,4 +57,4 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 		void PrintMemoryMap() const noexcept;
 		void DumpMemoryToStdout() const noexcept;
 	};
-}
+}// namespace X86_64_EMU_SOFT::SYSTEM::MEMORY

@@ -4,12 +4,12 @@
 #include "HELPERS/GET_BIT.h"
 #include "HELPERS/SET_BIT.h"
 #include "CR0_DEC.h"
+#include <cstdint>
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
 {
 			inline void CR0::SetValue(uint64_t value)  {
-				const CR0::InputValidityCR0 isValid= ValidateInput(value);
-				if(isValid !=InputValidityCR0::Valid)
+				if(ValidateInput(value) !=InputValidityCR0::Valid)
 				{
 					throw  EXCEPTIONS::GENERAL_PROTECTION_FAULT("Invalid value for CR0");
 				}
@@ -124,4 +124,4 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
 			{
 				return HELPERS::GetBit(storage, 0);
 			}
-}
+}// namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS

@@ -6,12 +6,12 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
 {
 	class EFER
 	{
-		uint64_t storage;
+		uint64_t storage=0;
 	public:
-		inline void SetValue(uint64_t value) noexcept {
+		 void SetValue(uint64_t value) noexcept {
 			storage = value;
 		}
-		inline uint64_t GetValue() const noexcept {
+		[[nodiscard]] uint64_t GetValue() const noexcept {
 			return storage;
 		}
 		void SetNXE(bool enabled) noexcept;
@@ -23,4 +23,4 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
 		void SetSCE(bool enabled) noexcept;
 		[[nodiscard]] bool GetSCE() const noexcept;
 	};
-}
+}// namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS

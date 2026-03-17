@@ -9,7 +9,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 	enum class PrefixGroup1 : uint8_t {
 		LOCK = 0xF0,
 		REPNE_REPNZ = 0xF2,
-		REP_REPE_REPZ = 0xF3
+		REP_REPE_REPZ = 0xF3,
+		NONE = 0xFF
+
 	};
 	enum  class PrefixGroup2 : uint8_t {
 		CS_SEGMENT_OVERRIDE = 0x2E,
@@ -17,7 +19,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		DS_SEGMENT_OVERRIDE = 0x3E,
 		ES_SEGMENT_OVERRIDE = 0x26,
 		FS_SEGMENT_OVERRIDE = 0x64,
-		GS_SEGMENT_OVERRIDE = 0x65
+		GS_SEGMENT_OVERRIDE = 0x65,
+		NONE =0xFF
 	};
 	enum class  PrefixGroup3 : uint8_t {
 		OPERAND_SIZE_OVERRIDE = 0x66,
@@ -26,12 +29,12 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		ADDRESS_SIZE_OVERRIDE = 0x67
 	};
 
-	struct ModRM {
+	struct ModRM {//NOLINT(altera-struct-pack-align)
 		uint8_t rm : 3;
 		uint8_t reg : 3;
 		uint8_t mod : 2;
 	};
-	struct SIB {
+	struct SIB {//NOLINT(altera-struct-pack-align)
 		uint8_t base : 3;
 		uint8_t index : 3;
 		uint8_t scale : 2;
@@ -39,7 +42,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 	
 
 
-	enum class TargetRegister{
+	enum class TargetRegister:uint8_t{
 		RAX,
 		RBX,
 		RCX,
@@ -82,31 +85,31 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 	}
 
 
-	struct Instruction {
+	struct Instruction {//NOLINT(altera-struct-pack-align)
 		uint8_t InstructionLengthBytes=0;
 
 
-		PrefixGroup1 Prefix1;
-		PrefixGroup2 Prefix2;
+		PrefixGroup1 Prefix1=PrefixGroup1::NONE;
+		PrefixGroup2 Prefix2=PrefixGroup2::NONE;
 		bool OperandOverride = false;
 		bool AddressOverride = false;
 		bool hasModRM = false;
-		ModRM ModRM;
+		ModRM ModRM{ .rm=0,.reg=0,.mod=0 };
 		bool hasSIB = false;
-		SIB SIB ;
+		SIB SIB{ .base=0,.index=0,.scale=0 };
 		uint8_t ImmediateSizeBytes = 0;
-		uint8_t OpcodeSizeBytes;
+		uint8_t OpcodeSizeBytes=0;
 		uint8_t DisplacementSizeBytes = 0;
 		uint8_t SourceSize=0;
 		uint8_t DestinationSize=0;
 		TargetRegister SourceRegister=TargetRegister::None;
 		TargetRegister DestinationRegister=TargetRegister::None;
 		InstructionType Type = InstructionType::UD;
-		std::array<uint8_t, sizeof(uint64_t)> ImmediateBytes ;
-		std::array<uint8_t, sizeof(uint64_t)> DisplacementBytes ;
-		std::array<uint8_t, 3> OpcodeBytes;
+		std::array<uint8_t, sizeof(uint64_t)> ImmediateBytes{};
+		std::array<uint8_t, sizeof(uint64_t)> DisplacementBytes{};
+		std::array<uint8_t, 3> OpcodeBytes{};
 
 	};
 
 
-}
+}//namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSRUCTIONS

@@ -96,6 +96,21 @@
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\MACROS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\DECODING_ENGINE\DECODING_ENGINE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\DECODING_ENGINE\DECODING_HANDLERS\HANDLERS_ALU.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\DECODING_ENGINE\DECODING_HANDLERS\PREFIX_HANDLERS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\DECODING_ENGINE\DECODING_HANDLERS\HANDLERS_SPECIAL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\EXECUTION_ENGINE\EXECUTION_ENGINE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SOURCE\STARTUP.cpp">
@@ -108,9 +123,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SOURCE\SYSTEM\SYSTEM_STATE.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SOURCE\SYSTEM\CPU\REGISTERS\GPR.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SOURCE\SYSTEM\MEMORY\MEMORY.cpp">
@@ -129,6 +141,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SOURCE\SYSTEM\CPU\VCORE.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SOURCE\SYSTEM\CPU\DECODING_ENGINE\DECODING_ENGINE.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SOURCE\SYSTEM\CPU\EXECUTING_ENGINE\EXECUTION_ENGINE.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

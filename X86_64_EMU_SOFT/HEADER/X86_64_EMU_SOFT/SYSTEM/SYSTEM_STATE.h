@@ -3,21 +3,21 @@
 
 #include <unordered_map>
 #include <memory>
+#include <string>
 #include "CPU/CPU_STATE.h"
 #include "SYSTEM/IO_DEVICES/DEVICE_BASE.h"
 #include "SYSTEM/MEMORY/MEMORY.h"
 #include "HELPERS/CMD_PARSE.h"
 
-namespace X86_64_EMU_SOFT
+namespace X86_64_EMU_SOFT::SYSTEM
 {
-	namespace SYSTEM{
 
 		class System {
 			std::vector<std::shared_ptr<IO_DEVICES::DeviceBase>> RegisteredDevices;
 			std::shared_ptr<CPU::CPU> cpu;
 			std::shared_ptr<MEMORY::MemoryBus> memoryBus;
 			const HELPERS::CmdArgs cmdArgs;
-			enum class DeviceDescriptorParts
+			enum class DeviceDescriptorParts : uint8_t
 			{
 				DeviceName = 0,
 				DeviceType = 1,
@@ -48,5 +48,4 @@ namespace X86_64_EMU_SOFT
 			System& operator=(System&& other) = delete;
 			~System()noexcept;
 		};
-	}
-}
+}// namespace X86_64_EMU_SOFT::SYSTEM

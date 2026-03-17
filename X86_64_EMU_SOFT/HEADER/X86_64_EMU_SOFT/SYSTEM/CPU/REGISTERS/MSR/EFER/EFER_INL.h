@@ -1,4 +1,6 @@
 #pragma once
+#include "HELPERS/GET_BIT.h"
+#include "HELPERS/SET_BIT.h"
 #include "EFER_DEC.h"
 namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS {
 	inline void EFER::SetNXE(bool enabled) noexcept
@@ -36,4 +38,4 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS {
 		return HELPERS::GetBit(storage, 0);
 	}
 
-}
+}// namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS

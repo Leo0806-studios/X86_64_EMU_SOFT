@@ -8,14 +8,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES
 		uint64_t PreferedBaseAddress;
 		uint64_t PageCount;
 	};
-	class DeviceBase
+	class DeviceBase//NOLINT(cppcoreguidelines-special-member-functions,hicpp-special-member-functions)
 	{
 	public:
 		virtual ~DeviceBase() = default;
-		virtual uint8_t Read8(uint64_t offset) const noexcept = 0;
-		virtual uint16_t Read16(uint64_t offset) const noexcept = 0;
-		virtual uint32_t Read32(uint64_t offset) const noexcept = 0;
-		virtual uint64_t Read64(uint64_t offset) const noexcept = 0;
+		[[nodiscard]]virtual uint8_t Read8(uint64_t offset) const noexcept = 0;
+		[[nodiscard]]virtual uint16_t Read16(uint64_t offset) const noexcept = 0;
+		[[nodiscard]]virtual uint32_t Read32(uint64_t offset) const noexcept = 0;
+		[[nodiscard]]virtual uint64_t Read64(uint64_t offset) const noexcept = 0;
 		virtual void Write8(uint64_t offset, uint8_t value) noexcept = 0;
 		virtual void Write16(uint64_t offset, uint16_t value) noexcept = 0;
 		virtual void Write32(uint64_t offset, uint32_t value) noexcept = 0;
@@ -29,7 +29,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES
 	if ((offset) + (size) > (maxSize)) { \
 		std::print("device acces out of range\n"); \
 		__debugbreak();\
-		__assume(false);\
+		while(true){}\
 	}
 
 #else
@@ -37,4 +37,4 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES
 
 #endif // DEBUG
 
-}
+}// namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES

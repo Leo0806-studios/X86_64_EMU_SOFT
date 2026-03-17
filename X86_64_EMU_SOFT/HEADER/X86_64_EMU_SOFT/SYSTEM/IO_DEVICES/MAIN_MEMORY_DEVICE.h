@@ -9,13 +9,13 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 		[[nodiscard ]] explicit MainMemoryDevice(size_t sizeKB) noexcept;
 		
 		// Inherited via DeviceBase
-		uint8_t Read8(uint64_t offset) const noexcept override;
-		uint16_t Read16(uint64_t offset) const noexcept override;
-		uint32_t Read32(uint64_t offset) const noexcept override;
-		uint64_t Read64(uint64_t offset) const noexcept override;
+		[[nodiscard ]] uint8_t Read8(uint64_t offset) const noexcept override;
+		[[nodiscard ]] uint16_t Read16(uint64_t offset) const noexcept override;
+		[[nodiscard ]] uint32_t Read32(uint64_t offset) const noexcept override;
+		[[nodiscard ]] uint64_t Read64(uint64_t offset) const noexcept override;
 		void Write8(uint64_t offset, uint8_t value) noexcept override;
 		void Write16(uint64_t offset, uint16_t value) noexcept override;
 		void Write32(uint64_t offset, uint32_t value) noexcept override;
 		void Write64(uint64_t offset, uint64_t value) noexcept override;
 	};
-}
+}// namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES

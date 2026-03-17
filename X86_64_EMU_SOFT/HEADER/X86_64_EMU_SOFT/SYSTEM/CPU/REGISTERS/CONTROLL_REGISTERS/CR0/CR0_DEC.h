@@ -9,8 +9,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
 	/// </summary>
 	class CR0  
 	{
-		uint64_t storage;
-		enum class InputValidityCR0 {
+		uint64_t storage=0;
+		enum class InputValidityCR0:uint8_t {
 			Valid = 0,
 			ReservedBitAccesed = 1,
 			PeInactiveOnPgEnable = 2
@@ -157,4 +157,4 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
 		[[nodiscard]] bool GetPE() const noexcept;
 
 	};
-}
+}//namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
