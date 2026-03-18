@@ -57,7 +57,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 	{
 		ValidateDeviceAccess(offset, 2U, memory.size())
 			memory[offset] = value & 0xFFULL;
-		memory[offset + 1] = (value >> 8U) & 0xFFULL;
+		memory[offset + 1] = (value >> 8U) & 0xFFULL;//NOLINT(hicpp-signed-bitwise)
 	}
 
 	void MainMemoryDevice::Write32(uint64_t offset, uint32_t value) noexcept//NOLINT(bugprone-exception-escape)

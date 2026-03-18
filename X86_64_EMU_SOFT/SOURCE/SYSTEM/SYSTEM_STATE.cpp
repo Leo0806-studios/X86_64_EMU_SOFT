@@ -34,7 +34,13 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 				}
 			}
 		}
-
+		void LogErrorDeviceDescriptor(const std::unordered_map<System::DeviceDescriptorParts, std::string>& deviceDescriptor, const std::string& errorMessage) {
+			std::cerr << errorMessage << ": ";
+			for (const auto& [part, value] : deviceDescriptor) {
+				std::cerr << value << " ";
+			}
+			std::cerr << std::endl;
+		}
 	}
 	bool System::ConstructAndRegisterDevices(const std::vector< std::unordered_map<DeviceDescriptorParts, std::string>>& deviceDescriptors)
 	{
@@ -43,32 +49,20 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 
 			if (deviceDescriptor.at(DeviceDescriptorParts::DeviceType) == "MEMORY") {
 				if (!RegisterMemoryDevice(deviceDescriptor)) {
-					std::cerr << "failed to register memory device: ";
-					for (const auto& [part, value] : deviceDescriptor) {
-						std::cerr << value << " ";
-					}
-					std::cerr << std::endl;
+					LogErrorDeviceDescriptor(deviceDescriptor, "failed to register memory device");
 					return false;
 				}
 			}
 			else if (deviceDescriptor.at(DeviceDescriptorParts::DeviceType) == "RESET_ROM") {
 				if (!RegisterResetROMDevice(deviceDescriptor)) {
-					std::cerr << "failed to register reset rom device: ";
-					for (const auto& [part, value] : deviceDescriptor) {
-						std::cerr << value << " ";
-					}
-					std::cerr << std::endl;
+					LogErrorDeviceDescriptor(deviceDescriptor, "failed to register reset rom device");
 					return false;
 				}
 				
 			}
 			else if (deviceDescriptor.at(DeviceDescriptorParts::DeviceType) == "FIRMWARE") {
 				if (!RegisterFirmwareDevice(deviceDescriptor)) {
-					std::cerr << "failed to register firmware rom device: ";
-					for (const auto& [part, value] : deviceDescriptor) {
-						std::cerr << value << " ";
-					}
-					std::cerr << std::endl;
+					LogErrorDeviceDescriptor(deviceDescriptor, "failed to register firmware rom device");
 					return false;
 				}
 			}

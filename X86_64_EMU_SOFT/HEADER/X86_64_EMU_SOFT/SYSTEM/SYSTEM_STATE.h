@@ -13,10 +13,7 @@ namespace X86_64_EMU_SOFT::SYSTEM
 {
 
 		class System {
-			std::vector<std::shared_ptr<IO_DEVICES::DeviceBase>> RegisteredDevices;
-			std::shared_ptr<CPU::CPU> cpu;
-			std::shared_ptr<MEMORY::MemoryBus> memoryBus;
-			const HELPERS::CmdArgs cmdArgs;
+		public:
 			enum class DeviceDescriptorParts : uint8_t
 			{
 				DeviceName = 0,
@@ -29,6 +26,11 @@ namespace X86_64_EMU_SOFT::SYSTEM
 				DeviceArg5 = 7,
 				DeviceArg6 = 8
 			};
+		private:
+			std::vector<std::shared_ptr<IO_DEVICES::DeviceBase>> RegisteredDevices;
+			std::shared_ptr<CPU::CPU> cpu;
+			std::shared_ptr<MEMORY::MemoryBus> memoryBus;
+			const HELPERS::CmdArgs cmdArgs;
 			[[nodiscard]] bool ConstructAndRegisterDevices(const std::vector< std::unordered_map<DeviceDescriptorParts, std::string>>& deviceDescriptors);
 			[[nodiscard]] bool RegisterMemoryDevice(const std::unordered_map<DeviceDescriptorParts, std::string>& deviceDescriptor);
 			[[nodiscard]] bool RegisterResetROMDevice(const std::unordered_map<DeviceDescriptorParts, std::string>& deviceDescriptor);

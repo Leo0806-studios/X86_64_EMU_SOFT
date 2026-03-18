@@ -35,11 +35,14 @@ Checks: '*,
 -clang-diagnostic-c++98-compat-local-type-template-args,
 -clang-diagnostic-pre-c++23-cpmpat,
 -clang-diagnostic-c++98-c++11-compat-binary-literal,
+-clang-diagnostic-pre-c++20-compat-pedantic
+
 
 -readability-enum-initial-value,
 -readability-implicit-bool-conversion,
 -readability-convert-member-functions-to-static,
 -readability-magic-numbers,
+-readability-identifier-length,
 
 
 -llvmlibc-restrict-system-libc-headers,

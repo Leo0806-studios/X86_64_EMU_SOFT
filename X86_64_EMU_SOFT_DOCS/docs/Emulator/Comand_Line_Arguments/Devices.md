@@ -9,7 +9,9 @@ the strings have two allowed formats
 the syntax inside the .deviceInfo file is identical to Format 2
 
 ## 1.2.2.2 Format 2  
-"DeviceName,DeviceType,HandlerBinary,DeviceArg1,DeviceArg2,DeviceArg3,DeviceArg4,DeviceArg5,DeviceArg6"
+
+
+    DeviceName,DeviceType,HandlerBinary,DeviceArg1,DeviceArg2,DeviceArg3,DeviceArg4,DeviceArg5,DeviceArg6  
 
 
 ### 1.2.2.2.1 DeviceName
