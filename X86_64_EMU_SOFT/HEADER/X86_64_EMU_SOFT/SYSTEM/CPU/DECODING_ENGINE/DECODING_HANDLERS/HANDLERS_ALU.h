@@ -126,7 +126,36 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				}
 				break;
 			}
-			case 1:
+			case 1: {
+				instruction.Type = INSTRUCTIONS::InstructionType::OR;
+				if ((core.getMode() == vCoreMode::realMode && !instruction.OperandOverride) ||
+					(core.getMode() == vCoreMode::protectedMode && instruction.OperandOverride)) {
+					instruction.DestinationSize = instruction.SourceSize = 16;
+					instruction.ImmediateSizeBytes = 2;
+					instruction.InstructionLengthBytes++;
+					const int16_t signExtend = static_cast<int8_t>(memoryBus.Read8(address));//NOLINT(bugprone-signed-char-misuse,cert-str34-c)
+					std::array<uint8_t, 2> arr = { 0,0 };
+					std::memcpy(arr.data(), &signExtend, arr.size());//NOLINT(clang-diagnostic-unsafe-buffer-usage-in-libc-call)
+					instruction.ImmediateBytes[0] = arr[0];
+					instruction.ImmediateBytes[1] = arr[1];
+					instruction.DestinationRegister = DecodingEngine::DecodeRegisterFromModRMRegField(instruction.ModRM.rm);
+				}
+				else if ((core.getMode() == vCoreMode::realMode && instruction.OperandOverride) ||
+						(core.getMode() == vCoreMode::protectedMode && !instruction.OperandOverride)) {
+					instruction.DestinationSize = instruction.SourceSize = 32;
+					instruction.ImmediateSizeBytes = 4;
+					instruction.InstructionLengthBytes++;
+					const int32_t signExtend = static_cast<int8_t>(memoryBus.Read8(address));//NOLINT(bugprone-signed-char-misuse,cert-str34-c)
+					std::array<uint8_t, 4> arr = { 0,0,0,0 };
+					std::memcpy(arr.data(), &signExtend, arr.size());//NOLINT(clang-diagnostic-unsafe-buffer-usage-in-libc-call)
+					instruction.ImmediateBytes[0] = arr[0];
+					instruction.ImmediateBytes[1] = arr[1];
+					instruction.ImmediateBytes[2] = arr[2];
+					instruction.ImmediateBytes[3] = arr[3];
+					instruction.DestinationRegister = DecodingEngine::DecodeRegisterFromModRMRegField(instruction.ModRM.rm);
+				}
+				break;
+			}
 			case 2:
 			case 3:
 			case 4:goto fail;
