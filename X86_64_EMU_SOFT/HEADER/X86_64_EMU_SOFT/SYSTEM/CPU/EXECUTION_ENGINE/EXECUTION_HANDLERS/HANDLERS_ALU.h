@@ -2,7 +2,9 @@
 #include "SYSTEM/CPU/VCORE.h"
 #include <cstdint>
 #include <string.h>
+#include <tuple>
 #include <print>
+#include "SYSTEM/CPU/EXECUTION_ENGINE/EXECUTION_ENGINE.h"
 #include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h"
 #include "SYSTEM/CPU/EXCEPTIONS/UNDEFINED_OPCODE.h"
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
@@ -15,7 +17,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			std::memcpy(&sourceVal, instruction.ImmediateBytes.data(), instruction.InstructionLengthBytes);
 			const uint64_t destVal = core.GetRegisterValue(instruction.DestinationRegister);
 			std::print("value of Destintion register: {:#X} (signed {}), value of immediat {:#X} (signed: {} before execution\n", destVal, static_cast<int64_t>(destVal), sourceVal, static_cast<int64_t>(sourceVal));
-			core.SetRegisterValue(instruction.DestinationRegister, destVal + sourceVal);
+			core.SetRegisterValueMasked(instruction.DestinationRegister, destVal + sourceVal, instruction.DestinationSize);
 			std::print("value of Destiontion Register: {:#X} (signed {}) after execution\n", core.GetRegisterValue(instruction.DestinationRegister), static_cast<int64_t>(core.GetRegisterValue(instruction.DestinationRegister)));
 			return;
 		}
@@ -24,7 +26,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			const uint64_t sourceVal = core.GetRegisterValue(instruction.SourceRegister);
 			const uint64_t destVal = core.GetRegisterValue(instruction.DestinationRegister);
 			std::print("value of Destintion register: {:#X} (signed: {}), value of Source Register {:#X} (signed: {}) before execution\n", destVal, static_cast<int64_t>(destVal), sourceVal, static_cast<int64_t>(sourceVal));
-			core.SetRegisterValue(instruction.DestinationRegister, destVal + sourceVal);
+			core.SetRegisterValueMasked(instruction.DestinationRegister, destVal + sourceVal,instruction.DestinationSize);
 			std::print("value of Destiontion Register: {:#X} (signed: {}) after execution\n", core.GetRegisterValue(instruction.DestinationRegister), static_cast<int64_t>(core.GetRegisterValue(instruction.DestinationRegister)));
 			return;
 		}
@@ -49,7 +51,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			std::memcpy(&sourceVal, instruction.ImmediateBytes.data(), instruction.InstructionLengthBytes);
 			const uint64_t destVal = core.GetRegisterValue(instruction.DestinationRegister);
 			std::print("value of Destintion register: {:#X} (signed {}), value of immediat {:#X} (signed {}) before execution\n", destVal, static_cast<int64_t>(destVal), sourceVal, static_cast<int64_t>(sourceVal));
-			core.SetRegisterValue(instruction.DestinationRegister, destVal - sourceVal);
+			core.SetRegisterValueMasked(instruction.DestinationRegister, destVal - sourceVal,instruction.DestinationSize);
 			std::print("value of Destiontion Register: {:#X} (signed {}) after execution\n", core.GetRegisterValue(instruction.DestinationRegister), static_cast<int64_t>(core.GetRegisterValue(instruction.DestinationRegister)));
 			return;
 		}
@@ -58,7 +60,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			const uint64_t sourceVal = core.GetRegisterValue(instruction.SourceRegister);
 			const uint64_t destVal = core.GetRegisterValue(instruction.DestinationRegister);
 			std::print("value of Destintion register: {:#X} (signed {}), value of Source Register {:#X} (signed: {}) before execution\n", destVal, static_cast<int64_t>(destVal), sourceVal, static_cast<int64_t>(sourceVal));
-			core.SetRegisterValue(instruction.DestinationRegister, destVal - sourceVal);
+			core.SetRegisterValueMasked(instruction.DestinationRegister, destVal - sourceVal,instruction.DestinationSize);
 			std::print("value of Destiontion Register: {:#X} (signed {}) after execution\n", core.GetRegisterValue(instruction.DestinationRegister), static_cast<int64_t>(core.GetRegisterValue(instruction.DestinationRegister)));
 			return;
 		}
@@ -77,6 +79,33 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	inline void Handle_OR(VirtualCore& core,const  INSTRUCTIONS::Instruction& instruction) {
 		std::ignore = core;
 		std::ignore = instruction;
-		throw EXCEPTIONS::UNDEFINED_OPCODE("OR instruction is not implemented yet");
+		if (instruction.ImmediateSizeBytes > 0) {
+			std::print("Executing instruction: OR r/m{} {}, imm{} \n", instruction.DestinationSize, VirtualCore::getSubregisterFromSize(instruction.DestinationRegister, instruction.DestinationSize), instruction.SourceSize);
+			uint64_t sourceVal = 0;
+			std::memcpy(&sourceVal, instruction.ImmediateBytes.data(), instruction.InstructionLengthBytes);
+			const uint64_t destVal = core.GetRegisterValue(instruction.DestinationRegister);
+			std::print("value of Destintion register: {:#X} (binary {:#B}), value of immediat {:#X} (binary {:#B}) before execution\n", destVal, destVal, sourceVal, sourceVal);
+			core.SetRegisterValueMasked(instruction.DestinationRegister, destVal | sourceVal, instruction.DestinationSize);
+			std::print("value of Destiontion Register: {:#X} (binary {:#B}) after execution\n", core.GetRegisterValue(instruction.DestinationRegister), core.GetRegisterValue(instruction.DestinationRegister));
+			return;
+		}
+		if (instruction.ModRM.mod == 0b11) {
+			std::print("Executing instruction: OR r/m{} {}, r{} {}\n", instruction.DestinationSize, VirtualCore::getSubregisterFromSize(instruction.DestinationRegister, instruction.DestinationSize), instruction.SourceSize, VirtualCore::getSubregisterFromSize(instruction.SourceRegister, instruction.SourceSize));
+			const uint64_t sourceVal = core.GetRegisterValue(instruction.SourceRegister);
+			const uint64_t destVal = core.GetRegisterValue(instruction.DestinationRegister);
+			std::print("value of Destintion register: {:#X} (binary {:#B}), value of Source Register {:#X} (binary: {:#B}) before execution\n", destVal, destVal, sourceVal, sourceVal);
+			core.SetRegisterValueMasked(instruction.DestinationRegister, destVal | sourceVal, instruction.DestinationSize);
+			std::print("value of Destiontion Register: {:#X} (binary {:#B}) after execution\n", core.GetRegisterValue(instruction.DestinationRegister), core.GetRegisterValue(instruction.DestinationRegister));
+			return;
+		}
+		switch (instruction.ModRM.mod) {
+			case 0b00:
+			case 0b01:
+			case 0b10:
+				std::print("Memory operands are not supported yet for SUB\n");
+				throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not supported yet for SUB");
+			default:
+				throw EXCEPTIONS::UNDEFINED_OPCODE("Invalid ModRM mod field for SUB instruction");
+		}
 	}
 }// namespace X86_64_EMU_SOFT::SYSTEM::CPU

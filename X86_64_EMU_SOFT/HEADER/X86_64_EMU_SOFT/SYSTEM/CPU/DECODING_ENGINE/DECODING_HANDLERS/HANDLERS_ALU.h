@@ -129,7 +129,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case 1:
 			case 2:
 			case 3:
-			case 4:
+			case 4:goto fail;
 			case 5: {
 				instruction.Type = INSTRUCTIONS::InstructionType::SUB;
 				if ((core.getMode() == vCoreMode::realMode && !instruction.OperandOverride) ||
@@ -165,6 +165,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case 6:
 			case 7:
 			default: {
+				fail:
 				std::stringstream msg;
 				const auto asIntegerType = static_cast<uint16_t>(instruction.OpcodeBytes[0]);
 				msg << "\n\n #UD exception \n \n byte: 0x" << std::hex << asIntegerType

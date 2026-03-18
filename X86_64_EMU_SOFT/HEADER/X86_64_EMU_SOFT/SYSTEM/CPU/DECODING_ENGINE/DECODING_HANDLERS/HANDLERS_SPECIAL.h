@@ -9,6 +9,26 @@
 #include "SYSTEM/MEMORY/MEMORY.h"
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
+	inline bool Handle_MOVrm16rm32r16r32(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
+		instruction.OpcodeBytes[0] = byte;
+		instruction.OpcodeSizeBytes++;
+		instruction.InstructionLengthBytes++;
+		instruction.Type = INSTRUCTIONS::InstructionType::MOV;
+		DecodingEngine::digestModRMAndSIB(address, *core.GetMemoryBus(), instruction);
+		if ((core.getMode() == vCoreMode::realMode && !instruction.OperandOverride) ||
+			(core.getMode() == vCoreMode::protectedMode && instruction.OperandOverride)) {
+			instruction.DestinationSize = instruction.SourceSize = 16;
+		}
+		else if ((core.getMode() == vCoreMode::realMode && instruction.OperandOverride) ||
+				 (core.getMode() == vCoreMode::protectedMode && !instruction.OperandOverride)) {
+			instruction.DestinationSize = instruction.SourceSize = 32;
+		}
+		instruction.SourceRegister = DecodingEngine::DecodeRegisterFromModRMRegField(instruction.ModRM.reg);
+		if (instruction.ModRM.mod == 3) {
+			instruction.DestinationRegister = DecodingEngine::DecodeRegisterFromModRMRMField(instruction.ModRM.rm);
+		}
+		return true;
+	}
 	inline bool Handle_MOVr16r32imm16imm32_BASE(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
 		instruction.OpcodeBytes[0] = byte;
 		instruction.OpcodeSizeBytes++;

@@ -60,6 +60,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16r32imm16imm32_BASE) + 5U] = Handle_MOVr16r32imm16imm32_BASE;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16r32imm16imm32_BASE) + 6U] = Handle_MOVr16r32imm16imm32_BASE;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16r32imm16imm32_BASE) + 7U] = Handle_MOVr16r32imm16imm32_BASE;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVrm16rm32r16r32)] = Handle_MOVrm16rm32r16r32;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::NOP)] = Handle_NOP;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::UD)] = Handle_UD;
 		}

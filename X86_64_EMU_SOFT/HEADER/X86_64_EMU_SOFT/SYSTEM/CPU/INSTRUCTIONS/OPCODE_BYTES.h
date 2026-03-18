@@ -19,6 +19,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 		ORrm16rm32r16r32 = 0x9,
 		SUBrm16rm32r16r32 = 0x29,
 		GROUP1 = 0x83,
+		MOVrm16rm32r16r32 = 0x89,
 		NOP = 0x90,
 
 

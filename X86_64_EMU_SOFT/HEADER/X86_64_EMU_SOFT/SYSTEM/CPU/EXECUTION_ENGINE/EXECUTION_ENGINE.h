@@ -1,5 +1,6 @@
 #pragma once
 #include <unordered_map>
+#include <array>
 #include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h" 
 #include "SYSTEM/CPU/VCORE.h"
 #include "SYSTEM/CPU/INSTRUCTIONS/OPCODE_BYTES.h"

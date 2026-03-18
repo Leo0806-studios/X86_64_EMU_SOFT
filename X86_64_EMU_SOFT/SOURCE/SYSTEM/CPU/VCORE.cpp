@@ -65,6 +65,37 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 
 	}
+	uint64_t VirtualCore::GetRegisterValueMasked(INSTRUCTIONS::TargetRegister reg, uint8_t bits) const
+	{
+		const uint64_t value = GetRegisterValue(reg);
+		const uint64_t mask = (1ULL << bits) - 1;
+		const uint64_t ret = value & mask;
+		return ret;
+	}
+	uint64_t VirtualCore::GetRegisterValueMasked(RegisterID reg, uint8_t bits) const noexcept
+	{
+		const uint64_t value = GetRegisterValue(reg);
+		const uint64_t mask = (1ULL << bits) - 1;
+		const uint64_t ret = value & mask;
+		return ret;
+	}
+	void VirtualCore::SetRegisterValueMasked(INSTRUCTIONS::TargetRegister reg, uint64_t value, uint8_t bits)
+	{
+		const uint64_t originalVaue = GetRegisterValue(reg);
+		const uint64_t mask = (1ULL << bits) - 1;
+		const uint64_t valueToSet = value & mask;
+		const uint64_t valueToKeep = originalVaue & ~mask;
+		SetRegisterValue(reg, valueToKeep | valueToSet);
+	
+	}
+	void VirtualCore::SetRegisterValueMasked(RegisterID reg, uint64_t value, uint8_t bits) noexcept
+	{
+		const uint64_t originalVaue = GetRegisterValue(reg);
+		const uint64_t mask = (1ULL << bits) - 1;
+		const uint64_t valueToSet = value & mask;
+		const uint64_t valueToKeep = originalVaue & ~mask;
+		SetRegisterValue(reg, valueToKeep | valueToSet);
+	}
 	void VirtualCore::SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value)
 	{
 		switch (reg) {

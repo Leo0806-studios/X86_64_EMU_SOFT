@@ -25,17 +25,28 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 				__assume(instruction.ImmediateBytes.data());
 				std::memcpy(&val, instruction.ImmediateBytes.data(), sizeof(uint64_t));
-				uint64_t tmpval = core.GetRegisterValue(instruction.DestinationRegister);
-				__assume(instruction.DestinationSize < 64);
-				const uint64_t mask = (1ULL << instruction.DestinationSize) - 1;
-				tmpval &= ~mask;
-				tmpval |= val;
+				
 				std::print("value of destination register {:#X} (signed {}) before execution\n", core.GetRegisterValue(instruction.DestinationRegister), static_cast<int64_t>(core.GetRegisterValue(instruction.DestinationRegister)));
-				core.SetRegisterValue(instruction.DestinationRegister, tmpval);
+				core.SetRegisterValueMasked(instruction.DestinationRegister, val,instruction.DestinationSize);
 				std::print("value of destination register {:#X} (signed {}) after execution\n", core.GetRegisterValue(instruction.DestinationRegister), static_cast<int64_t>(core.GetRegisterValue(instruction.DestinationRegister)));
+				return;
 			}
-			else {
-				throw EXCEPTIONS::UNDEFINED_OPCODE("Register to memory or register to register is not yet supported for MOV");
+			if (instruction.ModRM.mod == 0b11) {
+				std::print("Executing instruction: MOV r/m{} {}, r{} {}\n", instruction.DestinationSize, VirtualCore::getSubregisterFromSize(instruction.DestinationRegister, instruction.DestinationSize), instruction.SourceSize, VirtualCore::getSubregisterFromSize(instruction.SourceRegister, instruction.SourceSize));
+				const uint64_t sourceVal = core.GetRegisterValue(instruction.SourceRegister);
+				std::print("value of Source Register {:#X} (signed {}) before execution\n", sourceVal, static_cast<int64_t>(sourceVal));
+				core.SetRegisterValueMasked(instruction.DestinationRegister, sourceVal, instruction.DestinationSize);
+				std::print("value of destination register {:#X} (signed {}) after execution\n", core.GetRegisterValue(instruction.DestinationRegister), static_cast<int64_t>(core.GetRegisterValue(instruction.DestinationRegister)));
+				return;
+			}
+			switch (instruction.ModRM.mod) {
+				case 0b00:
+				case 0b01:
+				case 0b10:
+					std::print("Memory operands are not supported yet for MOV\n");
+					throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not supported yet for MOV");
+				default:
+					throw EXCEPTIONS::UNDEFINED_OPCODE("Invalid ModRM mod field for MOV instruction");
 			}
 	}
 

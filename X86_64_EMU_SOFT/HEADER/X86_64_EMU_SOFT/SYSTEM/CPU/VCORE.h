@@ -99,6 +99,38 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		vCoreMode getMode()const noexcept;
 		[[nodiscard]] uint64_t GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const;
 		[[nodiscard]] uint64_t GetRegisterValue(RegisterID reg) const noexcept;
+		/// <summary>
+		/// gets the lowes "bits" bits of the Value of the register specified by reg
+		/// </summary>
+		/// <param name="reg"></param>
+		/// <param name="bits"></param>
+		/// <returns></returns>
+		[[nodiscard]] uint64_t GetRegisterValueMasked(INSTRUCTIONS::TargetRegister reg, uint8_t bits) const;
+
+		/// <summary>
+		/// gets the lowes "bits" bits of the Value of the register specified by reg
+		/// </summary>
+		/// <param name="reg"></param>
+		/// <param name="bits"></param>
+		/// <returns></returns>
+		[[nodiscard]] uint64_t GetRegisterValueMasked(RegisterID reg, uint8_t bits) const noexcept;
+
+		/// <summary>
+		/// sets the value of the register specified by reg to value but only for the lowest "bits" bits. the rest of the bits are left unchanged
+		/// also only applies the lowest "bits" bits of value to the register. the rest of the bits in value are ignored
+		/// </summary>
+		/// <param name="reg"></param>
+		/// <param name="value"></param>
+		/// <param name="bits"></param>
+		void SetRegisterValueMasked(INSTRUCTIONS::TargetRegister reg, uint64_t value, uint8_t bits);
+		/// <summary>
+		/// sets the value of the register specified by reg to value but only for the lowest "bits" bits. the rest of the bits are left unchanged
+		/// also only applies the lowest "bits" bits of value to the register. the rest of the bits in value are ignored
+		/// </summary>
+		/// <param name="reg"></param>
+		/// <param name="value"></param>
+		/// <param name="bits"></param>
+		void SetRegisterValueMasked(RegisterID reg, uint64_t value, uint8_t bits) noexcept;
 		void SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value);
 		void SetRegisterValue(RegisterID reg, uint64_t value) noexcept;
 		[[nodiscard]] std::shared_ptr<MEMORY::MemoryBus> GetMemoryBus()const noexcept {
