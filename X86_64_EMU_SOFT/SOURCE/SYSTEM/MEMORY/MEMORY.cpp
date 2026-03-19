@@ -5,6 +5,7 @@
 #include <print>
 #include <tuple>
 #include <intrin.h>
+#include <array>
 #include <utility>
 #include "SYSTEM/MEMORY/MEMORY.h"
 #include "SYSTEM/IO_DEVICES/MAIN_MEMORY_DEVICE.h"
@@ -265,33 +266,30 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 	uint16_t  MemoryBus::Read16(uint64_t address) const noexcept
 	{
 		uint16_t value = 0;
-		value |= Read8(address);
-		value |= static_cast<uint16_t>(Read8(address + 1)) << 8U;
+		std::array<uint8_t, sizeof(value)> arr = { Read8(address),Read8(address + 1) };
+		static_assert(sizeof(value) == sizeof(arr), "value and tmp buffer are not the same size (uint16_t)");
+		std::memcpy(&value, arr.data(), sizeof(value));
 		return value;
 	}
 
 	uint32_t  MemoryBus::Read32(uint64_t address) const noexcept
 	{
 		uint32_t value = 0;
-		value |= Read8(address);
-		value |= static_cast<uint32_t>(Read8(address + 1)) << 8U;
-		value |= static_cast<uint32_t>(Read8(address + 2)) << 16U;
-		value |= static_cast<uint32_t>(Read8(address + 3)) << 24U;
+		std::array<uint8_t, sizeof(value)> arr = { Read8(address + 0U),Read8(8 + 1U),Read8(address + 2U),Read8(address + 3U) };
+		static_assert(sizeof(value) == sizeof(arr), "value and tmp buffer are not the same size (uint32_t)");
+		std::memcpy(&value, arr.data(), sizeof(value));
 		return value;
 	}
 
 	uint64_t  MemoryBus::Read64(uint64_t address) const noexcept
 	{
 		uint64_t value = 0;
-		value |= Read8(address);
-		value |= static_cast<uint64_t>(Read8(address + 1)) << 8U;
-		value |= static_cast<uint64_t>(Read8(address + 2)) << 16U;
-		value |= static_cast<uint64_t>(Read8(address + 3)) << 24U;
-		value |= static_cast<uint64_t>(Read8(address + 4)) << 32U;
-		value |= static_cast<uint64_t>(Read8(address + 5)) << 40U;
-		value |= static_cast<uint64_t>(Read8(address + 6)) << 48U;
-		value |= static_cast<uint64_t>(Read8(address + 7)) << 56U;
+		std::array<uint8_t, sizeof(value)> arr = { Read8(address + 0U),Read8(address + 1U),Read8(address + 2U),Read8(address + 3U),
+													Read8(address + 4U),Read8(address + 5U),Read8(address + 6U),Read8(address + 7U) };
+		static_assert(sizeof(value) == sizeof(arr), "value and tmp buffer are not the same size (uint32_t)");
+		std::memcpy(&value, arr.data(), sizeof(value));
 		return value;
+
 	}
 
 	void  MemoryBus::Write8(uint64_t address, uint8_t value) noexcept
@@ -309,27 +307,32 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 	void  MemoryBus::Write16(uint64_t address, uint16_t value) noexcept
 	{
-		Write8(address, value & 0xFFULL);
-		Write8(address, (value >> 8U) & 0xFFULL);
+		std::array<uint8_t, sizeof(value)> arr{ 0,0 };
+		std::memcpy(arr.data(), &value,sizeof(arr));
+		for (const auto& byte : arr) {
+			Write8(address, byte);
+			address++;
+		}
 	}
 
 	void  MemoryBus::Write32(uint64_t address, uint32_t value) noexcept
 	{
-		Write8(address, (value >> 0U) & 0xFFULL);
-		Write8(address, (value >> 8U) & 0xFFULL);
-		Write8(address, (value >> 16U) & 0xFFULL);
+		std::array<uint8_t, sizeof(value)> arr{ 0,0 };
+		std::memcpy(arr.data(), &value, sizeof(arr));
+		for (const auto& byte : arr) {
+			Write8(address, byte);
+			address++;
+		}
 	}
 
 	void  MemoryBus::Write64(uint64_t address, uint64_t value) noexcept
 	{
-		Write8(address, (value >> 0U) & 0xFFULL);
-		Write8(address, (value >> 8U) & 0xFFULL);
-		Write8(address, (value >> 16U) & 0xFFULL);
-		Write8(address, (value >> 24U) & 0xFFULL);
-		Write8(address, (value >> 32U) & 0xFFULL);
-		Write8(address, (value >> 40U) & 0xFFULL);
-		Write8(address, (value >> 48U) & 0xFFULL);
-		Write8(address, (value >> 56U) & 0xFFULL);
+		std::array<uint8_t, sizeof(value)> arr{ 0,0 };
+		std::memcpy(arr.data(), &value, sizeof(arr));
+		for (const auto& byte : arr) {
+			Write8(address, byte);
+			address++;
+		}
 
 	}
 
