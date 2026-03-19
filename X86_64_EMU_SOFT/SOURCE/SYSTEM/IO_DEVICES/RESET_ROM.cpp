@@ -11,7 +11,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 
 	uint8_t ResetROMDevice::Read8(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 	{
-		ValidateDeviceAccess(offset, 1U, memory.size())
+		//ValidateDeviceAccess(offset, 1U, memory.size())
 		return memory[offset];
 	}
 

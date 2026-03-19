@@ -7,9 +7,11 @@
 #include <intrin.h>
 #include <array>
 #include <utility>
+#include <tracy/Tracy.hpp>
 #include "SYSTEM/MEMORY/MEMORY.h"
 #include "SYSTEM/IO_DEVICES/MAIN_MEMORY_DEVICE.h"
 #include "SYSTEM/IO_DEVICES/DEVICE_BASE.h"
+#include "HELPERS/REDEFINE_MACROS.h"
 namespace {
 	[[nodiscard]] uint64_t GetPageNumber(uint64_t address) {
 		return address >> 12U;
@@ -21,6 +23,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 	void  MemoryBus::PrintMemoryMap() const noexcept//NOLINT(bugprone-exception-escape)
 	{
+		ZoneNamed(PrintMemoryMap, true);
 		for (const auto& deviceInfo : RegisteredDevices) {
 			if (deviceInfo.sizeBytes < 1024) {
 				std::print("Device: {}, Base Address: {}, Size: {}B\n", typeid(*deviceInfo.device).name(), deviceInfo.baseAdress, deviceInfo.sizeBytes);//NOSONAR //NOLINT(clang-diagnostic-potentially-evaluated-expression)
@@ -49,6 +52,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 	void  MemoryBus::DumpMemoryToStdout() const noexcept//NOLINT(bugprone-exception-escape)
 	{
+		ZoneNamed(DumpMemoryToStdout, true);
+
 		for (const auto& page : MemoryPages) {
 			for (const auto& section : page.Sections) {
 				if (section.device) {
@@ -65,6 +70,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 			}
 			std::print("\n");
 		}
+
 	}
 
 	bool  MemoryBus::PageEntry::IsPageContiguous() const noexcept
@@ -123,6 +129,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 	bool  MemoryBus::MapResetRom(std::shared_ptr<IO_DEVICES::DeviceBase> device, uint64_t sizeBytes, uint64_t resetVector)//NOLINT(performance-unnecessary-value-param)
 	{
+		ZoneNamed(MapResetRom, true);
 		const uint64_t resetStartPage = GetPageNumber(resetVector);
 		const uint64_t reserEndPage = GetPageNumber(resetVector + sizeBytes);
 		const uint64_t inPageOffet = resetVector & 0xFFFULL;
@@ -178,6 +185,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 	bool  MemoryBus::MapFirmwareRom(std::shared_ptr<IO_DEVICES::DeviceBase> device, uint64_t sizeBytes, uint64_t FirmwareEntry)//NOLINT(performance-unnecessary-value-param)
 	{
+		ZoneNamed(MapFirmwareRom, true);
 		const uint64_t firmwareStartPage = GetPageNumber(FirmwareEntry);
 		const uint64_t inPageOffet = FirmwareEntry & 0xFFFULL;
 		DeviceInfos info{ .device = device,.sizeBytes = sizeBytes,.baseAdress = FirmwareEntry };
@@ -194,6 +202,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 
 					if (typeid(*section.device) != typeid(IO_DEVICES::MainMemoryDevice)) {//NOSONAR
+
 						return false;
 					}
 					if (section.size >= remainingDeviceBytes) {//NOSONAR
@@ -226,6 +235,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 	bool  MemoryBus::MapMainMemory(std::shared_ptr<IO_DEVICES::DeviceBase> device, uint64_t sizeBytes, uint64_t Base)
 	{
+		ZoneNamed(MapMainMemory, true);
 		const uint64_t amountPages = (sizeBytes + 4095) / 4096;
 		uint64_t deviceOffset = 0;
 		DeviceInfos info{ .device = device, .sizeBytes = sizeBytes,.baseAdress = Base };
@@ -251,13 +261,15 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 	uint8_t  MemoryBus::Read8(uint64_t address) const noexcept
 	{
+		ZoneNamed(Read8, true);
 		const uint64_t PageNumber = GetPageNumber(address);
 		const uint64_t inPageOffset = address & 0xFFFULL;
 		auto& page = MemoryPages[PageNumber];
 		for (auto& section : page.Sections) {
 			if (inPageOffset >= section.pageOffset && inPageOffset < (section.pageOffset + section.size)) {
 				const uint64_t off = inPageOffset - section.pageOffset;
-				return  section.device->Read8(section.DeviceOffset + off);
+				const uint8_t value = section.device->Read8(section.DeviceOffset + off);
+				return  value;
 			}
 		}
 		return 0xFF;

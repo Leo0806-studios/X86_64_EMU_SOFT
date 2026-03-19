@@ -7,6 +7,7 @@
 #include <utility>
 #include <exception>
 #include <print>
+#include <tracy/Tracy.hpp>
 #include "SYSTEM/CPU/DECODING_ENGINE/DECODING_ENGINE.h"
 #include "SYSTEM/CPU/DECODING_ENGINE/DECODING_HANDLERS/PREFIX_HANDLERS.h"
 #include "SYSTEM/CPU/DECODING_ENGINE/DECODING_HANDLERS/HANDLERS_SPECIAL.h"
@@ -16,6 +17,7 @@
 #include "SYSTEM/CPU/VCORE.h"
 #include "SYSTEM/MEMORY/MEMORY.h"
 #include "SYSTEM/CPU/EXCEPTIONS/UNDEFINED_OPCODE.h"
+#include "HELPERS/REDEFINE_MACROS.h"
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	[[noreturn]] inline static bool ThrowUndefinedOpcode(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {//NOSONAR
 		std::ignore = core;
@@ -81,8 +83,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	INSTRUCTIONS::Instruction DecodingEngine::DecodeInstruction(const VirtualCore& core)
 	{
-
-
+		ZoneNamed(DecodeInstruction, true);
 		uint64_t address = core.RIP.GetValue();
 		INSTRUCTIONS::Instruction instruction = {};
 		const MEMORY::MemoryBus& memBus = *core.memoryBus;
@@ -166,6 +167,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	void DecodingEngine::digestModRMAndSIB(uint64_t& address,const  VirtualCore& core, INSTRUCTIONS::Instruction& instruction) noexcept
 	{
+		ZoneNamed(digestModRMAndSIB, true);
 		const uint8_t modrmByte = static_cast<uint8_t>(core.FetchBytes(address, 1));
 		instruction.ModRM = std::bit_cast<INSTRUCTIONS::ModRM>(modrmByte);
 		instruction.InstructionLengthBytes++;

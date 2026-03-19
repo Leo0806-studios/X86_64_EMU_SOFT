@@ -13,6 +13,7 @@
 #include <iterator>
 #include <memory>
 #include <vector>
+#include <tracy/Tracy.hpp>
 #include "SYSTEM/IO_DEVICES/MAIN_MEMORY_DEVICE.h"
 #include "SYSTEM/IO_DEVICES/FIRMWARE.h"
 #include "SYSTEM/IO_DEVICES/RESET_ROM.h"
@@ -21,10 +22,12 @@
 #include <SYSTEM/CPU/VCORE.h>
 #include <SYSTEM/IO_DEVICES/DEVICE_BASE.h>
 #include <SYSTEM/MEMORY/MEMORY.h>
+#include "HELPERS/GLOBALS.h"
+#include "HELPERS/REDEFINE_MACROS.h"
 
 namespace X86_64_EMU_SOFT::SYSTEM {
 	namespace {
-
+		
 
 		void PrintDevices(const boost::program_options::variables_map& map) {
 			if (map.count("Device") > 0) {
@@ -44,6 +47,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 	}
 	bool System::ConstructAndRegisterDevices(const std::vector< std::unordered_map<DeviceDescriptorParts, std::string>>& deviceDescriptors)
 	{
+		ZoneScoped;
 		for (const auto& deviceDescriptor : deviceDescriptors) {
 
 
@@ -78,6 +82,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 
 	bool System::RegisterMemoryDevice(const std::unordered_map<DeviceDescriptorParts, std::string>& deviceDescriptor)
 	{
+		ZoneScoped;
 		const uint64_t sizeKB = std::stoull(deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2));
 		std::shared_ptr<IO_DEVICES::DeviceBase> device = std::make_shared<IO_DEVICES::MainMemoryDevice>(sizeKB);
 		RegisteredDevices.push_back(device);
@@ -89,6 +94,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 
 	bool System::RegisterResetROMDevice(const std::unordered_map<DeviceDescriptorParts, std::string>& deviceDescriptor)
 	{
+		ZoneScoped;
 		std::ifstream RomFile(deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2), std::ios::binary);
 		const auto& path = deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2);
 		RomFile.open(path, std::ios::binary);
@@ -114,6 +120,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 
 	bool System::RegisterFirmwareDevice(const std::unordered_map<DeviceDescriptorParts, std::string>& deviceDescriptor)
 	{
+		ZoneScoped;
 		std::ifstream RomFile(deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2), std::ios::binary);
 		const auto& path = deviceDescriptor.at(DeviceDescriptorParts::DeviceArg2);
 		RomFile.open(path, std::ios::binary);
@@ -138,6 +145,8 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 
 	System::System(int argc, const char* argv[]) :cmdArgs(argc, argv)
 	{
+
+		ZoneScoped;
 		if (!cmdArgs.Validate()) {
 			std::cerr << "invalid command line arguments" << std::endl;
 			exit(1);
@@ -150,6 +159,24 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 			exit(1);
 		}
 		std::cout << "Memory Bus created successfully" << std::endl;
+		HELPERS::Tracemode= [&]() {
+			uint16_t tracemode = cmdArgs.GetArgMap()["TraceMode"].as<uint16_t>();
+			if (tracemode == 0) {
+				return HELPERS::TraceMode::none;
+			}
+			else if(tracemode == 1){
+				return HELPERS::TraceMode::minimal;
+			}
+			else if (tracemode == 2) {
+				return HELPERS::TraceMode::reduced;
+			}
+			else if (tracemode == 3) {
+				return HELPERS::TraceMode::full;
+			}
+			else {
+				return HELPERS::TraceMode::full;
+			}
+			}();
 		uint16_t Cores = cmdArgs.GetArgMap()["Cores"].as<uint16_t>();
 		CPU::vCoreMode startupMode = CPU::IntToMode(cmdArgs.GetArgMap()["StartupMode"].as<int>());
 		cpu = std::make_shared<CPU::CPU>(Cores,cmdArgs.GetArgMap()["ResetVector"].as<uint64_t>(),memoryBus,startupMode);

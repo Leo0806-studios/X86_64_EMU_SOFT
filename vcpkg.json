@@ -1,6 +1,8 @@
 {
   "dependencies": [
+    "boost-algorithm",
     "boost-program-options",
-    "boost-algorithm"
+  "tracy"
+    
   ]
 }

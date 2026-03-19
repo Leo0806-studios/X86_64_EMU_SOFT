@@ -1,19 +1,19 @@
 // X86_64_EMU_SOFT_EXE.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
-
+#include <iostream>
 #include "SYSTEM/SYSTEM_STATE.h"
 
-
-int main(int argc,const char** argv)
+int main(int argc, const char** argv)
 {
 	X86_64_EMU_SOFT::SYSTEM::System EmulatorState(argc, argv);
 	EmulatorState.Start();
+	std::cin >> std::ws;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu
 
-// Tips for Getting Started: 
+// Tips for Getting Started:
 //   1. Use the Solution Explorer window to add/manage files
 //   2. Use the Team Explorer window to connect to source control
 //   3. Use the Output window to see build output and other messages

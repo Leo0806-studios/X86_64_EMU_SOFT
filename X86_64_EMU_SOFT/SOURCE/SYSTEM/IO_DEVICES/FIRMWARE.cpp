@@ -11,7 +11,7 @@ X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::FirmwareRomDevice(std::v
 
 uint8_t X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::Read8(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 {
-    ValidateDeviceAccess(offset, 1, memory.size())
+   // ValidateDeviceAccess(offset, 1, memory.size())
     return memory[offset];
 }
 

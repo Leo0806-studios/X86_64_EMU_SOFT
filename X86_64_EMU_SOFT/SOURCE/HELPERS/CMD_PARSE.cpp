@@ -8,10 +8,12 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <tracy/Tracy.hpp>
 #include "HELPERS/CMD_PARSE.h"
-
+#include "HELPERS/REDEFINE_MACROS.h"
 X86_64_EMU_SOFT::HELPERS::CmdArgs::CmdArgs(int argc, const char** argv)
 {
+	ZoneNamed(CmdArgs, true);
 	namespace bo = boost::program_options;
 	const char* DeviceDescriptionHelp =
 		R"(this option describes IO devices in the system
@@ -35,6 +37,7 @@ DeviceArg1-6 : information about the device that the emulator must know. for inf
 		("Features,X", bo::value<std::vector<std::string>>(), "specefies wich additional CPU features should be enabled(eg avx, sse,vmx,...). will set the coresponding cpuid bits and enable the registers and instructions")
 		("Cores,C", bo::value<uint16_t>()->default_value(1), "sets the number of cores the emulated CPU should have. has to be between 1 and 255")
 		("Device,D", bo::value<std::vector<std::string>>(), DeviceDescriptionHelp)
+		("TraceMode,T",bo::value<uint16_t>()->default_value(0),"the trace logging of execution on the fly.")
 		("Preset", bo::value<std::filesystem::path>(), "path to a .cpuPreset file. follows the exact same syntax as CMD arguments except that different args are seperated by newlines. do not recursively pass the same file. if a preset file is passed all other options are ignored");
 	bo::variables_map ArgMap;
 	bo::store(bo::parse_command_line(argc, argv, desc), ArgMap);

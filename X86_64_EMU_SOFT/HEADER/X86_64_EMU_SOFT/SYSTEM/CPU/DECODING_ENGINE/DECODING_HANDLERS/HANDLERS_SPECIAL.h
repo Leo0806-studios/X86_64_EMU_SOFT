@@ -2,14 +2,18 @@
 #include <cstdint>
 #include <tuple>
 #include <utility>
+#include <tracy/Tracy.hpp>
 #include "SYSTEM/CPU/DECODING_ENGINE/DECODING_ENGINE.h"
 #include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h"
 #include "SYSTEM/CPU/INSTRUCTIONS/OPCODE_BYTES.h"
 #include "SYSTEM/CPU/VCORE.h"
 #include "SYSTEM/MEMORY/MEMORY.h"
+#include <HELPERS/REDEFINE_MACROS.h>
+
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	inline bool Handle_MOVrm16rm32r16r32(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
+		ZoneScoped;
 		instruction.OpcodeBytes[0] = byte;
 		instruction.OpcodeSizeBytes++;
 		instruction.InstructionLengthBytes++;
@@ -30,6 +34,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		return true;
 	}
 	inline bool Handle_MOVr16r32imm16imm32_BASE(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
+		ZoneScoped;
 		instruction.OpcodeBytes[0] = byte;
 		instruction.OpcodeSizeBytes++;
 		instruction.InstructionLengthBytes++;
@@ -59,6 +64,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	inline bool Handle_NOP(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {//NOSONAR
 
+		ZoneScoped;
 		instruction.OpcodeBytes[0] = byte;
 		instruction.OpcodeSizeBytes++;
 		instruction.InstructionLengthBytes++;
@@ -71,6 +77,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		return true;
 	}
 	inline bool Handle_UD(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {//NOSONAR
+		ZoneScoped;
 		instruction.OpcodeBytes[0] = byte;
 		instruction.OpcodeSizeBytes++;
 		instruction.InstructionLengthBytes++;

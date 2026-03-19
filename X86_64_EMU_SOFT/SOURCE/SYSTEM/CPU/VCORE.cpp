@@ -10,6 +10,8 @@
 #include <utility>
 #include <format>
 #include <string>
+#include <source_location>
+#include <tracy/Tracy.hpp>
 #include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h"
 #include "SYSTEM/CPU/INSTRUCTIONS/OPCODE_BYTES.h"
 #include "SYSTEM/CPU/EXCEPTIONS/UNDEFINED_OPCODE.h"
@@ -17,6 +19,8 @@
 #include "SYSTEM/CPU/DECODING_ENGINE/DECODING_ENGINE.h"
 #include "SYSTEM/CPU/EXECUTION_ENGINE/EXECUTION_ENGINE.h"
 #include "SYSTEM/MEMORY/MEMORY.h"
+#include "HELPERS/GLOBALS.h"
+#include "HELPERS/REDEFINE_MACROS.h"
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
@@ -28,6 +32,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	uint64_t VirtualCore::GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const
 	{
+		ZoneNamed(GetRegisterValue, true);
 		switch (reg) {
 			case INSTRUCTIONS::TargetRegister::RAX: return RAX.GetValue();
 			case INSTRUCTIONS::TargetRegister::RBX: return RBX.GetValue();
@@ -52,6 +57,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	uint64_t VirtualCore::GetRegisterValue(RegisterID reg) const noexcept
 	{
+		ZoneNamed(GetRegisterValue, true);
 		switch (reg) {
 			case RegisterID::RAX: return RAX.GetValue();
 			case RegisterID::RCX: return RCX.GetValue();
@@ -98,6 +104,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	void VirtualCore::SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value)
 	{
+		ZoneNamed(SetRegisterValue, true);
 		switch (reg) {
 			case INSTRUCTIONS::TargetRegister::RAX: RAX.SetValue(value); break;
 			case INSTRUCTIONS::TargetRegister::RBX: RBX.SetValue(value); break;
@@ -121,6 +128,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	void VirtualCore::SetRegisterValue(RegisterID reg, uint64_t value) noexcept
 	{
+		ZoneNamed(SetRegisterValue, true);
 		switch (reg) {
 			case RegisterID::RAX: RAX.SetValue(value); break;
 			case RegisterID::RCX: RCX.SetValue(value); break;
@@ -180,6 +188,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	void VirtualCore::WriteBytes(uint64_t address, const uint64_t value, uint8_t sizeBytes)
 	{
+		ZoneNamed(WriteBytes, true);
 		switch (sizeBytes) {
 			case 1: memoryBus->Write8(address, static_cast<uint8_t>(value)); break;
 			case 2: memoryBus->Write16(address, static_cast<uint16_t>(value)); break;
@@ -191,6 +200,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	uint64_t VirtualCore::FetchBytes(uint64_t address, uint8_t sizeBytes) const
 	{
+		ZoneNamed(FetchBytes, true);
 		switch (sizeBytes) {
 			case 1: return memoryBus->Read8(address); 
 			case 2: return memoryBus->Read16(address); 
@@ -201,6 +211,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 
 	inline void VirtualCore::PrintInstruction(const INSTRUCTIONS::Instruction& instruction) noexcept {//NOLINT(bugprone-exception-escape) Throw in std::print is non recoverable so its not handled
+		ZoneNamed(PrintInstruction, true);
 		std::print("Instruction Length: {} bytes\n", instruction.InstructionLengthBytes);
 		if (std::to_underlying(instruction.Prefix1)) {
 			std::print("Prefix Group 1: {:#X}\n", std::to_underlying(instruction.Prefix1));
@@ -244,6 +255,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	void VirtualCore::PrintCoreState() const
 	{
+		ZoneNamed(PrintCoreState, true);
 		std::print("*****************************************************************\n");
 		std::print("RIP: {:#X}, decimal {}, signed {}\n", RIP.GetValue(), RIP.GetValue(), static_cast<int64_t>(RIP.GetValue()));
 		std::print("\tEIP: {:#X}, decimal {}, signed {}\n", 0xFFFFFFFFULL & RIP.GetValue(), 0xFFFFFFFFULL & RIP.GetValue(), static_cast<int32_t>(0xFFFFFFFFULL & RIP.GetValue()));
@@ -411,16 +423,19 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	bool VirtualCore::StartCore() noexcept//NOLINT(bugprone-exception-escape) Throw in std::print is non recoverable so its not handled
 	{
+		
 		isRunning.store(true);
 		hasShutdown.store(false);
 		std::print("Core started at reset vector: {:#X}\n", RIP.GetValue());
 		try {
 
 			while (true) {
-				std::print("\nDecoding instruction at RIP: {:#X}\n", RIP.GetValue());
+				FrameMark;
+				RunIfMinimalOrHigherTraceMode(std::print("\nDecoding instruction at RIP: {:#X}\n", RIP.GetValue());)
+
 				const INSTRUCTIONS::Instruction instruction = decodeInstruction();
 				RIP.SetValue(RIP.GetValue() + instruction.InstructionLengthBytes);
-				PrintInstruction(instruction);
+				RunIfReducedOrHigherTraceMode(PrintInstruction(instruction);)
 				executeInstruction(instruction);
 			}
 		}
@@ -430,6 +445,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			PrintCoreState();
 		}
 		hasShutdown.store(true);
+		
 		return true;
 	}
 }// namespace X86_64_EMU_SOFT::SYSTEM::CPU
