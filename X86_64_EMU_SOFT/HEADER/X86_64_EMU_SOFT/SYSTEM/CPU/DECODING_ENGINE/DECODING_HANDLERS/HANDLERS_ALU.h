@@ -24,7 +24,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		instruction.DestinationSize = 16;
 		instruction.hasModRM = true;
 		instruction.Type = INSTRUCTIONS::InstructionType::ADD; 
-		DecodingEngine::digestModRMAndSIB(address, *core.GetMemoryBus(), instruction);
+		DecodingEngine::digestModRMAndSIB(address, core, instruction);
 		instruction.SourceRegister = DecodingEngine::DecodeRegisterFromModRMRegField(instruction.ModRM.reg);
 		if (instruction.ModRM.mod == 3) {
 			instruction.DestinationRegister = DecodingEngine::DecodeRegisterFromModRMRMField(instruction.ModRM.rm);
@@ -41,7 +41,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 		instruction.Type = INSTRUCTIONS::InstructionType::OR;
-		DecodingEngine::digestModRMAndSIB(address, *core.GetMemoryBus(), instruction);
+		DecodingEngine::digestModRMAndSIB(address, core, instruction);
 		if ((core.getMode() == vCoreMode::realMode && !instruction.OperandOverride) ||
 			(core.getMode() == vCoreMode::protectedMode && instruction.OperandOverride)) {
 			instruction.DestinationSize = instruction.SourceSize = 16;
@@ -69,7 +69,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 		instruction.Type = INSTRUCTIONS::InstructionType::SUB;
-		DecodingEngine::digestModRMAndSIB(address, *core.GetMemoryBus(), instruction);
+		DecodingEngine::digestModRMAndSIB(address, core, instruction);
 		if ((core.getMode() == vCoreMode::realMode && !instruction.OperandOverride) || 
 			(core.getMode() == vCoreMode::protectedMode && instruction.OperandOverride)) {
 			instruction.DestinationSize = instruction.SourceSize = 16;
@@ -91,8 +91,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		instruction.InstructionLengthBytes++;
 
 
-		const MEMORY::MemoryBus& memoryBus = *core.GetMemoryBus();
-		DecodingEngine::digestModRMAndSIB(address, memoryBus, instruction);
+		DecodingEngine::digestModRMAndSIB(address, core, instruction);
 		switch (instruction.ModRM.reg) {
 			case 0: {
 				instruction.Type = INSTRUCTIONS::InstructionType::ADD;
@@ -101,7 +100,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 					instruction.DestinationSize = instruction.SourceSize = 16;
 					instruction.ImmediateSizeBytes = 2;
 					instruction.InstructionLengthBytes++;
-					const int16_t signExtend = static_cast<int8_t>(memoryBus.Read8(address));//NOLINT(bugprone-signed-char-misuse,cert-str34-c)
+					const int16_t signExtend = static_cast<int8_t>(core.FetchBytes(address,1));//NOLINT(bugprone-signed-char-misuse,cert-str34-c)
 					std::array<uint8_t,2> arr = { 0,0 };
 					std::memcpy(arr.data(), &signExtend, arr.size());//NOLINT(clang-diagnostic-unsafe-buffer-usage-in-libc-call)
 					instruction.ImmediateBytes[0] = arr[0];
@@ -113,7 +112,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 					instruction.DestinationSize = instruction.SourceSize = 32;
 					instruction.ImmediateSizeBytes = 4;
 					instruction.InstructionLengthBytes++;
-					const int32_t signExtend = static_cast<int8_t>(memoryBus.Read8(address));//NOLINT(bugprone-signed-char-misuse,cert-str34-c)
+					const int32_t signExtend = static_cast<int8_t>(core.FetchBytes(address, 1));//NOLINT(bugprone-signed-char-misuse,cert-str34-c)
 					std::array<uint8_t,4> arr = { 0,0,0,0 };
 					std::memcpy(arr.data(), &signExtend, arr.size());//NOLINT(clang-diagnostic-unsafe-buffer-usage-in-libc-call)
 					instruction.ImmediateBytes[0] = arr[0];
@@ -133,7 +132,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 					instruction.DestinationSize = instruction.SourceSize = 16;
 					instruction.ImmediateSizeBytes = 2;
 					instruction.InstructionLengthBytes++;
-					const int16_t signExtend = static_cast<int8_t>(memoryBus.Read8(address));//NOLINT(bugprone-signed-char-misuse,cert-str34-c)
+					const int16_t signExtend = static_cast<int8_t>(core.FetchBytes(address, 1));//NOLINT(bugprone-signed-char-misuse,cert-str34-c)
 					std::array<uint8_t, 2> arr = { 0,0 };
 					std::memcpy(arr.data(), &signExtend, arr.size());//NOLINT(clang-diagnostic-unsafe-buffer-usage-in-libc-call)
 					instruction.ImmediateBytes[0] = arr[0];
@@ -145,7 +144,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 					instruction.DestinationSize = instruction.SourceSize = 32;
 					instruction.ImmediateSizeBytes = 4;
 					instruction.InstructionLengthBytes++;
-					const int32_t signExtend = static_cast<int8_t>(memoryBus.Read8(address));//NOLINT(bugprone-signed-char-misuse,cert-str34-c)
+					const int32_t signExtend = static_cast<int8_t>(core.FetchBytes(address, 1));//NOLINT(bugprone-signed-char-misuse,cert-str34-c)
 					std::array<uint8_t, 4> arr = { 0,0,0,0 };
 					std::memcpy(arr.data(), &signExtend, arr.size());//NOLINT(clang-diagnostic-unsafe-buffer-usage-in-libc-call)
 					instruction.ImmediateBytes[0] = arr[0];
@@ -166,7 +165,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 					instruction.DestinationSize = instruction.SourceSize = 16;
 					instruction.ImmediateSizeBytes = 2;
 					instruction.InstructionLengthBytes++;
-					const int16_t signExtend = static_cast<int8_t>(memoryBus.Read8(address));//NOLINT(bugprone-signed-char-misuse,cert-str34-c)
+					const int16_t signExtend = static_cast<int8_t>(core.FetchBytes(address, 1));//NOLINT(bugprone-signed-char-misuse,cert-str34-c)
 					std::array<uint8_t, 2> arr = { 0,0 };
 					std::memcpy(arr.data(), &signExtend, arr.size());//NOLINT(clang-diagnostic-unsafe-buffer-usage-in-libc-call)
 					instruction.ImmediateBytes[0] = arr[0];
@@ -178,7 +177,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 					instruction.DestinationSize = instruction.SourceSize = 32;
 					instruction.ImmediateSizeBytes = 4;
 					instruction.InstructionLengthBytes++;
-					const int32_t signExtend = static_cast<int8_t>(memoryBus.Read8(address));//NOLINT(bugprone-signed-char-misuse,cert-str34-c)
+					const int32_t signExtend = static_cast<int8_t>(core.FetchBytes(address, 1));//NOLINT(bugprone-signed-char-misuse,cert-str34-c)
 					std::array<uint8_t, 4> arr = { 0,0,0,0 };
 					std::memcpy(arr.data(), &signExtend, arr.size());//NOLINT(clang-diagnostic-unsafe-buffer-usage-in-libc-call)
 					instruction.ImmediateBytes[0] = arr[0];

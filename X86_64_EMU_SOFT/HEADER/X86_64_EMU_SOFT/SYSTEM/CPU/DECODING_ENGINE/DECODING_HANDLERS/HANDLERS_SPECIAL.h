@@ -14,7 +14,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		instruction.OpcodeSizeBytes++;
 		instruction.InstructionLengthBytes++;
 		instruction.Type = INSTRUCTIONS::InstructionType::MOV;
-		DecodingEngine::digestModRMAndSIB(address, *core.GetMemoryBus(), instruction);
+		DecodingEngine::digestModRMAndSIB(address, core, instruction);
 		if ((core.getMode() == vCoreMode::realMode && !instruction.OperandOverride) ||
 			(core.getMode() == vCoreMode::protectedMode && instruction.OperandOverride)) {
 			instruction.DestinationSize = instruction.SourceSize = 16;
@@ -49,7 +49,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 		}
 		for (uint8_t i = 0; i < instruction.ImmediateSizeBytes; i++) {
-			instruction.ImmediateBytes[i] = (*core.GetMemoryBus()).Read8(address);
+			instruction.ImmediateBytes[i] = static_cast<uint8_t>(core.FetchBytes(address, 1));
 			address++;
 			instruction.InstructionLengthBytes++;
 		}

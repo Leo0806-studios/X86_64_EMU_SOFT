@@ -133,18 +133,23 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		void SetRegisterValueMasked(RegisterID reg, uint64_t value, uint8_t bits) noexcept;
 		void SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value);
 		void SetRegisterValue(RegisterID reg, uint64_t value) noexcept;
-		[[nodiscard]] std::shared_ptr<MEMORY::MemoryBus> GetMemoryBus()const noexcept {
-			return memoryBus;
-		}
 		[[nodiscard]] static std::string getSubregisterFromSize(SYSTEM::CPU::INSTRUCTIONS::TargetRegister reg, uint8_t bits);
 		/// <summary>
 		/// writes "sizeBytes" amount of bytes from "value" to the memory bus while performing all necesary validation of the target address
-		/// sizebytes must be at most 8
+		/// sizebytes must one of 1,2,4,8
 		/// </summary>
 		/// <param name="address"></param>
 		/// <param name="value"></param>
 		/// <param name="sizeBytes"></param>
 		void WriteBytes(uint64_t address, const uint64_t value, uint8_t sizeBytes);
+
+		/// <summary>
+		/// fetches "sizeBtes" amount of bytes.
+		/// sizeBytes must be one of 1,2,4,8
+		/// </summary>
+		/// <param name="address"></param>
+		/// <param name="sizeBytes"></param>
+		/// <returns></returns>
 		[[nodiscard]] uint64_t FetchBytes(uint64_t address, uint8_t sizeBytes) const;
 
 		static void PrintInstruction(const INSTRUCTIONS::Instruction& instruction)noexcept;

@@ -86,7 +86,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		const uint64_t valueToSet = value & mask;
 		const uint64_t valueToKeep = originalVaue & ~mask;
 		SetRegisterValue(reg, valueToKeep | valueToSet);
-	
+
 	}
 	void VirtualCore::SetRegisterValueMasked(RegisterID reg, uint64_t value, uint8_t bits) noexcept
 	{
@@ -136,7 +136,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 
 	[[nodiscard]]
-	 std::string VirtualCore::getSubregisterFromSize(CPU::INSTRUCTIONS::TargetRegister reg, uint8_t bits) { 
+	std::string VirtualCore::getSubregisterFromSize(CPU::INSTRUCTIONS::TargetRegister reg, uint8_t bits) {
 		switch (reg) {
 			using enum CPU::INSTRUCTIONS::TargetRegister;
 			using enum CPU::vCoreMode;
@@ -178,7 +178,29 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 	}
 
-	inline void VirtualCore::PrintInstruction(const INSTRUCTIONS::Instruction& instruction) noexcept{//NOLINT(bugprone-exception-escape) Throw in std::print is non recoverable so its not handled
+	void VirtualCore::WriteBytes(uint64_t address, const uint64_t value, uint8_t sizeBytes)
+	{
+		switch (sizeBytes) {
+			case 1: memoryBus->Write8(address, static_cast<uint8_t>(value)); break;
+			case 2: memoryBus->Write16(address, static_cast<uint16_t>(value)); break;
+			case 4: memoryBus->Write32(address, static_cast<uint32_t>(value)); break;
+			case 8: memoryBus->Write64(address, value); break;
+			default: throw std::out_of_range("sizeBytes out of allowed range (1,2,4,8 ) for VirtualCore.WriteBytes");
+		}
+	}
+
+	uint64_t VirtualCore::FetchBytes(uint64_t address, uint8_t sizeBytes) const
+	{
+		switch (sizeBytes) {
+			case 1: return memoryBus->Read8(address); 
+			case 2: return memoryBus->Read16(address); 
+			case 4: return memoryBus->Read32(address); 
+			case 8: return memoryBus->Read64(address); 
+			default: throw std::out_of_range("sizeBytes out of allowed range (1,2,4,8 ) for VirtualCore.FetchBytes");
+		}
+	}
+
+	inline void VirtualCore::PrintInstruction(const INSTRUCTIONS::Instruction& instruction) noexcept {//NOLINT(bugprone-exception-escape) Throw in std::print is non recoverable so its not handled
 		std::print("Instruction Length: {} bytes\n", instruction.InstructionLengthBytes);
 		if (std::to_underlying(instruction.Prefix1)) {
 			std::print("Prefix Group 1: {:#X}\n", std::to_underlying(instruction.Prefix1));
@@ -280,17 +302,17 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	{
 		vCoreMode ret = vCoreMode::realMode;
 		if (EFER.GetLMA() && CR0.GetPE()) {
-			ret= vCoreMode::longMode;
+			ret = vCoreMode::longMode;
 		}
 		else if (!EFER.GetLMA() && CR0.GetPE()) {
-			ret= vCoreMode::protectedMode;
+			ret = vCoreMode::protectedMode;
 		}
 		return ret;
 
 	}
 	VirtualCore::VirtualCore(uint64_t resetVector, std::shared_ptr<MEMORY::MemoryBus> memBus, vCoreMode startupMode) noexcept :
 		RAX(), RBX(), RCX(), RDX(), RSI(), RDI(), RSP(), RBP(), R8(), R9(), R10(), R11(), R12(), R13(), R14(), R15(),
-		RIP(), EFER(),CR0(),
+		RIP(), EFER(), CR0(),
 		isRunning(false), hasShutdown(false), isEnabled(false), memoryBus(std::move(memBus))
 
 	{
@@ -314,7 +336,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	VirtualCore::VirtualCore(const VirtualCore& other)noexcept :
 		RAX(other.RAX), RBX(other.RBX), RCX(other.RCX), RDX(other.RDX), RSI(other.RDX), RDI(other.RDI), RSP(other.RSP), RBP(other.RBP),
 		R8(other.R8), R9(other.R9), R10(other.R10), R11(other.R11), R12(other.R12), R13(other.R13), R14(other.R14), R15(other.R15),
-		RIP(other.RIP),  EFER(other.EFER), CR0(other.CR0),
+		RIP(other.RIP), EFER(other.EFER), CR0(other.CR0),
 		isRunning(other.isRunning.load()), hasShutdown(other.hasShutdown.load()), isEnabled(other.isEnabled.load()), memoryBus(other.memoryBus)
 	{}
 	VirtualCore& VirtualCore::operator=(const VirtualCore& other)noexcept

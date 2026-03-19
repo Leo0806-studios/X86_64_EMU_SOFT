@@ -164,16 +164,16 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 	}
 
-	void DecodingEngine::digestModRMAndSIB(uint64_t& address, const MEMORY::MemoryBus& memoryBus, INSTRUCTIONS::Instruction& instruction) noexcept
+	void DecodingEngine::digestModRMAndSIB(uint64_t& address,const  VirtualCore& core, INSTRUCTIONS::Instruction& instruction) noexcept
 	{
-		const uint8_t modrmByte = memoryBus.Read8(address);
+		const uint8_t modrmByte = static_cast<uint8_t>(core.FetchBytes(address, 1));
 		instruction.ModRM = std::bit_cast<INSTRUCTIONS::ModRM>(modrmByte);
 		instruction.InstructionLengthBytes++;
 
 		address++;
 		if (instruction.ModRM.mod != 3 && instruction.ModRM.rm == 4) {
 			instruction.hasSIB = true;
-			const uint8_t sibByte = memoryBus.Read8(address);
+			const uint8_t sibByte = static_cast<uint8_t>(core.FetchBytes(address, 1));
 			instruction.SIB = std::bit_cast<INSTRUCTIONS::SIB>(sibByte);
 			instruction.InstructionLengthBytes++;
 			address++;

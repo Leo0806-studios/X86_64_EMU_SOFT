@@ -37,7 +37,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		/// <param name="address"></param>
 		/// <param name="memoryBus"></param>
 		/// <param name="instruction"></param>
-		static  void digestModRMAndSIB(uint64_t& address, const MEMORY::MemoryBus& memoryBus, INSTRUCTIONS::Instruction& instruction)noexcept;
+		static  void digestModRMAndSIB(uint64_t& address,const  VirtualCore& core, INSTRUCTIONS::Instruction& instruction)noexcept;
 		[[nodiscard]] static  INSTRUCTIONS::Instruction DecodeInstruction(const VirtualCore& core);
 	};
 }
