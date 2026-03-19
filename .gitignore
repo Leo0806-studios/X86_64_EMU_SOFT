@@ -367,3 +367,7 @@ FodyWeavers.xsd
 
 /vcpkg_installed
 /X86_64_EMU_SOFT_EXE/Intel® VTune™ Profiler Results/X86_64_EMU_SOFT_EXE
+/Depend
+/X86_64_EMU_SOFT_EXE/e000
+/X86_64_EMU_SOFT_EXE/annotations.advidb2
+/tracy-profiler.exe
