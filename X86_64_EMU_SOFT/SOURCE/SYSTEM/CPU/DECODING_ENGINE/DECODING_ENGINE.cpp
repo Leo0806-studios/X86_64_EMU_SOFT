@@ -52,14 +52,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 			//SPECIAL
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16r32imm16imm32_BASE) + 0U] = Handle_MOVr16r32imm16imm32_BASE;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16r32imm16imm32_BASE) + 1U] = Handle_MOVr16r32imm16imm32_BASE;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16r32imm16imm32_BASE) + 2U] = Handle_MOVr16r32imm16imm32_BASE;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16r32imm16imm32_BASE) + 3U] = Handle_MOVr16r32imm16imm32_BASE;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16r32imm16imm32_BASE) + 4U] = Handle_MOVr16r32imm16imm32_BASE;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16r32imm16imm32_BASE) + 5U] = Handle_MOVr16r32imm16imm32_BASE;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16r32imm16imm32_BASE) + 6U] = Handle_MOVr16r32imm16imm32_BASE;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16r32imm16imm32_BASE) + 7U] = Handle_MOVr16r32imm16imm32_BASE;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16AXr32EAXimm16imm32)] = Handle_MOVr16r32imm16imm32_BASE;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16CXr32ECXimm16imm32)] = Handle_MOVr16r32imm16imm32_BASE;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16DXr32EDXimm16imm32)] = Handle_MOVr16r32imm16imm32_BASE;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16BXr32EBXimm16imm32)] = Handle_MOVr16r32imm16imm32_BASE;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16SPr32ESPimm16imm32)] = Handle_MOVr16r32imm16imm32_BASE;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16BPr32EBPimm16imm32)] = Handle_MOVr16r32imm16imm32_BASE;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16SIr32ESIimm16imm32)] = Handle_MOVr16r32imm16imm32_BASE;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16DIr32EDIimm16imm32)] = Handle_MOVr16r32imm16imm32_BASE;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVrm16rm32r16r32)] = Handle_MOVrm16rm32r16r32;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::NOP)] = Handle_NOP;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::UD)] = Handle_UD;

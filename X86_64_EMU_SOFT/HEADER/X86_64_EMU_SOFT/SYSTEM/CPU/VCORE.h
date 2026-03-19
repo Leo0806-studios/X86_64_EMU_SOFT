@@ -137,6 +137,15 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 			return memoryBus;
 		}
 		[[nodiscard]] static std::string getSubregisterFromSize(SYSTEM::CPU::INSTRUCTIONS::TargetRegister reg, uint8_t bits);
+		/// <summary>
+		/// writes "sizeBytes" amount of bytes from "value" to the memory bus while performing all necesary validation of the target address
+		/// sizebytes must be at most 8
+		/// </summary>
+		/// <param name="address"></param>
+		/// <param name="value"></param>
+		/// <param name="sizeBytes"></param>
+		void WriteBytes(uint64_t address, const uint64_t value, uint8_t sizeBytes);
+		[[nodiscard]] uint64_t FetchBytes(uint64_t address, uint8_t sizeBytes) const;
 
 		static void PrintInstruction(const INSTRUCTIONS::Instruction& instruction)noexcept;
 	};

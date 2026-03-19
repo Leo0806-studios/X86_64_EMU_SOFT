@@ -141,13 +141,13 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			using enum CPU::INSTRUCTIONS::TargetRegister;
 			using enum CPU::vCoreMode;
 			case RAX: switch (bits) {
-				case 16: return "AX"; case 32:return "EAX";  case 64: default: return "RAX";
+				case 8: return "AL"; case 16: return "AX"; case 32:return "EAX";  case 64: default: return "RAX";
 			}
 			case RBX: switch (bits) {
-				case 16: return "BX"; case 32:return "EBX";  case 64: default: return "RBX";
+				case 8: return "BL"; case 16: return "BX"; case 32:return "EBX";  case 64: default: return "RBX";
 			}
 			case RCX: switch (bits) {
-				case 16: return "CX"; case 32:return "ECX";  case 64: default: return "RCX";
+				case 8: return "CL"; case 16: return "CX"; case 32:return "ECX";  case 64: default: return "RCX";
 			}
 			case RDX: switch (bits) {
 				case 16: return "DX"; case 32:return "EDX";  case 64: default: return "RDX";
