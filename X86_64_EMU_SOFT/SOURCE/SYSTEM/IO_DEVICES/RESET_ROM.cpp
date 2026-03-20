@@ -2,8 +2,11 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+#include <tracy/Tracy.hpp>
 #include "SYSTEM/IO_DEVICES/RESET_ROM.h"
 #include "SYSTEM/IO_DEVICES/DEVICE_BASE.h"
+#include <HELPERS/MACROS.h>
+#include <HELPERS/REDEFINE_MACROS.h>
 namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 
 	ResetROMDevice::ResetROMDevice(std::vector<uint8_t> data) noexcept :memory(std::move(data))
@@ -11,12 +14,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 
 	uint8_t ResetROMDevice::Read8(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 	{
-		//ValidateDeviceAccess(offset, 1U, memory.size())
+		DeepZoneScoped;
+		ValidateDeviceAccess(offset, 1U, memory.size())
 		return memory[offset];
 	}
 
 	uint16_t ResetROMDevice::Read16(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 	{
+		DeepZoneScoped;
 		ValidateDeviceAccess(offset, 2U, memory.size())
 		uint16_t value = 0;
 		value |= memory[offset];
@@ -26,6 +31,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 
 	uint32_t ResetROMDevice::Read32(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 	{
+		DeepZoneScoped;
 		ValidateDeviceAccess(offset, 4U, memory.size())
 		uint32_t value = 0;
 		value |= memory[offset];
@@ -37,6 +43,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 
 	uint64_t ResetROMDevice::Read64(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 	{
+		DeepZoneScoped;
 		ValidateDeviceAccess(offset, 8U, memory.size())
 		uint64_t value = 0;
 		value |= memory[offset];
@@ -52,18 +59,21 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 
 	void ResetROMDevice::Write8(uint64_t offset, uint8_t value) noexcept
 	{
+		DeepZoneScoped;
 		std::ignore = offset;
 		std::ignore = value;
 	}
 
 	void ResetROMDevice::Write16(uint64_t offset, uint16_t value) noexcept
 	{
+		DeepZoneScoped;
 		std::ignore = offset;
 		std::ignore = value;
 	}
 
 	void ResetROMDevice::Write32(uint64_t offset, uint32_t value) noexcept
 	{
+		DeepZoneScoped;
 		std::ignore = offset;
 		std::ignore = value;
 	}
@@ -71,6 +81,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 
 	void ResetROMDevice::Write64(uint64_t offset, uint64_t value) noexcept
 	{
+		DeepZoneScoped;
 		std::ignore = offset;
 		std::ignore = value;
 	}

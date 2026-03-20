@@ -2,8 +2,11 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+#include <tracy/Tracy.hpp>
 #include "SYSTEM/IO_DEVICES/DEVICE_BASE.h"
 #include "SYSTEM/IO_DEVICES/FIRMWARE.h"
+#include <HELPERS/REDEFINE_MACROS.h>
+#include <HELPERS/MACROS.h>
 
 X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::FirmwareRomDevice(std::vector<uint8_t> data) noexcept :memory(std::move(data))
 {
@@ -11,12 +14,14 @@ X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::FirmwareRomDevice(std::v
 
 uint8_t X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::Read8(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 {
-   // ValidateDeviceAccess(offset, 1, memory.size())
+    DeepZoneScoped;
+    ValidateDeviceAccess(offset, 1, memory.size())
     return memory[offset];
 }
 
 uint16_t X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::Read16(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 {
+    DeepZoneScoped;
     ValidateDeviceAccess(offset, 2, memory.size())
     uint16_t value = 0;
     value |= memory[offset];
@@ -26,6 +31,7 @@ uint16_t X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::Read16(uint64_t
 
 uint32_t X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::Read32(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 {
+    DeepZoneScoped;
     ValidateDeviceAccess(offset, 4, memory.size())
     uint32_t value = 0;
     value |= memory[offset];
@@ -37,6 +43,7 @@ uint32_t X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::Read32(uint64_t
 
 uint64_t X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::Read64(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 {
+    DeepZoneScoped;
     ValidateDeviceAccess(offset, 8, memory.size())
     uint64_t value = 0;
     value |= memory[offset];
@@ -52,24 +59,28 @@ uint64_t X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::Read64(uint64_t
 
 void X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::Write8(uint64_t offset, uint8_t value) noexcept 
 {
+    DeepZoneScoped;
     std::ignore = offset;
     std::ignore = value; 
 }
 
 void X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::Write16(uint64_t offset, uint16_t value) noexcept
 {
+    DeepZoneScoped;
     std::ignore = offset;
     std::ignore = value;
 }
 
 void X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::Write32(uint64_t offset, uint32_t value) noexcept
 {
+    DeepZoneScoped;
     std::ignore = offset;
     std::ignore = value;
 }
 
 void X86_64_EMU_SOFT::SYSTEM::IO_DEVICES::FirmwareRomDevice::Write64(uint64_t offset, uint64_t value) noexcept
 {
+    DeepZoneScoped;
     std::ignore = offset;
     std::ignore = value;
 }

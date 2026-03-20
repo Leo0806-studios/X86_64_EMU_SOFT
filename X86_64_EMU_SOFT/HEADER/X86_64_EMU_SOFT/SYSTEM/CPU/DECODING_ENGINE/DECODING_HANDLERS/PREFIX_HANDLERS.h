@@ -7,6 +7,7 @@
 #include "SYSTEM/CPU/VCORE.h"
 #include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h"
 #include "SYSTEM/CPU/DECODING_ENGINE/DECODING_ENGINE.h"
+#include <HELPERS/MACROS.h>
 #include <HELPERS/REDEFINE_MACROS.h>
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	inline bool HandlePrefix(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction,uint8_t byte) {//NOSONAR

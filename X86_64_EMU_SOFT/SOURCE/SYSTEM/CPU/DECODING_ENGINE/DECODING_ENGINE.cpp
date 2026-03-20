@@ -20,6 +20,7 @@
 #include "HELPERS/REDEFINE_MACROS.h"
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	[[noreturn]] inline static bool ThrowUndefinedOpcode(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {//NOSONAR
+		DeepZoneScoped;
 		std::ignore = core;
 		std::ignore = instruction;
 		std::stringstream msg;

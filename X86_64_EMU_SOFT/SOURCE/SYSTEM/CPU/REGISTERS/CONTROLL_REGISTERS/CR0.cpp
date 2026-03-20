@@ -4,6 +4,8 @@
 #include "HELPERS/DIFF.h"
 #include "SYSTEM/CPU/REGISTERS/CONTROLL_REGISTERS/CR0.h"
 #include "HELPERS/GET_BIT.h"
+#include <tracy/Tracy.hpp>
+#include <HELPERS/MACROS.h>
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
 {
@@ -15,6 +17,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
 			}// namespace  
 			CR0::InputValidityCR0 CR0::ValidateInput(uint64_t value) const noexcept
 			{
+				DeepZoneScoped;
 				//check for reserved bits
 				if ((std::bitset<64>(HELPERS::Diff(storage, value)) & ReservedEntriesMask) != std::bitset<64>(0))
 				{

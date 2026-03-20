@@ -1,6 +1,9 @@
 #include <cstdint>
+#include <tracy/Tracy.hpp>
 #include "SYSTEM/IO_DEVICES/MAIN_MEMORY_DEVICE.h"
 #include "SYSTEM/IO_DEVICES/DEVICE_BASE.h"
+#include <HELPERS/MACROS.h>
+#include <HELPERS/REDEFINE_MACROS.h>
 namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 	MainMemoryDevice::MainMemoryDevice(size_t sizeKB) noexcept//NOLINT(bugprone-exception-escape)
 	{
@@ -8,12 +11,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 	}
 	uint8_t MainMemoryDevice::Read8(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 	{
+		DeepZoneScoped;
 		ValidateDeviceAccess(offset, 1, memory.size())
 			return memory[offset];
 	}
 
 	uint16_t MainMemoryDevice::Read16(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 	{
+		DeepZoneScoped;
 		ValidateDeviceAccess(offset, 2, memory.size())
 			uint16_t value = 0;
 		value |= memory[offset];
@@ -23,6 +28,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 
 	uint32_t MainMemoryDevice::Read32(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 	{
+		DeepZoneScoped;
 		ValidateDeviceAccess(offset, 4, memory.size())
 			uint32_t value = 0;
 		value |= memory[offset];
@@ -34,6 +40,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 
 	uint64_t MainMemoryDevice::Read64(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 	{
+		DeepZoneScoped;
 		ValidateDeviceAccess(offset, 8, memory.size())
 			uint64_t value = 0;
 		value |= memory[offset];
@@ -49,12 +56,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 
 	void MainMemoryDevice::Write8(uint64_t offset, uint8_t value) noexcept//NOLINT(bugprone-exception-escape)
 	{
+		DeepZoneScoped;
 		ValidateDeviceAccess(offset, 1U, memory.size())
 			memory[offset] = value;
 	}
 
 	void MainMemoryDevice::Write16(uint64_t offset, uint16_t value) noexcept//NOLINT(bugprone-exception-escape)
 	{
+		DeepZoneScoped;
 		ValidateDeviceAccess(offset, 2U, memory.size())
 			memory[offset] = value & 0xFFULL;
 		memory[offset + 1] = (value >> 8U) & 0xFFULL;//NOLINT(hicpp-signed-bitwise)
@@ -62,6 +71,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 
 	void MainMemoryDevice::Write32(uint64_t offset, uint32_t value) noexcept//NOLINT(bugprone-exception-escape)
 	{
+		DeepZoneScoped;
 		ValidateDeviceAccess(offset, 4U, memory.size())
 			memory[offset] = value & 0xFFU;
 		memory[offset + 1] = (value >> 8U) & 0xFFU;
@@ -71,6 +81,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 
 	void MainMemoryDevice::Write64(uint64_t offset, uint64_t value) noexcept//NOLINT(bugprone-exception-escape)
 	{
+		DeepZoneScoped;
 		ValidateDeviceAccess(offset, 8U, memory.size())
 			memory[offset] = value & 0xFFU;
 		memory[offset + 1] = (value >> 8U) & 0xFFU;

@@ -8,6 +8,7 @@
 #include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h"
 #include "SYSTEM/CPU/EXCEPTIONS/UNDEFINED_OPCODE.h"
 #include "HELPERS/GLOBALS.h"
+#include <HELPERS/MACROS.h>
 #include"HELPERS/REDEFINE_MACROS.h"
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
@@ -25,7 +26,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		RunIfMinimalOrHigherTraceMode(std::print("Executing instruction: NOP\n"););
 	}
 	inline void Handle_MOV(VirtualCore& core,const INSTRUCTIONS::Instruction& instruction) {
-		ZoneScoped;
+		ZoneScoped; //NOLINT
 
 			if (instruction.ImmediateSizeBytes > 0) {
 				RunIfMinimalOrHigherTraceMode(std::print("Executing instruction: MOV r/m{} {}, imm{}\n", instruction.DestinationSize, VirtualCore::getSubregisterFromSize(instruction.DestinationRegister, instruction.DestinationSize), instruction.SourceSize););

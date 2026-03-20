@@ -20,6 +20,7 @@
 namespace X86_64_EMU_SOFT::SYSTEM::CPU{
 	namespace {
 		[[noreturn]] void UndefinedOpcodeHandler(VirtualCore& core,const INSTRUCTIONS::Instruction& instruction) {
+			DeepZoneScoped;
 			std::ignore = core;
 			std::ignore = instruction;
 			throw EXCEPTIONS::UNDEFINED_OPCODE("undefined opcode Handler called");
@@ -50,7 +51,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU{
 		}();
 	 void ExecutionEngine::ExecuteInstruction(VirtualCore& core, const INSTRUCTIONS::Instruction& instruction)
 	{
-		 ZoneNamed(ExecuteInstruction, true);
+		 ZoneScoped;
 		 ExecutionEngine::HandlerFuncs[std::to_underlying(instruction.Type)](core, instruction);
 	}
 }

@@ -8,6 +8,7 @@
 #include "SYSTEM/CPU/INSTRUCTIONS/OPCODE_BYTES.h"
 #include "SYSTEM/CPU/VCORE.h"
 #include "SYSTEM/MEMORY/MEMORY.h"
+#include <HELPERS/MACROS.h>
 #include <HELPERS/REDEFINE_MACROS.h>
 
 

@@ -20,6 +20,7 @@
 #include "SYSTEM/CPU/EXECUTION_ENGINE/EXECUTION_ENGINE.h"
 #include "SYSTEM/MEMORY/MEMORY.h"
 #include "HELPERS/GLOBALS.h"
+#include <HELPERS/MACROS.h>
 #include "HELPERS/REDEFINE_MACROS.h"
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
@@ -32,7 +33,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	uint64_t VirtualCore::GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const
 	{
-		ZoneNamed(GetRegisterValue, true);
+		DeepZoneScoped;
+
 		switch (reg) {
 			case INSTRUCTIONS::TargetRegister::RAX: return RAX.GetValue();
 			case INSTRUCTIONS::TargetRegister::RBX: return RBX.GetValue();
@@ -57,7 +59,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	uint64_t VirtualCore::GetRegisterValue(RegisterID reg) const noexcept
 	{
-		ZoneNamed(GetRegisterValue, true);
+		DeepZoneScoped;
 		switch (reg) {
 			case RegisterID::RAX: return RAX.GetValue();
 			case RegisterID::RCX: return RCX.GetValue();
@@ -73,6 +75,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	uint64_t VirtualCore::GetRegisterValueMasked(INSTRUCTIONS::TargetRegister reg, uint8_t bits) const
 	{
+		DeepZoneScoped;
 		const uint64_t value = GetRegisterValue(reg);
 		const uint64_t mask = (1ULL << bits) - 1;
 		const uint64_t ret = value & mask;
@@ -80,6 +83,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	uint64_t VirtualCore::GetRegisterValueMasked(RegisterID reg, uint8_t bits) const noexcept
 	{
+		DeepZoneScoped;
 		const uint64_t value = GetRegisterValue(reg);
 		const uint64_t mask = (1ULL << bits) - 1;
 		const uint64_t ret = value & mask;
@@ -87,6 +91,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	void VirtualCore::SetRegisterValueMasked(INSTRUCTIONS::TargetRegister reg, uint64_t value, uint8_t bits)
 	{
+		DeepZoneScoped;
 		const uint64_t originalVaue = GetRegisterValue(reg);
 		const uint64_t mask = (1ULL << bits) - 1;
 		const uint64_t valueToSet = value & mask;
@@ -96,6 +101,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	void VirtualCore::SetRegisterValueMasked(RegisterID reg, uint64_t value, uint8_t bits) noexcept
 	{
+		DeepZoneScoped;
 		const uint64_t originalVaue = GetRegisterValue(reg);
 		const uint64_t mask = (1ULL << bits) - 1;
 		const uint64_t valueToSet = value & mask;
@@ -104,7 +110,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	void VirtualCore::SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value)
 	{
-		ZoneNamed(SetRegisterValue, true);
+		DeepZoneScoped;
 		switch (reg) {
 			case INSTRUCTIONS::TargetRegister::RAX: RAX.SetValue(value); break;
 			case INSTRUCTIONS::TargetRegister::RBX: RBX.SetValue(value); break;
@@ -128,7 +134,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	void VirtualCore::SetRegisterValue(RegisterID reg, uint64_t value) noexcept
 	{
-		ZoneNamed(SetRegisterValue, true);
+		DeepZoneScoped;
+
 		switch (reg) {
 			case RegisterID::RAX: RAX.SetValue(value); break;
 			case RegisterID::RCX: RCX.SetValue(value); break;
@@ -145,6 +152,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	[[nodiscard]]
 	std::string VirtualCore::getSubregisterFromSize(CPU::INSTRUCTIONS::TargetRegister reg, uint8_t bits) {
+		DeepZoneScoped;
 		switch (reg) {
 			using enum CPU::INSTRUCTIONS::TargetRegister;
 			using enum CPU::vCoreMode;
@@ -188,7 +196,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	void VirtualCore::WriteBytes(uint64_t address, const uint64_t value, uint8_t sizeBytes)
 	{
-		ZoneNamed(WriteBytes, true);
+		ZoneScoped;
 		switch (sizeBytes) {
 			case 1: memoryBus->Write8(address, static_cast<uint8_t>(value)); break;
 			case 2: memoryBus->Write16(address, static_cast<uint16_t>(value)); break;
@@ -200,7 +208,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	uint64_t VirtualCore::FetchBytes(uint64_t address, uint8_t sizeBytes) const
 	{
-		ZoneNamed(FetchBytes, true);
+		ZoneScoped;
 		switch (sizeBytes) {
 			case 1: return memoryBus->Read8(address); 
 			case 2: return memoryBus->Read16(address); 
@@ -211,7 +219,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 
 	inline void VirtualCore::PrintInstruction(const INSTRUCTIONS::Instruction& instruction) noexcept {//NOLINT(bugprone-exception-escape) Throw in std::print is non recoverable so its not handled
-		ZoneNamed(PrintInstruction, true);
+		ZoneScoped;
 		std::print("Instruction Length: {} bytes\n", instruction.InstructionLengthBytes);
 		if (std::to_underlying(instruction.Prefix1)) {
 			std::print("Prefix Group 1: {:#X}\n", std::to_underlying(instruction.Prefix1));
@@ -250,12 +258,13 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	void VirtualCore::executeInstruction(const INSTRUCTIONS::Instruction& instruction)
 	{
+		ZoneScoped;
 		ExecutionEngine::ExecuteInstruction(*this, instruction);
 
 	}
 	void VirtualCore::PrintCoreState() const
 	{
-		ZoneNamed(PrintCoreState, true);
+		ZoneScoped;
 		std::print("*****************************************************************\n");
 		std::print("RIP: {:#X}, decimal {}, signed {}\n", RIP.GetValue(), RIP.GetValue(), static_cast<int64_t>(RIP.GetValue()));
 		std::print("\tEIP: {:#X}, decimal {}, signed {}\n", 0xFFFFFFFFULL & RIP.GetValue(), 0xFFFFFFFFULL & RIP.GetValue(), static_cast<int32_t>(0xFFFFFFFFULL & RIP.GetValue()));
@@ -312,6 +321,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	vCoreMode VirtualCore::getMode()const noexcept
 	{
+		DeepZoneScoped;
 		vCoreMode ret = vCoreMode::realMode;
 		if (EFER.GetLMA() && CR0.GetPE()) {
 			ret = vCoreMode::longMode;
@@ -328,6 +338,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		isRunning(false), hasShutdown(false), isEnabled(false), memoryBus(std::move(memBus))
 
 	{
+		DeepZoneScoped;
 		if (startupMode == vCoreMode::realMode) {
 			CR0.SetPE(false);
 			EFER.SetLME(false);
@@ -350,9 +361,12 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		R8(other.R8), R9(other.R9), R10(other.R10), R11(other.R11), R12(other.R12), R13(other.R13), R14(other.R14), R15(other.R15),
 		RIP(other.RIP), EFER(other.EFER), CR0(other.CR0),
 		isRunning(other.isRunning.load()), hasShutdown(other.hasShutdown.load()), isEnabled(other.isEnabled.load()), memoryBus(other.memoryBus)
-	{}
+	{
+		DeepZoneScoped;
+	}
 	VirtualCore& VirtualCore::operator=(const VirtualCore& other)noexcept
 	{
+		DeepZoneScoped;
 		if (this == &other) {
 			return *this;
 		}
@@ -386,9 +400,12 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		R12(std::move(other.R12)), R13(std::move(other.R13)), R14(std::move(other.R14)), R15(std::move(other.R15)),
 		RIP(std::move(other.RIP)), EFER(std::move(other.EFER)), CR0(std::move(other.CR0)),
 		isRunning(other.isRunning.load()), hasShutdown(other.hasShutdown.load()), isEnabled(other.isEnabled.load()), memoryBus(std::move(other.memoryBus))
-	{}
+	{
+		DeepZoneScoped;
+	}
 	VirtualCore& VirtualCore::operator=(VirtualCore&& other) noexcept
 	{
+		DeepZoneScoped;
 		if (this == &other) {
 			return *this;
 		}
@@ -417,6 +434,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	VirtualCore::~VirtualCore()
 	{
+		DeepZoneScoped;
 		isRunning.store(false);
 		hasShutdown.store(true);
 
@@ -424,6 +442,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	bool VirtualCore::StartCore() noexcept//NOLINT(bugprone-exception-escape) Throw in std::print is non recoverable so its not handled
 	{
 		
+		DeepZoneScoped;
 		isRunning.store(true);
 		hasShutdown.store(false);
 		std::print("Core started at reset vector: {:#X}\n", RIP.GetValue());

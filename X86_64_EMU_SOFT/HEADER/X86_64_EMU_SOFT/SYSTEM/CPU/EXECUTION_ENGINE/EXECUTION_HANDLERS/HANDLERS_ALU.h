@@ -5,6 +5,7 @@
 #include <string.h>
 #include <tracy/Tracy.hpp>
 #include <tuple>
+#include <HELPERS/MACROS.h>
 #include "HELPERS/GLOBALS.h"
 #include "SYSTEM/CPU/EXCEPTIONS/UNDEFINED_OPCODE.h"
 #include "SYSTEM/CPU/EXECUTION_ENGINE/EXECUTION_ENGINE.h"
