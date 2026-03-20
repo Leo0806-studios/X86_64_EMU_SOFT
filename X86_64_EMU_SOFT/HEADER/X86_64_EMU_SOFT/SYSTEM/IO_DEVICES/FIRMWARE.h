@@ -3,7 +3,7 @@
 #include <cstdint>
 #include "DEVICE_BASE.h"
 namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
-	class FirmwareRomDevice :public DeviceBase {
+	class FirmwareRomDevice final :public DeviceBase {
 		std::vector<uint8_t> memory;
 	public:
 		[[nodiscard]] explicit FirmwareRomDevice(std::vector<uint8_t> data) noexcept;

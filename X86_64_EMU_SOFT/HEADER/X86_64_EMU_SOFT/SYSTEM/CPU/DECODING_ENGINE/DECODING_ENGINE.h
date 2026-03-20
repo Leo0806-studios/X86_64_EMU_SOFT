@@ -16,10 +16,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		/// byte is the byte current byte of the instruction 
 		/// </summary>
 		using HandlerFunc = bool(*)(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction,uint8_t byte);
-		static std::array<HandlerFunc, 256> HandlerFuncs;
 		const static bool HandlerFuncSetupDone;
 
 	public:
+		static std::array<HandlerFunc, 256> HandlerFuncs;
 		static INSTRUCTIONS::TargetRegister DecodeRegisterFromModRMRegField(uint8_t regField)noexcept;
 		static INSTRUCTIONS::TargetRegister DecodeRegisterFromModRMRMField(uint8_t rmField)noexcept;
 
@@ -38,6 +38,6 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		/// <param name="memoryBus"></param>
 		/// <param name="instruction"></param>
 		static  void digestModRMAndSIB(uint64_t& address,const  VirtualCore& core, INSTRUCTIONS::Instruction& instruction)noexcept;
-		[[nodiscard]] static  INSTRUCTIONS::Instruction DecodeInstruction(const VirtualCore& core);
+		//[[nodiscard]] static  INSTRUCTIONS::Instruction DecodeInstruction(const VirtualCore& core);
 	};
 }

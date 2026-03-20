@@ -9,7 +9,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 	{
 		memory.resize(sizeKB * 1024, 0);
 	}
-	uint8_t MainMemoryDevice::Read8(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
+	uint8_t MainMemoryDevice::Read8(const uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 	{
 		DeepZoneScoped;
 		ValidateDeviceAccess(offset, 1, memory.size())

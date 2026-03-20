@@ -12,7 +12,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 	ResetROMDevice::ResetROMDevice(std::vector<uint8_t> data) noexcept :memory(std::move(data))
 	{}
 
-	uint8_t ResetROMDevice::Read8(uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
+	uint8_t ResetROMDevice::Read8(const uint64_t offset) const noexcept//NOLINT(bugprone-exception-escape)
 	{
 		DeepZoneScoped;
 		ValidateDeviceAccess(offset, 1U, memory.size())

@@ -8,9 +8,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	class ExecutionEngine {
 		using HandlerFunc = void(*)(VirtualCore& core,const  INSTRUCTIONS::Instruction& instruction);
-		static std::array<HandlerFunc,256> HandlerFuncs;
 		static const bool HandlerFuncsSetupDone;
 	public:
-		static  void ExecuteInstruction(VirtualCore& core, const INSTRUCTIONS::Instruction& instruction);
+		static std::array<HandlerFunc,256> HandlerFuncs;
+		//static  void ExecuteInstruction(VirtualCore& core, const INSTRUCTIONS::Instruction& instruction);
 	};
 }//X86_64_EMU_SOFT::SYSTEM::CPU

@@ -82,21 +82,20 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 
-	INSTRUCTIONS::Instruction DecodingEngine::DecodeInstruction(const VirtualCore& core)
-	{
-		ZoneNamed(DecodeInstruction, true);
-		uint64_t address = core.RIP.GetValue();
-		INSTRUCTIONS::Instruction instruction = {};
-		const MEMORY::MemoryBus& memBus = *core.memoryBus;
-
-		uint8_t instructionByte = memBus.Read8(address);
-		address++;
-		while (!HandlerFuncs[instructionByte](core, address, instruction, instructionByte)) {
-			instructionByte = memBus.Read8(address);
-			address++;
-		}
-		return instruction;
-	}
+	//INSTRUCTIONS::Instruction DecodingEngine::DecodeInstruction(const VirtualCore& core)
+	//{
+	//	ZoneNamed(DecodeInstruction, true);//NOLINT
+	//	uint64_t address = core.RIP.GetValue();
+	//	INSTRUCTIONS::Instruction instruction = {};
+	//
+	//	auto instructionByte = static_cast<uint8_t>(core.FetchBytes(address, 1));
+	//	address++;
+	//	while (!HandlerFuncs[instructionByte](core, address, instruction, instructionByte)) {
+	//		instructionByte = static_cast<uint8_t>(core.FetchBytes(address, 1));
+	//		address++;
+	//	}
+	//	return instruction;
+	//}
 
 
 

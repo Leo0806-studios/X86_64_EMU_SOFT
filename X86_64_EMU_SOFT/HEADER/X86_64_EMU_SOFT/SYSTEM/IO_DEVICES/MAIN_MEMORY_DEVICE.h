@@ -3,7 +3,7 @@
 #include <cstdint>
 #include "DEVICE_BASE.h"
 namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
-	class MainMemoryDevice :public DeviceBase{
+	class MainMemoryDevice final :public DeviceBase{
 		std::vector <uint8_t> memory;
 	public:
 		[[nodiscard ]] explicit MainMemoryDevice(size_t sizeKB) noexcept;

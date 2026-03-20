@@ -3,7 +3,7 @@
 #include <vector>
 #include "SYSTEM/IO_DEVICES/DEVICE_BASE.h"
 namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
-	class ResetROMDevice : public DeviceBase
+	class ResetROMDevice final : public DeviceBase
 	{
 		std::vector<uint8_t> memory;
 	public:

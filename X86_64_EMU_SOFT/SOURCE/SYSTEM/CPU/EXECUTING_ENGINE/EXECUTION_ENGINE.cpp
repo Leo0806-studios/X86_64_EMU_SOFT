@@ -49,9 +49,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU{
 
 		return true;
 		}();
-	 void ExecutionEngine::ExecuteInstruction(VirtualCore& core, const INSTRUCTIONS::Instruction& instruction)
-	{
-		 ZoneScoped;
-		 ExecutionEngine::HandlerFuncs[std::to_underlying(instruction.Type)](core, instruction);
-	}
+	// void ExecutionEngine::ExecuteInstruction(VirtualCore& core, const INSTRUCTIONS::Instruction& instruction)
+	//{
+	//	 ZoneScoped;
+	//	 ExecutionEngine::HandlerFuncs[std::to_underlying(instruction.Type)](core, instruction);
+	//}
 }

@@ -4,12 +4,14 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
+#include <tracy/Tracy.hpp>
 #include "SYSTEM/CPU/REGISTERS/GPR.h"
 #include "SYSTEM/CPU/REGISTERS/CONTROLL_REGISTERS/CR0.h"
 #include "SYSTEM/CPU/REGISTERS/MSR/EFER.h"
 #include "SYSTEM/CPU/REGISTERS/RIP.h"
 #include "SYSTEM/MEMORY/MEMORY.h"
 #include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h"
+#include <HELPERS/MACROS.h>
 namespace X86_64_EMU_SOFT::SYSTEM::CPU
 {
 
@@ -96,7 +98,19 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		bool StartCore() noexcept;
 
 
-		vCoreMode getMode()const noexcept;
+		vCoreMode getMode()const noexcept
+		{
+			DeepZoneScoped;
+			vCoreMode ret = vCoreMode::realMode;
+			if (EFER.GetLMA() && CR0.GetPE()) {
+				ret = vCoreMode::longMode;
+			}
+			else if (!EFER.GetLMA() && CR0.GetPE()) {
+				ret = vCoreMode::protectedMode;
+			}
+			return ret;
+
+		}
 		[[nodiscard]] uint64_t GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const;
 		[[nodiscard]] uint64_t GetRegisterValue(RegisterID reg) const noexcept;
 		/// <summary>

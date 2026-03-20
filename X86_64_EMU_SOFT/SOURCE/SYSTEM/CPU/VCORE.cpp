@@ -28,7 +28,18 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	INSTRUCTIONS::Instruction VirtualCore::decodeInstruction() const
 	{
-		return DecodingEngine::DecodeInstruction(*this);
+		ZoneScoped;//NOLINT
+		uint64_t address = RIP.GetValue();
+		INSTRUCTIONS::Instruction instruction = {};
+
+		auto instructionByte = static_cast<uint8_t>(FetchBytes(address, 1));
+		address++;
+		while (!DecodingEngine::HandlerFuncs[instructionByte](*this, address, instruction, instructionByte)) {
+			instructionByte = static_cast<uint8_t>(FetchBytes(address, 1));
+			address++;
+		}
+		return instruction;
+		//return DecodingEngine::DecodeInstruction(*this);
 
 	}
 	uint64_t VirtualCore::GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const
@@ -206,7 +217,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 	}
 
-	uint64_t VirtualCore::FetchBytes(uint64_t address, uint8_t sizeBytes) const
+	inline	uint64_t  VirtualCore::FetchBytes(uint64_t address, uint8_t sizeBytes) const
 	{
 		ZoneScoped;
 		switch (sizeBytes) {
@@ -259,7 +270,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	void VirtualCore::executeInstruction(const INSTRUCTIONS::Instruction& instruction)
 	{
 		ZoneScoped;
-		ExecutionEngine::ExecuteInstruction(*this, instruction);
+		ExecutionEngine::HandlerFuncs[std::to_underlying(instruction.Type)](*this, instruction);
+		//ExecutionEngine::ExecuteInstruction(*this, instruction);
 
 	}
 	void VirtualCore::PrintCoreState() const
@@ -317,19 +329,6 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		std::print("EFER: {:#X}, decimal {}, binary {:#B}\n", EFER.GetValue(), EFER.GetValue(), EFER.GetValue());
 
 		std::print("*****************************************************************\n");
-
-	}
-	vCoreMode VirtualCore::getMode()const noexcept
-	{
-		DeepZoneScoped;
-		vCoreMode ret = vCoreMode::realMode;
-		if (EFER.GetLMA() && CR0.GetPE()) {
-			ret = vCoreMode::longMode;
-		}
-		else if (!EFER.GetLMA() && CR0.GetPE()) {
-			ret = vCoreMode::protectedMode;
-		}
-		return ret;
 
 	}
 	VirtualCore::VirtualCore(uint64_t resetVector, std::shared_ptr<MEMORY::MemoryBus> memBus, vCoreMode startupMode) noexcept :
