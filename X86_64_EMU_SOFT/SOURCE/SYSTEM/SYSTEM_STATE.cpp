@@ -147,6 +147,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 	{
 
 		ZoneScoped;
+		std::ios::sync_with_stdio(false);
 		if (!cmdArgs.Validate()) {
 			std::cerr << "invalid command line arguments" << std::endl;
 			exit(1);
@@ -220,3 +221,4 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 	{
 	}
 }
+

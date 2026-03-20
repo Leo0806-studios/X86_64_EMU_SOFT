@@ -371,3 +371,4 @@ FodyWeavers.xsd
 /X86_64_EMU_SOFT_EXE/e000
 /X86_64_EMU_SOFT_EXE/annotations.advidb2
 /tracy-profiler.exe
+*.tracy
