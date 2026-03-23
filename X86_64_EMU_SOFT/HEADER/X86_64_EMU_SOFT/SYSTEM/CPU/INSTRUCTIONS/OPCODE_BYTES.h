@@ -7,6 +7,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 
 		ADD,
 		SUB,
+		INC,
+		DEC,
 
 		OR,
 
@@ -15,8 +17,12 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 
 	};
 	enum class PrimaryOpcodeByteValue :uint8_t {
-		ADDrm16r16 = 0x1,//handled partial
+		ADD_rm16rm32rm64_r16r32r64_0x1 = 0x1,//handled partial
+
+
 		ORrm16rm32r16r32 = 0x9,//handled partial
+
+
 		SUBrm16rm32r16r32 = 0x29,//handled partial
 
 		REX_INCr16AXr32EAX = 0x40,//not handled yet
@@ -35,8 +41,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 		REX_DECr16BPr32EBP = 0x4D,//not handled yet
 		REX_DECr16SIr32ESI = 0x4E,//not handled yet
 		REX_DECr16DIr32EDI = 0x4F,//not handled yet
+
+
 		GROUP1 = 0x83,//handled partial
+
+
 		MOVrm16rm32r16r32 = 0x89,//handled partial
+
+
 		NOP = 0x90,//handled fully
 
 

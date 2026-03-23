@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <print>
 #include <source_location>
-#include <string.h>
+#include <cstring>
 #include <tracy/Tracy.hpp>
 #include <tuple>
 #include <HELPERS/MACROS.h>
@@ -50,7 +50,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	}
 	inline void Handle_SUB(VirtualCore& core, const  INSTRUCTIONS::Instruction& instruction) {
-		ZoneNamed(HandleSub, true);
+		ZoneNamed(HandleSub, true);//NOLINT
 		if (instruction.ImmediateSizeBytes > 0) {
 			RunIfMinimalOrHigherTraceMode(std::print("Executing instruction: SUB r/m{} {}, imm{} \n", instruction.DestinationSize, VirtualCore::getSubregisterFromSize(instruction.DestinationRegister, instruction.DestinationSize), instruction.SourceSize););
 			uint64_t sourceVal = 0;

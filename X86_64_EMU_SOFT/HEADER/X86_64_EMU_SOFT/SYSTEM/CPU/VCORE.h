@@ -100,7 +100,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 
 		vCoreMode getMode()const noexcept
 		{
-			DeepZoneScoped;
+			//DeepZoneScoped;
 			vCoreMode ret = vCoreMode::realMode;
 			if (EFER.GetLMA() && CR0.GetPE()) {
 				ret = vCoreMode::longMode;
@@ -110,6 +110,15 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 			}
 			return ret;
 
+		}
+		[[nodiscard]] uint8_t GetDefaultOperandSize() const noexcept
+		{
+			switch (getMode()) {
+				case vCoreMode::realMode:return 16;
+				case vCoreMode::protectedMode: 
+				case vCoreMode::longMode:return 32;
+				default:__assume(false);
+			}
 		}
 		[[nodiscard]] uint64_t GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const;
 		[[nodiscard]] uint64_t GetRegisterValue(RegisterID reg) const noexcept;

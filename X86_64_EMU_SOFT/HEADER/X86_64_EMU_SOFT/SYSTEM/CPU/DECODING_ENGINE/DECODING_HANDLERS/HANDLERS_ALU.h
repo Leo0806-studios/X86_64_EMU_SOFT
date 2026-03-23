@@ -17,21 +17,43 @@
 
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
-	inline bool Handle_ADDrm16r16(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
-		ZoneScoped;
+	inline bool Handle_ADD_rm8_r8_0x0(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte){
+		ZoneScoped;//NOLINT
+		instruction.Type = INSTRUCTIONS::InstructionType::ADD;
 		instruction.OpcodeBytes[0] = byte;
 		instruction.OpcodeSizeBytes++;
 		instruction.InstructionLengthBytes++;
-
-
-		instruction.SourceSize = 16;
-		instruction.DestinationSize = 16;
 		instruction.hasModRM = true;
-		instruction.Type = INSTRUCTIONS::InstructionType::ADD; 
 		DecodingEngine::digestModRMAndSIB(address, core, instruction);
-		instruction.SourceRegister = DecodingEngine::DecodeRegisterFromModRMRegField(instruction.ModRM.reg);
+		instruction.SourceSize = instruction.DestinationSize = 8;
+	}
+	inline bool Handle_ADD_rm16rm32rm64_r16r32r64_0x1(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
+		ZoneScoped;//NOLINT
+		instruction.Type = INSTRUCTIONS::InstructionType::ADD; 
+		instruction.OpcodeBytes[0] = byte;
+		instruction.OpcodeSizeBytes++;
+		instruction.InstructionLengthBytes++;
+		instruction.hasModRM = true;
+		DecodingEngine::digestModRMAndSIB(address, core, instruction); 
+		const uint8_t defaultOperandSIze = instruction.SourceSize = instruction.DestinationSize = core.GetDefaultOperandSize();
+		if(instruction.hasREX && instruction.REX.W){
+			instruction.SourceSize = instruction.DestinationSize = 64;
+		}
+		else {
+			if (defaultOperandSIze == 32 && instruction.OperandOverride) {
+				instruction.SourceSize = instruction.DestinationSize = 16;
+			}
+			else if (defaultOperandSIze == 16 && instruction.OperandOverride) {
+				instruction.SourceSize = instruction.DestinationSize = 32;
+			}
+		}
+		static_assert(INSTRUCTIONS::Instruction().REX.B == 0);
+		instruction.SourceRegister = DecodingEngine::DecodeRegisterFromModRMRegField(instruction.ModRM.reg|static_cast<uint8_t>(instruction.REX.B<<3ULL));
 		if (instruction.ModRM.mod == 3) {
-			instruction.DestinationRegister = DecodingEngine::DecodeRegisterFromModRMRMField(instruction.ModRM.rm);
+			instruction.DestinationRegister = DecodingEngine::DecodeRegisterFromModRMRMField(instruction.ModRM.rm|static_cast<uint8_t> (instruction.REX.R<<3ULL));
+		}
+		else {
+			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands not supported yet for ADD 0x1 decoding");
 		}
 		return true;
 	}
@@ -39,20 +61,21 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 	inline bool Handle_ORrm16rm32r16r32(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
-		ZoneScoped;
+		ZoneScoped;//NOLINT
+		instruction.Type = INSTRUCTIONS::InstructionType::OR;
 		instruction.OpcodeBytes[0] = byte;
 		instruction.OpcodeSizeBytes++;
 		instruction.InstructionLengthBytes++;
 
 
-		instruction.Type = INSTRUCTIONS::InstructionType::OR;
+		const vCoreMode mode = core.getMode();
 		DecodingEngine::digestModRMAndSIB(address, core, instruction);
 		if ((core.getMode() == vCoreMode::realMode && !instruction.OperandOverride) ||
 			(core.getMode() == vCoreMode::protectedMode && instruction.OperandOverride)) {
 			instruction.DestinationSize = instruction.SourceSize = 16;
 		}
-		else if ((core.getMode() == vCoreMode::realMode && instruction.OperandOverride) ||
-				 (core.getMode() == vCoreMode::protectedMode && !instruction.OperandOverride)) {
+		else if (((mode == vCoreMode::realMode && instruction.OperandOverride) ||
+				  (mode == vCoreMode::protectedMode && !instruction.OperandOverride)) || mode == vCoreMode::longMode) {
 			instruction.DestinationSize = instruction.SourceSize = 32;
 
 		}
@@ -77,13 +100,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 		instruction.Type = INSTRUCTIONS::InstructionType::SUB;
+		const vCoreMode mode = core.getMode();
 		DecodingEngine::digestModRMAndSIB(address, core, instruction);
-		if ((core.getMode() == vCoreMode::realMode && !instruction.OperandOverride) || 
-			(core.getMode() == vCoreMode::protectedMode && instruction.OperandOverride)) {
+		if ((mode == vCoreMode::realMode && !instruction.OperandOverride) ||
+			(mode == vCoreMode::protectedMode && instruction.OperandOverride)) {
 			instruction.DestinationSize = instruction.SourceSize = 16;
 		}
-		else if ((core.getMode() == vCoreMode::realMode && instruction.OperandOverride) ||
-				 (core.getMode() == vCoreMode::protectedMode && !instruction.OperandOverride)) {
+		else if (((mode == vCoreMode::realMode && instruction.OperandOverride) ||
+				 (mode == vCoreMode::protectedMode && !instruction.OperandOverride))|| mode == vCoreMode::longMode) {
 			instruction.DestinationSize = instruction.SourceSize = 32;
 
 		}
@@ -93,20 +117,46 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 		return true;
 	}
-	inline bool Handle_GROUP1_0X83(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
+
+	inline bool Handle_REX_INCr16AXr32_BASE(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
 		ZoneScoped;
+
+		std::ignore = address;
+		if (core.getMode() == vCoreMode::longMode) {
+			instruction.hasREX = true;
+			instruction.REX = std::bit_cast<X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::REX>(byte);
+			return false;
+		}
+		if (core.getMode() == vCoreMode::protectedMode || core.getMode() == vCoreMode::realMode) {
+
+		instruction.SourceSize = instruction.DestinationSize = 16;
+		}
+		else {
+			instruction.SourceSize = instruction.DestinationSize = 32;
+		}
+		instruction.Type = INSTRUCTIONS::InstructionType::INC;
+		instruction.OpcodeBytes[0] = byte;
+		instruction.OpcodeSizeBytes++;
+		instruction.InstructionLengthBytes++;
+		instruction.DestinationRegister = DecodingEngine::GetTargetRegisterfromAdditiveID(static_cast<uint8_t>(byte & static_cast<uint8_t>(0b111)));
+		return true;
+	}
+
+
+	inline bool Handle_GROUP1_0X83(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
+		ZoneScoped;//NOLINT
 
 		instruction.OpcodeBytes[0] = byte;
 		instruction.OpcodeSizeBytes++;
 		instruction.InstructionLengthBytes++;
 
-
+		const vCoreMode mode = core.getMode();
 		DecodingEngine::digestModRMAndSIB(address, core, instruction);
 		switch (instruction.ModRM.reg) {
 			case 0: {
 				instruction.Type = INSTRUCTIONS::InstructionType::ADD;
-				if ((core.getMode() == vCoreMode::realMode && !instruction.OperandOverride) ||
-					(core.getMode() == vCoreMode::protectedMode && instruction.OperandOverride)) {
+				if ((mode == vCoreMode::realMode && !instruction.OperandOverride) ||
+					(mode == vCoreMode::protectedMode && instruction.OperandOverride)) {
 					instruction.DestinationSize = instruction.SourceSize = 16;
 					instruction.ImmediateSizeBytes = 2;
 					instruction.InstructionLengthBytes++;
@@ -117,8 +167,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 					instruction.ImmediateBytes[1] = arr[1];
 					instruction.DestinationRegister = DecodingEngine::DecodeRegisterFromModRMRegField(instruction.ModRM.rm);
 				}
-				else if ((core.getMode() == vCoreMode::realMode && instruction.OperandOverride) ||
-						(core.getMode() == vCoreMode::protectedMode && !instruction.OperandOverride)) {
+				else if (((mode == vCoreMode::realMode && instruction.OperandOverride) ||
+						  (mode == vCoreMode::protectedMode && !instruction.OperandOverride)) || mode == vCoreMode::longMode) {
 					instruction.DestinationSize = instruction.SourceSize = 32;
 					instruction.ImmediateSizeBytes = 4;
 					instruction.InstructionLengthBytes++;

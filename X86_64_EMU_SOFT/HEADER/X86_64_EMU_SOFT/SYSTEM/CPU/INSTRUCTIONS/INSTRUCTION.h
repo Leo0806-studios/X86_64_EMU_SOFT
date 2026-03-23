@@ -40,7 +40,13 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		uint8_t scale : 2;
 	};
 	
-
+	struct REX {
+		uint8_t B : 1;
+		uint8_t X : 1;
+		uint8_t R : 1;
+		uint8_t W : 1;
+		uint8_t : 4; //reserved, should be 6
+	};
 
 	enum class TargetRegister:uint8_t{
 		RAX,
@@ -59,6 +65,13 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		R13,
 		R14,
 		R15,
+
+		//the folowing 8 bit registers are listed excplicitly since they arent just masked of lower parts of 64 bit registers (eg i cant just set the operand size to 8)
+
+		AH,
+		BH,
+		CH,
+		DH,
 		None = 0xFF
 	};
 	[[nodiscard]] constexpr std::string RegisterToString(TargetRegister reg) {
@@ -84,11 +97,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		}
 	}
 
-
-	struct Instruction {//NOLINT(altera-struct-pack-align)
+#pragma warning(push)
+#pragma warning(disable : 4324) //structure was padded due to alignment specifier
+	struct alignas(64) Instruction {
 		uint8_t InstructionLengthBytes=0;
-
-
 		PrefixGroup1 Prefix1=PrefixGroup1::NONE;
 		PrefixGroup2 Prefix2=PrefixGroup2::NONE;
 		bool OperandOverride = false;
@@ -97,19 +109,22 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		ModRM ModRM{ .rm=0,.reg=0,.mod=0 };
 		bool hasSIB = false;
 		SIB SIB{ .base=0,.index=0,.scale=0 };
+		bool hasREX = false;
+		REX REX{ .B = 0,.X = 0,.R = 0,.W = 0 };
 		uint8_t ImmediateSizeBytes = 0;
 		uint8_t OpcodeSizeBytes=0;
 		uint8_t DisplacementSizeBytes = 0;
 		uint8_t SourceSize=0;
 		uint8_t DestinationSize=0;
-		TargetRegister SourceRegister=TargetRegister::None;
-		TargetRegister DestinationRegister=TargetRegister::None;
-		InstructionType Type = InstructionType::UD;
-		std::array<uint8_t, sizeof(uint64_t)> ImmediateBytes{};
-		std::array<uint8_t, sizeof(uint64_t)> DisplacementBytes{};
+		alignas(8) std::array<uint8_t, sizeof(uint64_t)> ImmediateBytes{};
+		alignas(8) std::array<uint8_t, sizeof(uint64_t)> DisplacementBytes{};
 		std::array<uint8_t, 3> OpcodeBytes{};
+		TargetRegister DestinationRegister=TargetRegister::None;
+		TargetRegister SourceRegister=TargetRegister::None;
+		InstructionType Type = InstructionType::UD;
 
 	};
+#pragma warning(pop)
 
 
 }//namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSRUCTIONS

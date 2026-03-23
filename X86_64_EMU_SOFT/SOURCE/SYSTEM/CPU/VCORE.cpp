@@ -39,7 +39,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			address++;
 		}
 		return instruction;
-		//return DecodingEngine::DecodeInstruction(*this);
+
 
 	}
 	uint64_t VirtualCore::GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const
@@ -70,7 +70,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	uint64_t VirtualCore::GetRegisterValue(RegisterID reg) const noexcept
 	{
-		DeepZoneScoped;
+		DeepZoneScoped;//NOLINT
 		switch (reg) {
 			case RegisterID::RAX: return RAX.GetValue();
 			case RegisterID::RCX: return RCX.GetValue();
@@ -86,7 +86,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	uint64_t VirtualCore::GetRegisterValueMasked(INSTRUCTIONS::TargetRegister reg, uint8_t bits) const
 	{
-		DeepZoneScoped;
+		DeepZoneScoped;//NOLINT
 		const uint64_t value = GetRegisterValue(reg);
 		const uint64_t mask = (1ULL << bits) - 1;
 		const uint64_t ret = value & mask;
@@ -94,7 +94,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	uint64_t VirtualCore::GetRegisterValueMasked(RegisterID reg, uint8_t bits) const noexcept
 	{
-		DeepZoneScoped;
+		DeepZoneScoped;//NOLINT
 		const uint64_t value = GetRegisterValue(reg);
 		const uint64_t mask = (1ULL << bits) - 1;
 		const uint64_t ret = value & mask;
@@ -102,7 +102,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	void VirtualCore::SetRegisterValueMasked(INSTRUCTIONS::TargetRegister reg, uint64_t value, uint8_t bits)
 	{
-		DeepZoneScoped;
+		DeepZoneScoped;//NOLINT
 		const uint64_t originalVaue = GetRegisterValue(reg);
 		const uint64_t mask = (1ULL << bits) - 1;
 		const uint64_t valueToSet = value & mask;
@@ -112,7 +112,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	void VirtualCore::SetRegisterValueMasked(RegisterID reg, uint64_t value, uint8_t bits) noexcept
 	{
-		DeepZoneScoped;
+		DeepZoneScoped;//NOLINT
 		const uint64_t originalVaue = GetRegisterValue(reg);
 		const uint64_t mask = (1ULL << bits) - 1;
 		const uint64_t valueToSet = value & mask;
@@ -121,7 +121,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	void VirtualCore::SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value)
 	{
-		DeepZoneScoped;
+		DeepZoneScoped;//NOLINT
 		switch (reg) {
 			case INSTRUCTIONS::TargetRegister::RAX: RAX.SetValue(value); break;
 			case INSTRUCTIONS::TargetRegister::RBX: RBX.SetValue(value); break;
@@ -145,7 +145,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	void VirtualCore::SetRegisterValue(RegisterID reg, uint64_t value) noexcept
 	{
-		DeepZoneScoped;
+		DeepZoneScoped;//NOLINT
 
 		switch (reg) {
 			case RegisterID::RAX: RAX.SetValue(value); break;
@@ -163,7 +163,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	[[nodiscard]]
 	std::string VirtualCore::getSubregisterFromSize(CPU::INSTRUCTIONS::TargetRegister reg, uint8_t bits) {
-		DeepZoneScoped;
+		DeepZoneScoped;//NOLINT
 		switch (reg) {
 			using enum CPU::INSTRUCTIONS::TargetRegister;
 			using enum CPU::vCoreMode;
@@ -207,7 +207,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	void VirtualCore::WriteBytes(uint64_t address, const uint64_t value, uint8_t sizeBytes)
 	{
-		ZoneScoped;
+		ZoneScoped;//NOLINT
 		switch (sizeBytes) {
 			case 1: memoryBus->Write8(address, static_cast<uint8_t>(value)); break;
 			case 2: memoryBus->Write16(address, static_cast<uint16_t>(value)); break;
@@ -219,9 +219,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	inline	uint64_t  VirtualCore::FetchBytes(uint64_t address, uint8_t sizeBytes) const
 	{
-		ZoneScoped;
+		ZoneScoped;//NOLINT
 		switch (sizeBytes) {
-			case 1: return memoryBus->Read8(address); 
+			[[likely]] case 1: return memoryBus->Read8(address); 
 			case 2: return memoryBus->Read16(address); 
 			case 4: return memoryBus->Read32(address); 
 			case 8: return memoryBus->Read64(address); 
@@ -230,7 +230,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 
 	inline void VirtualCore::PrintInstruction(const INSTRUCTIONS::Instruction& instruction) noexcept {//NOLINT(bugprone-exception-escape) Throw in std::print is non recoverable so its not handled
-		ZoneScoped;
+		ZoneScoped;//NOLINT
 		std::print("Instruction Length: {} bytes\n", instruction.InstructionLengthBytes);
 		if (std::to_underlying(instruction.Prefix1)) {
 			std::print("Prefix Group 1: {:#X}\n", std::to_underlying(instruction.Prefix1));
@@ -269,14 +269,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	void VirtualCore::executeInstruction(const INSTRUCTIONS::Instruction& instruction)
 	{
-		ZoneScoped;
+		ZoneScoped;//NOLINT
 		ExecutionEngine::HandlerFuncs[std::to_underlying(instruction.Type)](*this, instruction);
-		//ExecutionEngine::ExecuteInstruction(*this, instruction);
+		
 
 	}
 	void VirtualCore::PrintCoreState() const
 	{
-		ZoneScoped;
+		ZoneScoped;//NOLINT
 		std::print("*****************************************************************\n");
 		std::print("RIP: {:#X}, decimal {}, signed {}\n", RIP.GetValue(), RIP.GetValue(), static_cast<int64_t>(RIP.GetValue()));
 		std::print("\tEIP: {:#X}, decimal {}, signed {}\n", 0xFFFFFFFFULL & RIP.GetValue(), 0xFFFFFFFFULL & RIP.GetValue(), static_cast<int32_t>(0xFFFFFFFFULL & RIP.GetValue()));

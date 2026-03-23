@@ -23,7 +23,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU{
 			DeepZoneScoped;
 			std::ignore = core;
 			std::ignore = instruction;
-			throw EXCEPTIONS::UNDEFINED_OPCODE("undefined opcode Handler called");
+			throw EXCEPTIONS::UNDEFINED_OPCODE("undefined opcode Handler called\n the insturction that was about to be executed was decoded but had no apropriate execution handler installed");
 		}
 	}
 	std::array<ExecutionEngine::HandlerFunc,256> ExecutionEngine::HandlerFuncs;
