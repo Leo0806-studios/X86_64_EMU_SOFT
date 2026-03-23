@@ -17,6 +17,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 
 	};
 	enum class PrimaryOpcodeByteValue :uint8_t {
+		ADD_rm8_r8_0x0 = 0x0,//not handled yet
 		ADD_rm16rm32rm64_r16r32r64_0x1 = 0x1,//handled partial
 
 

@@ -26,6 +26,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		instruction.hasModRM = true;
 		DecodingEngine::digestModRMAndSIB(address, core, instruction);
 		instruction.SourceSize = instruction.DestinationSize = 8;
+		instruction.SourceRegister = DecodingEngine::GetTargetRegister8BitFromModRMRegField(core,instruction.ModRM.reg | static_cast<uint8_t>(instruction.REX.B << 3ULL));
+		if (instruction.ModRM.mod == 3) {
+			instruction.DestinationRegister = DecodingEngine::DecodeRegisterFromModRMRMField(instruction.ModRM.rm | static_cast<uint8_t> (instruction.REX.R << 3ULL));
+		}
 	}
 	inline bool Handle_ADD_rm16rm32rm64_r16r32r64_0x1(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
 		ZoneScoped;//NOLINT
