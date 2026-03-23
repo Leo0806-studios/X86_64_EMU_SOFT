@@ -49,60 +49,61 @@ function calls and returns
 CALL
 
 RET
-
 ## Phase 7
-CPUID
+
 ## Phase 8
-interupts and IDT (this also introduces the concept of different cpu privileges)
+CPUID
 ## Phase 9
-Paging and page tables
+interupts and IDT (this also introduces the concept of different cpu privileges)
 ## Phase 10
+Paging and page tables
+## Phase 11
 Segmentation and GDT
 
-## Phase 11
+## Phase 12
 
 FPU instructions
 
-## Phase 12
+## Phase 13
 
 SSE/AVX instructions
 
 
-## Phase 13
+## Phase 14
 
 AMX 
 
-## Phase 14
+## Phase 15
 
 LAPIC
 
-## Phase 15
-multiple virtual CPUs and IPI (but only hardcoded for wakeup)
-
 ## Phase 16
-
-Real Mode quirks part 1
+multiple virtual CPUs and IPI (but only hardcoded for wakeup)
 
 ## Phase 17
 
-Real Mode quirks part 2
+Real Mode quirks part 1
 
 ## Phase 18
 
-Protected Mode quirks part 1
+Real Mode quirks part 2
 
 ## Phase 19
 
-Protected Mode quirks part 2
+Protected Mode quirks part 1
 
 ## Phase 20
-Long Mode quirks part 1
+
+Protected Mode quirks part 2
 
 ## Phase 21
+Long Mode quirks part 1
+
+## Phase 22
 
 Long Mode quirks part 2
 
-## Phase 22
+## Phase 23
 
 IO APIC
 
