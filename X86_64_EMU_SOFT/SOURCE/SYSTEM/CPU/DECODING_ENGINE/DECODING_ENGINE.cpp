@@ -24,7 +24,7 @@
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	[[noreturn]] inline static bool ThrowUndefinedOpcode(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {//NOSONAR
-		DeepZoneScoped;
+		DeepZoneScoped;//NOLINT
 		std::ignore = core;
 		std::ignore = instruction;
 		std::stringstream msg;
@@ -53,9 +53,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 			//ALU
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_rm16rm32rm64_r16r32r64_0x1)] = Handle_ADD_rm16rm32rm64_r16r32r64_0x1;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUBrm16rm32r16r32)] = Handle_SUBrm16rm32r16r32;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_rm16rm32_r16r32_0X29)] = Handle_SUB_rm16rm32_r16r32_0X29;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ORrm16rm32r16r32)] = Handle_ORrm16rm32r16r32;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::GROUP1)] = Handle_GROUP1_0X83;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::GROUP1_0X83)] = Handle_GROUP1_0X83;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::REX_INCr16AXr32EAX)] = Handle_REX_INCr16AXr32_BASE;//handled fully
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::REX_INCr16CXr32ECX)] = Handle_REX_INCr16AXr32_BASE;//handled fully
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::REX_INCr16DXr32EDX)] = Handle_REX_INCr16AXr32_BASE;//handled fully
@@ -111,6 +111,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 	inline INSTRUCTIONS::TargetRegister DecodingEngine::DecodeRegisterFromModRMRegField(uint8_t regField) noexcept {
+		DeepZoneScoped;//NOLINT
 		switch (regField) {
 			using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
 			case 0: return RAX;
@@ -133,9 +134,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				NeverOrAssert(false);
 			}
 		}
+		__assume(false);
 	}
 
 	inline INSTRUCTIONS::TargetRegister DecodingEngine::DecodeRegisterFromModRMRMField(uint8_t rmField) noexcept {
+		DeepZoneScoped;//NOLINT
 		switch (rmField) {
 			using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
 			case 0: return RAX;
@@ -158,9 +161,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				NeverOrAssert(false);
 			}
 		}
+		__assume(false);
 	}
 
 	inline INSTRUCTIONS::TargetRegister DecodingEngine::GetTargetRegisterfromAdditiveID(uint8_t regSelector) noexcept {
+		DeepZoneScoped;//NOLINT
 		__assume(regSelector <= 0b1111);
 		switch (regSelector) {
 			using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
@@ -183,10 +188,12 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			default: NeverOrAssert(false);
 
 		}
+		__assume(false);
 	}
 
 	INSTRUCTIONS::TargetRegister DecodingEngine::GetTargetRegister8BitFromModRMRegField(const VirtualCore& core, uint8_t  regField) noexcept
 	{
+		DeepZoneScoped;//NOLINT
 		if (core.getMode() == vCoreMode::longMode) {
 			switch (regField) {
 				using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
@@ -220,15 +227,76 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				case 5: return RBP;
 				case 6: return RSI;
 				case 7: return RDI;
+				case 8: return R8;
+				case 9: return R9;
+				case 10: return R10;
+				case 11: return R11;
+				case 12: return R12;
+				case 13: return R13;
+				case 14: return R14;
+				case 15: return R15;
 				default: NeverOrAssert(false);
 			}
 
 		}
-		return INSTRUCTIONS::TargetRegister();
+		__assume(false);
+
+	}
+
+	INSTRUCTIONS::TargetRegister DecodingEngine::GetTargetRegister8BitFromModRMRMField(const VirtualCore& core, uint8_t regField) noexcept
+	{
+		DeepZoneScoped;//NOLINT
+		if (core.getMode() == vCoreMode::longMode) {
+			switch (regField) {
+				using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
+				case 0: return RAX;
+				case 1: return RCX;
+				case 2: return RDX;
+				case 3: return RBX;
+				case 4: return AH;
+				case 5: return CH;
+				case 6: return DH;
+				case 7: return BH;
+				case 8:
+				case 9:
+				case 10:
+				case 11:
+				case 12:
+				case 13:
+				case 14:
+				case 15:
+				default: NeverOrAssert(false);
+			}
+		}
+		else {
+			switch (regField) {
+				using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
+				case 0: return RAX;
+				case 1: return RCX;
+				case 2: return RDX;
+				case 3: return RBX;
+				case 4: return RSP;
+				case 5: return RBP;
+				case 6: return RSI;
+				case 7: return RDI;
+				case 8: return R8;
+				case 9: return R9;
+				case 10: return R10;
+				case 11: return R11;
+				case 12: return R12;
+				case 13: return R13;
+				case 14: return R14;
+				case 15: return R15;
+				default: NeverOrAssert(false); 
+			}
+
+		}
+		__assume(false);
 	}
 
 	INSTRUCTIONS::TargetRegister DecodingEngine::GetFullRegisterFromHighRegister(INSTRUCTIONS::TargetRegister reg) noexcept
 	{
+		DeepZoneScoped;//NOLINT
 		switch (reg) {
 			using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
 			case AH:return RAX;
@@ -251,21 +319,23 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case R13:
 			case R14:
 			case R15:
+			case None:
 			default: NeverOrAssert(false);
 		}
+		__assume(false);
 	}
 
 	void DecodingEngine::digestModRMAndSIB(uint64_t& address, const  VirtualCore& core, INSTRUCTIONS::Instruction& instruction) noexcept
 	{
-		ZoneNamed(digestModRMAndSIB, true);
-		const uint8_t modrmByte = static_cast<uint8_t>(core.FetchBytes(address, 1));
+		DeepZoneScoped;//NOLINT
+		const auto modrmByte = static_cast<uint8_t>(core.FetchBytes(address, 1));
 		instruction.ModRM = std::bit_cast<INSTRUCTIONS::ModRM>(modrmByte);
 		instruction.InstructionLengthBytes++;
 
 		address++;
 		if (instruction.ModRM.mod != 3 && instruction.ModRM.rm == 4) {
 			instruction.hasSIB = true;
-			const uint8_t sibByte = static_cast<uint8_t>(core.FetchBytes(address, 1));
+			const auto sibByte = static_cast<uint8_t>(core.FetchBytes(address, 1));
 			instruction.SIB = std::bit_cast<INSTRUCTIONS::SIB>(sibByte);
 			instruction.InstructionLengthBytes++;
 			address++;

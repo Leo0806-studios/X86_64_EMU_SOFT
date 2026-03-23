@@ -24,7 +24,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 		ORrm16rm32r16r32 = 0x9,//handled partial
 
 
-		SUBrm16rm32r16r32 = 0x29,//handled partial
+		SUB_rm16rm32_r16r32_0X29 = 0x29,//handled partial
 
 		REX_INCr16AXr32EAX = 0x40,//not handled yet
 		REX_INCr16CXr32ECX = 0x41,//not handled yet
@@ -44,7 +44,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 		REX_DECr16DIr32EDI = 0x4F,//not handled yet
 
 
-		GROUP1 = 0x83,//handled partial
+		GROUP1_0X83 = 0x83,//handled partial
 
 
 		MOVrm16rm32r16r32 = 0x89,//handled partial

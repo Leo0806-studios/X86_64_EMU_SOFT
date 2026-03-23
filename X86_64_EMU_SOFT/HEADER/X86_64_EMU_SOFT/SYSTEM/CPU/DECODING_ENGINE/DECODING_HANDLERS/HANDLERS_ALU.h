@@ -14,6 +14,7 @@
 #include "SYSTEM/MEMORY/MEMORY.h"
 #include "SYSTEM/CPU/EXCEPTIONS/UNDEFINED_OPCODE.h"
 #include <HELPERS/REDEFINE_MACROS.h>
+#include <bit>
 
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
@@ -30,6 +31,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		if (instruction.ModRM.mod == 3) {
 			instruction.DestinationRegister = DecodingEngine::DecodeRegisterFromModRMRMField(instruction.ModRM.rm | static_cast<uint8_t> (instruction.REX.R << 3ULL));
 		}
+		else {
+			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not yet supported for ADD 0x0");
+		}
+		return true;
 	}
 	inline bool Handle_ADD_rm16rm32rm64_r16r32r64_0x1(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
 		ZoneScoped;//NOLINT
@@ -94,8 +99,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 
-	inline bool Handle_SUBrm16rm32r16r32(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
-		ZoneScoped;
+	inline bool Handle_SUB_rm16rm32_r16r32_0X29(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
+		ZoneScoped;//NOLINT
 
 		instruction.OpcodeBytes[0] = byte;		
 
@@ -123,7 +128,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 
 	inline bool Handle_REX_INCr16AXr32_BASE(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {
-		ZoneScoped;
+		ZoneScoped;//NOLINT
 
 		std::ignore = address;
 		if (core.getMode() == vCoreMode::longMode) {
