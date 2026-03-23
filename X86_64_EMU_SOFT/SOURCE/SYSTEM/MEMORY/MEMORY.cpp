@@ -1,18 +1,21 @@
 #include <algorithm>
 
+#include <array>
 #include <cstdint>
+#include <HELPERS/MACROS.h>
+#include <HELPERS/MACROS.h>
+#include <intrin.h>
 #include <memory>
 #include <print>
-#include <tuple>
-#include <intrin.h>
-#include <array>
-#include <utility>
 #include <tracy/Tracy.hpp>
-#include "SYSTEM/MEMORY/MEMORY.h"
-#include "SYSTEM/IO_DEVICES/MAIN_MEMORY_DEVICE.h"
-#include "SYSTEM/IO_DEVICES/DEVICE_BASE.h"
-#include <HELPERS/MACROS.h>
+#include <tuple>
+#include <utility>
 #include "HELPERS/REDEFINE_MACROS.h"
+#include "SYSTEM/IO_DEVICES/DEVICE_BASE.h"
+#include "SYSTEM/IO_DEVICES/MAIN_MEMORY_DEVICE.h"
+#include "SYSTEM/MEMORY/MEMORY.h"
+#include <SYSTEM/IO_DEVICES/RESET_ROM.h>
+#include <SYSTEM/IO_DEVICES/FIRMWARE.h>
 namespace {
 	[[nodiscard]] uint64_t GetPageNumber(uint64_t address) {
 		return address >> 12U;
@@ -148,6 +151,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 				currentPage.Sections[0].DeviceOffset = 0;
 				currentPage.Sections[0].pageOffset = 0;
 				currentPage.Sections[0].size = static_cast<uint32_t>(sizeBytes);
+				currentPage.Sections[0].deviceTag = PageEntry::PageSection::DeviceTag::ResetRom;
 				currentPage.Sections.push_back(newSection);
 				currentPage.SortSections();
 
@@ -160,6 +164,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 				currentPage.Sections[0].DeviceOffset = 0;
 				currentPage.Sections[0].pageOffset = static_cast<uint32_t>(inPageOffet);
 				currentPage.Sections[0].size = static_cast<uint32_t>(sizeBytes);
+				currentPage.Sections[0].deviceTag = PageEntry::PageSection::DeviceTag::ResetRom;
 				currentPage.Sections.push_back(newSection);
 				currentPage.SortSections();
 
@@ -175,6 +180,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 				currentPage.Sections[0].DeviceOffset = 0;
 				currentPage.Sections[0].pageOffset = static_cast<uint32_t>(inPageOffet);
 				currentPage.Sections[0].size = static_cast<uint32_t>(sizeBytes);
+				currentPage.Sections[0].deviceTag = PageEntry::PageSection::DeviceTag::ResetRom;
 				currentPage.Sections.push_back(newSectionBefore);
 				currentPage.Sections.push_back(newSectionAfter);
 				currentPage.SortSections();
@@ -190,7 +196,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 		ZoneScoped;
 		const uint64_t firmwareStartPage = GetPageNumber(FirmwareEntry);
 		const uint64_t inPageOffet = FirmwareEntry & 0xFFFULL;
-		DeviceInfos info{ .device = device,.sizeBytes = sizeBytes,.baseAdress = FirmwareEntry };
+		const DeviceInfos info{ .device = device,.sizeBytes = sizeBytes,.baseAdress = FirmwareEntry };
 		uint64_t remainingDeviceBytes = sizeBytes;
 		RegisteredDevices.push_back(std::move(info));
 		for (uint64_t page = firmwareStartPage; page < MemoryPages.size(); page++) {
@@ -216,6 +222,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 						section.DeviceOffset = 0;
 						section.pageOffset = static_cast<uint32_t>(inPageOffet);
 						section.size = static_cast<uint32_t>(sizeBytes);
+						section.deviceTag = PageEntry::PageSection::DeviceTag::FirmwareRom;
 						//currentPage.Sections.push_back(newSectionBefore);
 						currentPage.Sections.push_back(newSectionAfter);
 						remainingDeviceBytes = 0;
@@ -249,6 +256,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 			page.Sections[0].pageOffset = 0;
 			page.Sections[0].DeviceOffset = deviceOffset;
 			page.Sections[0].size = 4096;
+			page.Sections[0].deviceTag = PageEntry::PageSection::DeviceTag::MainMemory;
 			deviceOffset += page.Sections[0].size;
 		}
 		return true;
@@ -262,15 +270,28 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 	uint8_t  MemoryBus::Read8(uint64_t address) const noexcept
 	{
-		DeepZoneScoped;//NOLINT
-		const uint64_t PageNumber = GetPageNumber(address);
+
+		const uint64_t PageNumber = address >> 12ULL;
 		const uint64_t inPageOffset = address & 0xFFFULL;
 		const auto& page = MemoryPages[PageNumber];
 		for (const auto& section : page.Sections) {
 			if (inPageOffset >= section.pageOffset && inPageOffset < (section.pageOffset + section.size)) {
 				const uint64_t off = inPageOffset - section.pageOffset;
-				const uint8_t value = section.device->Read8(section.DeviceOffset + off);
-				return  value;
+				switch (section.deviceTag) {
+					case PageEntry::PageSection::DeviceTag::MainMemory: {
+						return static_cast<IO_DEVICES::MainMemoryDevice*>(section.device)->Read8(section.DeviceOffset + off);
+					}
+					case PageEntry::PageSection::DeviceTag::ResetRom: {
+						return static_cast<IO_DEVICES::ResetROMDevice*>(section.device)->Read8(section.DeviceOffset + off);
+					}
+					case PageEntry::PageSection::DeviceTag::FirmwareRom: {
+						return static_cast<IO_DEVICES::FirmwareRomDevice*>(section.device)->Read8(section.DeviceOffset + off);
+					}
+					case PageEntry::PageSection::DeviceTag::OtherDevice:
+					default: {
+						return section.device->Read8(section.DeviceOffset + off);
+					}
+				}
 			}
 		}
 		return 0xFF;
@@ -321,7 +342,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 	void  MemoryBus::Write16(uint64_t address, uint16_t value) noexcept
 	{
 		std::array<uint8_t, sizeof(value)> arr{ 0,0 };
-		std::memcpy(arr.data(), &value,sizeof(arr));
+		std::memcpy(arr.data(), &value, sizeof(arr));
 		for (const auto& byte : arr) {
 			Write8(address, byte);
 			address++;

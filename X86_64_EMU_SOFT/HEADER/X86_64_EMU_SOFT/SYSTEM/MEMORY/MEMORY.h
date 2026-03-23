@@ -14,7 +14,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 		struct PageEntry
 		{
 			struct PageSection {
+				enum class DeviceTag {
+					MainMemory,
+					ResetRom,
+					FirmwareRom,
+					OtherDevice
+				};
 				IO_DEVICES::DeviceBase* device = nullptr;
+				DeviceTag deviceTag = DeviceTag::OtherDevice;
 				uint64_t DeviceOffset = 0;
 				uint32_t pageOffset = 0;
 				uint32_t size = 4096;
