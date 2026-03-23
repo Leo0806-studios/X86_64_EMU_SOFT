@@ -10,4 +10,4 @@ namespace X86_64_EMU_SOFT::HELPERS {
 	inline TraceMode Tracemode = TraceMode::none;
 
 
-}
+}// namespace X86_64_EMU_SOFT::HELPERS
