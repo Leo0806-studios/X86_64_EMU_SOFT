@@ -18,22 +18,41 @@
 
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
-	inline bool Handle_ADD_rm8_r8_0x0(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte){
+	inline bool Handle_ADD_rm8_r8_0x0( VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, INSTRUCTIONS::Prefixes& prefixes, uint8_t byte){
 		ZoneScoped;//NOLINT
 		instruction.Type = INSTRUCTIONS::InstructionType::ADD;
 		instruction.OpcodeBytes[0] = byte;
 		instruction.OpcodeSizeBytes++;
 		instruction.InstructionLengthBytes++;
-		instruction.hasModRM = true;
-		DecodingEngine::digestModRMAndSIB(address, core, instruction);
-		instruction.SourceSize = instruction.DestinationSize = 8;
-		instruction.SourceRegister = DecodingEngine::GetTargetRegister8BitFromModRMRegField(core,instruction.ModRM.reg | static_cast<uint8_t>(instruction.REX.B << 3ULL));
-		if (instruction.ModRM.mod == 3) {
-			instruction.DestinationRegister = DecodingEngine::DecodeRegisterFromModRMRMField(instruction.ModRM.rm | static_cast<uint8_t> (instruction.REX.R << 3ULL));
+
+
+
+		DigestModrmSib(ModrmSib, hasSIB);
+
+
+		const auto sourceRegister = DecodingEngine::GetTargetRegister8BitFromModRMRegField(core, ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.B << 3ULL));
+		const INSTRUCTIONS::OPERANDS::RegisterOperand SourceOperand = 
+		{
+			.RegisterPointer = std::bit_cast<std::array<uint8_t,8>>(&core.GetRegister(sourceRegister)),
+			.SizeBits = 8,
+			.Flags = std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) 
+		};
+		instruction.Operand0 = INSTRUCTIONS::OPERANDS::Operand{ .Data = SourceOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
+
+
+		if (ModrmSib.first.mod == 3) {
+			const auto destinationregister = DecodingEngine::DecodeRegisterFromModRMRMField(ModrmSib.first.rm | static_cast<uint8_t> (prefixes.RexPrefix.R << 3ULL));
+			const auto destinationOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
+				.RegisterPointer = std::bit_cast<std::array<uint8_t, 8>>(&core.GetRegister(destinationregister)),
+				.SizeBits = 8,
+				.Flags = std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister)
+			};
+			instruction.Operand1 = INSTRUCTIONS::OPERANDS::Operand{ .Data = destinationOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
 		}
 		else {
 			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not yet supported for ADD 0x0");
 		}
+		instruction.OperandCount = 2;
 		return true;
 	}
 	inline bool Handle_ADD_rm16rm32rm64_r16r32r64_0x1(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {

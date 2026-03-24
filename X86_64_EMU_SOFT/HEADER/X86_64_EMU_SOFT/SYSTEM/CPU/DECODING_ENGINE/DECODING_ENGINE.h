@@ -15,7 +15,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		/// instruction is the current instruction
 		/// byte is the byte current byte of the instruction 
 		/// </summary>
-		using HandlerFunc = bool(*)(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte);
+		using HandlerFunc = bool(*)(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction,INSTRUCTIONS::Prefixes& prefixes, uint8_t byte);
 		const static bool HandlerFuncSetupDone;
 
 	public:
@@ -78,7 +78,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		/// <param name="address"></param>
 		/// <param name="memoryBus"></param>
 		/// <param name="instruction"></param>
-		static  void digestModRMAndSIB(uint64_t& address, const  VirtualCore& core, INSTRUCTIONS::Instruction& instruction)noexcept;
-		//[[nodiscard]] static  INSTRUCTIONS::Instruction DecodeInstruction(const VirtualCore& core);
+		/// <returns>true if a SIB byte was consumed</returns>
+		[[nodiscard]] static  bool digestModRMAndSIB(uint64_t& address, const  VirtualCore& core, INSTRUCTIONS::Instruction& instruction,std::pair<INSTRUCTIONS::ModRM,INSTRUCTIONS::SIB>& ModrmSib)noexcept;
 	};
+#define DEFINE_HANDLER(funcName) bool funcName( VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction,INSTRUCTIONS::Prefixes& prefixes, uint8_t byte)
+#define DigestModrmSib(PairName,retName) std::pair<INSTRUCTIONS::ModRM, INSTRUCTIONS::SIB> PairName{};const bool retName = DecodingEngine::digestModRMAndSIB(address, core, instruction, PairName)//NOLINT(bugprone-macro-parentheses)
 }

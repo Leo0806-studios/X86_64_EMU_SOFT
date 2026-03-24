@@ -325,21 +325,22 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		__assume(false);
 	}
 
-	void DecodingEngine::digestModRMAndSIB(uint64_t& address, const  VirtualCore& core, INSTRUCTIONS::Instruction& instruction) noexcept
+	bool DecodingEngine::digestModRMAndSIB(uint64_t& address, const  VirtualCore& core,INSTRUCTIONS::Instruction& instruction ,std::pair<INSTRUCTIONS::ModRM, INSTRUCTIONS::SIB>& ModrmSib) noexcept
 	{
 		DeepZoneScoped;//NOLINT
 		const auto modrmByte = static_cast<uint8_t>(core.FetchBytes(address, 1));
-		instruction.ModRM = std::bit_cast<INSTRUCTIONS::ModRM>(modrmByte);
+		ModrmSib.first = std::bit_cast<INSTRUCTIONS::ModRM>(modrmByte);
 		instruction.InstructionLengthBytes++;
 
 		address++;
-		if (instruction.ModRM.mod != 3 && instruction.ModRM.rm == 4) {
-			instruction.hasSIB = true;
+		if (ModrmSib.first.mod != 3 && ModrmSib.first.rm == 4) {
 			const auto sibByte = static_cast<uint8_t>(core.FetchBytes(address, 1));
-			instruction.SIB = std::bit_cast<INSTRUCTIONS::SIB>(sibByte);
+			ModrmSib.second= std::bit_cast<INSTRUCTIONS::SIB>(sibByte);
 			instruction.InstructionLengthBytes++;
 			address++;
+			return true;
 		}
+		return false;
 	}
 
 
