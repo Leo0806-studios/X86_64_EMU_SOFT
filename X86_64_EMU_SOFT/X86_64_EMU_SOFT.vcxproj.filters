@@ -117,9 +117,6 @@
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\EXECUTION_ENGINE\EXECUTION_HANDLERS\HANDLER_SPECIAL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\REDEFINE_MACROS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\GLOBALS.h">
       <Filter>Header Files</Filter>
     </ClInclude>

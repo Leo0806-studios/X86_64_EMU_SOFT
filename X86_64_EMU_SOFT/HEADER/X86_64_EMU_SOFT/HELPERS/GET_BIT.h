@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+
 namespace X86_64_EMU_SOFT::HELPERS
 {
 

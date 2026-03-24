@@ -32,28 +32,28 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 	};
 
 	struct ModRM {//NOLINT(altera-struct-pack-align)
-		uint8_t rm : 3;
-		uint8_t reg : 3;
-		uint8_t mod : 2;
+		uint8_t rm : 3=0;
+		uint8_t reg : 3=0;
+		uint8_t mod : 2=0;
 	};
 	struct SIB {//NOLINT(altera-struct-pack-align)
-		uint8_t base : 3;
-		uint8_t index : 3;
-		uint8_t scale : 2;
+		uint8_t base : 3=0;
+		uint8_t index : 3=0;
+		uint8_t scale : 2=0;
 	};
 
 	struct REX {
-		uint8_t B : 1;
-		uint8_t X : 1;
-		uint8_t R : 1;
-		uint8_t W : 1;
-		uint8_t : 4; //reserved, should be 6
+		uint8_t B : 1=0;
+		uint8_t X : 1=0;
+		uint8_t R : 1=0;
+		uint8_t W : 1=0;
+		uint8_t reserved: 4 =0; //reserved, should be 6
 	};
 
 	struct Prefixes {
 		bool OperandSizeOverride = false;
 		bool AddressSizeOverride = false;
-		REX RexPrefix{ .B = 0, .X=0,.R=0,.W=0 };
+		REX RexPrefix{ .B = 0, .X=0,.R=0,.W=0,.reserved =0 };
 
 	};
 

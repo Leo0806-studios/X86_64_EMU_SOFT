@@ -21,7 +21,7 @@
 #include "SYSTEM/MEMORY/MEMORY.h"
 #include "HELPERS/GLOBALS.h"
 #include <HELPERS/MACROS.h>
-#include "HELPERS/REDEFINE_MACROS.h"
+
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
@@ -34,7 +34,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 		auto instructionByte = static_cast<uint8_t>(FetchBytes(address, 1));
 		address++;
-		while (!DecodingEngine::HandlerFuncs[instructionByte](*this, address, instruction, instructionByte)) {
+		INSTRUCTIONS::Prefixes prefixes = {};
+		while (!DecodingEngine::HandlerFuncs[instructionByte](*this, address, instruction,prefixes, instructionByte)) {
 			instructionByte = static_cast<uint8_t>(FetchBytes(address, 1));
 			address++;
 		}
@@ -403,6 +404,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case INSTRUCTIONS::TargetRegister::R15: return R15;
 			case INSTRUCTIONS::TargetRegister::CR0: return CR0;
 			case INSTRUCTIONS::TargetRegister::MSR_EFER: return EFER;
+			case INSTRUCTIONS::TargetRegister::AH: return RAX;
+			case INSTRUCTIONS::TargetRegister::BH: return RBX;
+			case INSTRUCTIONS::TargetRegister::CH: return RCX;
+			case INSTRUCTIONS::TargetRegister::DH: return RDX;
 			case INSTRUCTIONS::TargetRegister::None:
 			default: NeverOrAssert(false);
 		}

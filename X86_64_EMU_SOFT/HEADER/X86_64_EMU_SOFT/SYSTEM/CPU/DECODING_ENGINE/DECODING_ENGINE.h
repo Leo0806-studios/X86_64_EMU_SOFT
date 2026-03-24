@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <cstdint>
+#include <utility>
 #include <SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h>
 #include <SYSTEM/CPU/VCORE.h>
 #include <SYSTEM/MEMORY/MEMORY.h>
@@ -15,7 +16,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		/// instruction is the current instruction
 		/// byte is the byte current byte of the instruction 
 		/// </summary>
-		using HandlerFunc = bool(*)(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction,INSTRUCTIONS::Prefixes& prefixes, uint8_t byte);
+		using HandlerFunc = bool(*)( VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction,INSTRUCTIONS::Prefixes& prefixes, uint8_t byte);
 		const static bool HandlerFuncSetupDone;
 
 	public:
@@ -83,4 +84,5 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	};
 #define DEFINE_HANDLER(funcName) bool funcName( VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction,INSTRUCTIONS::Prefixes& prefixes, uint8_t byte)
 #define DigestModrmSib(PairName,retName) std::pair<INSTRUCTIONS::ModRM, INSTRUCTIONS::SIB> PairName{};const bool retName = DecodingEngine::digestModRMAndSIB(address, core, instruction, PairName)//NOLINT(bugprone-macro-parentheses)
+	#define IsHighRegister(reg) (reg == INSTRUCTIONS::TargetRegister::AH || reg == INSTRUCTIONS::TargetRegister::BH || reg == INSTRUCTIONS::TargetRegister::CH || reg == INSTRUCTIONS::TargetRegister::DH)
 }

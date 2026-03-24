@@ -1,6 +1,8 @@
 #pragma once
-#include <bitset>
+
 #include  <cstdint>
+#include <bitset>
+
 namespace X86_64_EMU_SOFT::HELPERS
 {
 	[[nodiscard]] constexpr uint64_t Diff(uint64_t a, uint64_t b) noexcept {

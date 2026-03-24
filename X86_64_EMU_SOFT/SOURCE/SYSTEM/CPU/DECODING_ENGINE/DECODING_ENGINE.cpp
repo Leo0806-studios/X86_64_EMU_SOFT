@@ -20,10 +20,9 @@
 #include "SYSTEM/CPU/VCORE.h"
 
 #include "SYSTEM/MEMORY/MEMORY.h"
-#include "HELPERS/REDEFINE_MACROS.h"
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
-	[[noreturn]] inline static bool ThrowUndefinedOpcode(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, uint8_t byte) {//NOSONAR
+	[[noreturn]] inline static bool ThrowUndefinedOpcode(VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, INSTRUCTIONS::Prefixes& prefixes, uint8_t byte) {//NOSONAR
 		DeepZoneScoped;//NOLINT
 		std::ignore = core;
 		std::ignore = instruction;
@@ -52,10 +51,15 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			HandlerFuncs[0x67] = HandlePrefix; //Address-size override
 
 			//ALU
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_rm8_r8_0x0)] = Handle_ADD_rm8_r8_0x0;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_rm16rm32rm64_r16r32r64_0x1)] = Handle_ADD_rm16rm32rm64_r16r32r64_0x1;
+
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_rm16rm32_r16r32_0x9)] = Handle_OR_rm16rm32_r16r32_0x9;
+
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_rm16rm32_r16r32_0X29)] = Handle_SUB_rm16rm32_r16r32_0X29;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ORrm16rm32r16r32)] = Handle_ORrm16rm32r16r32;
+
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::GROUP1_0X83)] = Handle_GROUP1_0X83;
+
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::REX_INCr16AXr32EAX)] = Handle_REX_INCr16AXr32_BASE;//handled fully
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::REX_INCr16CXr32ECX)] = Handle_REX_INCr16AXr32_BASE;//handled fully
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::REX_INCr16DXr32EDX)] = Handle_REX_INCr16AXr32_BASE;//handled fully
