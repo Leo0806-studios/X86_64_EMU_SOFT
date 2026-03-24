@@ -2,8 +2,10 @@
 #include <cstdint>
 #include <array>
 #include <vector>
+#include <variant>
 #include <string>
 #include "OPCODE_BYTES.h"
+#include <SYSTEM/CPU/REGISTERS/REGISTER_BASE.h>
 namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 
 	enum class PrefixGroup1 : uint8_t {
@@ -20,7 +22,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		ES_SEGMENT_OVERRIDE = 0x26,
 		FS_SEGMENT_OVERRIDE = 0x64,
 		GS_SEGMENT_OVERRIDE = 0x65,
-		NONE =0xFF
+		NONE = 0xFF
 	};
 	enum class  PrefixGroup3 : uint8_t {
 		OPERAND_SIZE_OVERRIDE = 0x66,
@@ -39,7 +41,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		uint8_t index : 3;
 		uint8_t scale : 2;
 	};
-	
+
 	struct REX {
 		uint8_t B : 1;
 		uint8_t X : 1;
@@ -48,7 +50,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		uint8_t : 4; //reserved, should be 6
 	};
 
-	enum class TargetRegister:uint8_t{
+	enum class TargetRegister :uint8_t {
 		RAX,
 		RBX,
 		RCX,
@@ -85,6 +87,39 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		DH,
 		None = 0xFF
 	};
+	namespace OPERANDS {
+		enum class OperandType : uint8_t {
+			Memory,
+			Register,
+			Immediate
+		};
+
+		enum class RegisterOperandFlags : uint8_t {
+			isSegmentRegister = 1U<<0U,
+			isControlRegister = 1U<<1U,
+			isGeneralPurposeRegister = 1U << 2U,
+			isHighByteRegister = 1U << 3U,
+			isModelSpecificRegister = 1U << 4U,
+			isDebugRegister = 1U << 5U,
+		};
+		struct RegisterOperand {
+			std::array<uint8_t, 8> RegisterPointer{ 0,0,0,0,0,0,0,0 };
+			uint8_t SizeBits=0;
+			uint8_t Flags = 0;//Bitfield for various flags
+		};
+		struct MemoryOperand {
+			std::array<uint8_t,8> Address{ 0,0,0,0,0,0,0,0 };
+			uint8_t SizeBits=0;
+		};
+		struct ImmediateOperand {
+			std::array<uint8_t, 8> Value{ 0,0,0,0,0,0,0,0 };
+			uint8_t SizeBits = 0;
+		};
+		struct [[nodiscard("discarding operands can lead to the emulator misbehaving")]] Operand {
+			std::variant<RegisterOperand, MemoryOperand, ImmediateOperand> Data;
+			OperandType Type = OperandType::Register;
+		};
+	}// namespace OPERANDS
 	[[nodiscard]] constexpr std::string RegisterToString(TargetRegister reg) {
 		switch (reg) {
 			case TargetRegister::RAX: return "RAX";
@@ -114,34 +149,20 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		}
 	}
 
-#pragma warning(push)
-#pragma warning(disable : 4324) //structure was padded due to alignment specifier
-	struct alignas(64) Instruction {
-		uint8_t InstructionLengthBytes=0;
-		PrefixGroup1 Prefix1=PrefixGroup1::NONE;
-		PrefixGroup2 Prefix2=PrefixGroup2::NONE;
-		bool OperandOverride = false;
-		bool AddressOverride = false;
-		bool hasModRM = false;
-		ModRM ModRM{ .rm=0,.reg=0,.mod=0 };
-		bool hasSIB = false;
-		SIB SIB{ .base=0,.index=0,.scale=0 };
-		bool hasREX = false;
-		REX REX{ .B = 0,.X = 0,.R = 0,.W = 0 };
-		uint8_t ImmediateSizeBytes = 0;
-		uint8_t OpcodeSizeBytes=0;
-		uint8_t DisplacementSizeBytes = 0;
-		uint8_t SourceSize=0;
-		uint8_t DestinationSize=0;
-		alignas(8) std::array<uint8_t, sizeof(uint64_t)> ImmediateBytes{};
-		alignas(8) std::array<uint8_t, sizeof(uint64_t)> DisplacementBytes{};
+
+	struct  Instruction {
+		uint8_t InstructionLengthBytes = 0;
+		PrefixGroup1 Prefix1 = PrefixGroup1::NONE;
+		PrefixGroup2 Prefix2 = PrefixGroup2::NONE;
+		uint8_t OpcodeSizeBytes = 0;
 		std::array<uint8_t, 3> OpcodeBytes{};
-		TargetRegister DestinationRegister=TargetRegister::None;
-		TargetRegister SourceRegister=TargetRegister::None;
 		InstructionType Type = InstructionType::UD;
+		OPERANDS::Operand Operand1{};
+		OPERANDS::Operand Operand2{};
+		OPERANDS::Operand Operand3{};
+		OPERANDS::Operand Operand4{};
 
 	};
-#pragma warning(pop)
 
 
 }//namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSRUCTIONS
