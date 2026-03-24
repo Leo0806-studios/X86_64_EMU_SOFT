@@ -66,50 +66,56 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				case 8: return "CL"; case 16: return "CX"; case 32:return "ECX";  case 64: default: return "RCX";
 			}
 			case RDX: switch (bits) {
-				case 16: return "DX"; case 32:return "EDX";  case 64: default: return "RDX";
+				case 8:return "DL";	case 16: return "DX"; case 32:return "EDX";  case 64: default: return "RDX";
 			}
 			case RSI: switch (bits) {
-				case 16: return "SI"; case 32:return "ESI";  case 64: default: return "RSI";
+				case 8: return "SIL"; case 16: return "SI"; case 32:return "ESI";  case 64: default: return "RSI";
 			}
 			case RDI: switch (bits) {
-				case 16: return "DI"; case 32:return "EDI";  case 64: default: return "RDI";
+				case 8: return "DIL"; case 16: return "DI"; case 32:return "EDI";  case 64: default: return "RDI";
 			}
 			case RSP: switch (bits) {
-				case 16: return "SP"; case 32:return "ESP";  case 64: default: return "RSP";
+				case 8: return "SPL"; case 16: return "SP"; case 32:return "ESP";  case 64: default: return "RSP";
 			}
 			case RBP: switch (bits) {
-				case 16: return "BP"; case 32:return "EBP";  case 64: default: return "RBP";
+				case 8: return "BPL"; case 16: return "BP"; case 32:return "EBP";  case 64: default: return "RBP";
 			}
 			case R8: switch (bits)
 			{
-				case 16: return "R8W"; case 32:return "R8D";  case 64: default: return "R8";
+				case 8: return "R8B"; case 16: return "R8W"; case 32:return "R8D";  case 64: default: return "R8";
 			}
 			case R9: switch (bits)
 			{
-				case 16: return "R9W"; case 32:return "R9D";  case 64: default: return "R9";
+				case 8: return "R9B"; case 16: return "R9W"; case 32:return "R9D";  case 64: default: return "R9";
 			}
 			case R10: switch (bits)
 			{
-				case 16: return "R10W"; case 32:return "R10D";  case 64: default: return "R10";
+				case 8: return "R10B"; case 16: return "R10W"; case 32:return "R10D";  case 64: default: return "R10";
 			}
 			case R11: switch (bits)
 			{
-				case 16: return "R11W"; case 32:return "R11D";  case 64: default: return "R11";
+				case 8: return "R11B"; case 16: return "R11W"; case 32:return "R11D";  case 64: default: return "R11";
 			}
 			case R12: switch (bits) {
-				case 16: return "R12W"; case 32:return "R12D";  case 64: default: return "R12";
+				case 8: return "R12B"; case 16: return "R12W"; case 32:return "R12D";  case 64: default: return "R12";
 			}
 			case R13: switch (bits) {
-				case 16: return "R13W"; case 32:return "R13D";  case 64: default: return "R13";
+				case 8: return "R13B"; case 16: return "R13W"; case 32:return "R13D";  case 64: default: return "R13";
 			}
 			case R14: switch (bits) {
-				case 16: return "R14W"; case 32:return "R14D";  case 64: default: return "R14";
+				case 8: return "R14B"; case 16: return "R14W"; case 32:return "R14D";  case 64: default: return "R14";
 			}
 			case R15: switch (bits) {
-				case 16: return "R15W"; case 32:return "R15D";  case 64: default: return "R15";
+				case 8: return "R15B"; case 16: return "R15W"; case 32:return "R15D";  case 64: default: return "R15";
 			}
-			case None:
-			default: return "None";
+			case CR0: return "CR0";
+			case MSR_EFER: return "EFER";
+			case AH: return "AH";
+			case BH: return "BH";
+			case CH: return "CH";
+			case DH: return "DH";
+			case None: return "None";
+			default: return "Undefined";
 
 		}
 	}
