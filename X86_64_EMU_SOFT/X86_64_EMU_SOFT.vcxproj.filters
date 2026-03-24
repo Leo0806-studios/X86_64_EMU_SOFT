@@ -123,6 +123,9 @@
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\GLOBALS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\REGISTERS\REGISTER_BASE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SOURCE\STARTUP.cpp">

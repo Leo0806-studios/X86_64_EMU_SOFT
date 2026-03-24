@@ -2,9 +2,10 @@
 #include <cstdint>
 #include "HELPERS/GET_BIT.h"
 #include "HELPERS/SET_BIT.h"
+#include <SYSTEM/CPU/REGISTERS/REGISTER_BASE.h>
 namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
 {
-	class EFER
+	class EFER:public Register
 	{
 		uint64_t storage=0;
 	public:

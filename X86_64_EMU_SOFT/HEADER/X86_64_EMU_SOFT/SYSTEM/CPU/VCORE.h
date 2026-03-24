@@ -2,7 +2,6 @@
 #include <cstdint>
 #include <atomic>
 #include <memory>
-#include <unordered_map>
 #include <string>
 #include <tracy/Tracy.hpp>
 #include "SYSTEM/CPU/REGISTERS/GPR.h"
@@ -11,6 +10,7 @@
 #include "SYSTEM/CPU/REGISTERS/RIP.h"
 #include "SYSTEM/MEMORY/MEMORY.h"
 #include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h"
+#include <SYSTEM/CPU/REGISTERS/REGISTER_BASE.h>
 #include <HELPERS/MACROS.h>
 namespace X86_64_EMU_SOFT::SYSTEM::CPU
 {
@@ -96,11 +96,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		/// </summary>
 		/// <returns></returns>
 		bool StartCore() noexcept;
-
+		[[nodiscard]] REGISTERS::Register& GetRegister(INSTRUCTIONS::TargetRegister reg)noexcept;
 
 		vCoreMode getMode()const noexcept
 		{
-			//DeepZoneScoped;
+			DeepZoneScoped;//NOLINT
 			vCoreMode ret = vCoreMode::realMode;
 			if (EFER.GetLMA() && CR0.GetPE()) {
 				ret = vCoreMode::longMode;
@@ -120,42 +120,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 				default:__assume(false);
 			}
 		}
-		[[nodiscard]] uint64_t GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const;
-		[[nodiscard]] uint64_t GetRegisterValue(RegisterID reg) const noexcept;
-		/// <summary>
-		/// gets the lowes "bits" bits of the Value of the register specified by reg
-		/// </summary>
-		/// <param name="reg"></param>
-		/// <param name="bits"></param>
-		/// <returns></returns>
-		[[nodiscard]] uint64_t GetRegisterValueMasked(INSTRUCTIONS::TargetRegister reg, uint8_t bits) const;
 
-		/// <summary>
-		/// gets the lowes "bits" bits of the Value of the register specified by reg
-		/// </summary>
-		/// <param name="reg"></param>
-		/// <param name="bits"></param>
-		/// <returns></returns>
-		[[nodiscard]] uint64_t GetRegisterValueMasked(RegisterID reg, uint8_t bits) const noexcept;
 
-		/// <summary>
-		/// sets the value of the register specified by reg to value but only for the lowest "bits" bits. the rest of the bits are left unchanged
-		/// also only applies the lowest "bits" bits of value to the register. the rest of the bits in value are ignored
-		/// </summary>
-		/// <param name="reg"></param>
-		/// <param name="value"></param>
-		/// <param name="bits"></param>
-		void SetRegisterValueMasked(INSTRUCTIONS::TargetRegister reg, uint64_t value, uint8_t bits);
-		/// <summary>
-		/// sets the value of the register specified by reg to value but only for the lowest "bits" bits. the rest of the bits are left unchanged
-		/// also only applies the lowest "bits" bits of value to the register. the rest of the bits in value are ignored
-		/// </summary>
-		/// <param name="reg"></param>
-		/// <param name="value"></param>
-		/// <param name="bits"></param>
-		void SetRegisterValueMasked(RegisterID reg, uint64_t value, uint8_t bits) noexcept;
-		void SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value);
-		void SetRegisterValue(RegisterID reg, uint64_t value) noexcept;
+
+
 		[[nodiscard]] static std::string getSubregisterFromSize(SYSTEM::CPU::INSTRUCTIONS::TargetRegister reg, uint8_t bits);
 		/// <summary>
 		/// writes "sizeBytes" amount of bytes from "value" to the memory bus while performing all necesary validation of the target address

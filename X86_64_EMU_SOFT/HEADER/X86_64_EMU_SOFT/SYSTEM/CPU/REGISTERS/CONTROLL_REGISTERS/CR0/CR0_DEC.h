@@ -1,13 +1,14 @@
 #pragma once
 #include  <bitset>
 #include <cstdint>
+#include <SYSTEM/CPU/REGISTERS/REGISTER_BASE.h>
 namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
 {
 	/// <summary>
 	/// reperesents CR0
 	/// SetValue and GetValue are the functions used by the CPU to asignto and reat from. the individual getters and setters are for debugging and internal updates. only Get and SetValue validate integrity
 	/// </summary>
-	class CR0  
+	class CR0 : public Register 
 	{
 		uint64_t storage=0;
 		enum class InputValidityCR0:uint8_t {

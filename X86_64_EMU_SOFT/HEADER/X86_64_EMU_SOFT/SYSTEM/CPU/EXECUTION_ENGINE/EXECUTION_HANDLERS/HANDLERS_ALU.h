@@ -27,7 +27,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				return;
 		}
 		if (instruction.ModRM.mod == 0b11) {
-
+			
 			RunIfMinimalOrHigherTraceMode(std::print("Executing instruction: ADD r/m{} {}, r{} {}\n", instruction.DestinationSize, VirtualCore::getSubregisterFromSize(instruction.DestinationRegister, instruction.DestinationSize), instruction.SourceSize, VirtualCore::getSubregisterFromSize(instruction.SourceRegister, instruction.SourceSize)););
 				const uint64_t sourceVal = core.GetRegisterValue(instruction.SourceRegister);
 			const uint64_t destVal = core.GetRegisterValue(instruction.DestinationRegister);

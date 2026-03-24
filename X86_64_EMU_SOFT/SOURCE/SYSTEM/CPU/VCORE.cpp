@@ -42,124 +42,13 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 	}
-	uint64_t VirtualCore::GetRegisterValue(INSTRUCTIONS::TargetRegister reg) const
-	{
-		DeepZoneScoped;
 
-		switch (reg) {
-			case INSTRUCTIONS::TargetRegister::RAX: return RAX.GetValue();
-			case INSTRUCTIONS::TargetRegister::RBX: return RBX.GetValue();
-			case INSTRUCTIONS::TargetRegister::RCX: return RCX.GetValue();
-			case INSTRUCTIONS::TargetRegister::RDX: return RDX.GetValue();
-			case INSTRUCTIONS::TargetRegister::RSI: return RSI.GetValue();
-			case INSTRUCTIONS::TargetRegister::RDI: return RDI.GetValue();
-			case INSTRUCTIONS::TargetRegister::RSP: return RSP.GetValue();
-			case INSTRUCTIONS::TargetRegister::RBP: return RBP.GetValue();
-			case INSTRUCTIONS::TargetRegister::R8: return R8.GetValue();
-			case INSTRUCTIONS::TargetRegister::R9: return R9.GetValue();
-			case INSTRUCTIONS::TargetRegister::R10: return R10.GetValue();
-			case INSTRUCTIONS::TargetRegister::R11: return R11.GetValue();
-			case INSTRUCTIONS::TargetRegister::R12: return R12.GetValue();
-			case INSTRUCTIONS::TargetRegister::R13: return R13.GetValue();
-			case INSTRUCTIONS::TargetRegister::R14: return R14.GetValue();
-			case INSTRUCTIONS::TargetRegister::R15: return R15.GetValue();
-			case INSTRUCTIONS::TargetRegister::None:return 0xffffffffFFFFFFFFULL;
-			default: throw std::runtime_error("invalid value during register get");//NOSONAR
-		}
 
-	}
-	uint64_t VirtualCore::GetRegisterValue(RegisterID reg) const noexcept
-	{
-		DeepZoneScoped;//NOLINT
-		switch (reg) {
-			case RegisterID::RAX: return RAX.GetValue();
-			case RegisterID::RCX: return RCX.GetValue();
-			case RegisterID::RDX: return RDX.GetValue();
-			case RegisterID::RBX: return RBX.GetValue();
-			case RegisterID::RSP: return RSP.GetValue();
-			case RegisterID::RBP: return RBP.GetValue();
-			case RegisterID::RSI: return RSI.GetValue();
-			case RegisterID::RDI: return RDI.GetValue();
-			default: return 0xffffffffFFFFFFFFULL;
-		}
 
-	}
-	uint64_t VirtualCore::GetRegisterValueMasked(INSTRUCTIONS::TargetRegister reg, uint8_t bits) const
-	{
-		DeepZoneScoped;//NOLINT
-		const uint64_t value = GetRegisterValue(reg);
-		const uint64_t mask = (1ULL << bits) - 1;
-		const uint64_t ret = value & mask;
-		return ret;
-	}
-	uint64_t VirtualCore::GetRegisterValueMasked(RegisterID reg, uint8_t bits) const noexcept
-	{
-		DeepZoneScoped;//NOLINT
-		const uint64_t value = GetRegisterValue(reg);
-		const uint64_t mask = (1ULL << bits) - 1;
-		const uint64_t ret = value & mask;
-		return ret;
-	}
-	void VirtualCore::SetRegisterValueMasked(INSTRUCTIONS::TargetRegister reg, uint64_t value, uint8_t bits)
-	{
-		DeepZoneScoped;//NOLINT
-		const uint64_t originalVaue = GetRegisterValue(reg);
-		const uint64_t mask = (1ULL << bits) - 1;
-		const uint64_t valueToSet = value & mask;
-		const uint64_t valueToKeep = originalVaue & ~mask;
-		SetRegisterValue(reg, valueToKeep | valueToSet);
 
-	}
-	void VirtualCore::SetRegisterValueMasked(RegisterID reg, uint64_t value, uint8_t bits) noexcept
-	{
-		DeepZoneScoped;//NOLINT
-		const uint64_t originalVaue = GetRegisterValue(reg);
-		const uint64_t mask = (1ULL << bits) - 1;
-		const uint64_t valueToSet = value & mask;
-		const uint64_t valueToKeep = originalVaue & ~mask;
-		SetRegisterValue(reg, valueToKeep | valueToSet);
-	}
-	void VirtualCore::SetRegisterValue(INSTRUCTIONS::TargetRegister reg, uint64_t value)
-	{
-		DeepZoneScoped;//NOLINT
-		switch (reg) {
-			case INSTRUCTIONS::TargetRegister::RAX: RAX.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::RBX: RBX.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::RCX: RCX.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::RDX: RDX.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::RSI: RSI.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::RDI: RDI.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::RSP: RSP.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::RBP: RBP.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::R8: R8.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::R9: R9.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::R10: R10.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::R11: R11.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::R12: R12.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::R13: R13.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::R14: R14.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::R15: R15.SetValue(value); break;
-			case INSTRUCTIONS::TargetRegister::None: break;
-			default: throw std::runtime_error("invalid value during register set");//NOSONAR
-		}
-	}
-	void VirtualCore::SetRegisterValue(RegisterID reg, uint64_t value) noexcept
-	{
-		DeepZoneScoped;//NOLINT
 
-		switch (reg) {
-			case RegisterID::RAX: RAX.SetValue(value); break;
-			case RegisterID::RCX: RCX.SetValue(value); break;
-			case RegisterID::RDX: RDX.SetValue(value); break;
-			case RegisterID::RBX: RBX.SetValue(value); break;
-			case RegisterID::RSP: RSP.SetValue(value); break;
-			case RegisterID::RBP: RBP.SetValue(value); break;
-			case RegisterID::RSI: RSI.SetValue(value); break;
-			case RegisterID::RDI: RDI.SetValue(value); break;
-			default: break;
-		}
 
-	}
+
 
 	[[nodiscard]]
 	std::string VirtualCore::getSubregisterFromSize(CPU::INSTRUCTIONS::TargetRegister reg, uint8_t bits) {
@@ -191,16 +80,36 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case RBP: switch (bits) {
 				case 16: return "BP"; case 32:return "EBP";  case 64: default: return "RBP";
 			}
-			case R8:
-			case R9:
-			case R10:
-			case R11:
-			case R12:
-			case R13:
-			case R14:
-			case R15:
+			case R8: switch (bits)
+			{
+				case 16: return "R8W"; case 32:return "R8D";  case 64: default: return "R8";
+			}
+			case R9: switch (bits)
+			{
+				case 16: return "R9W"; case 32:return "R9D";  case 64: default: return "R9";
+			}
+			case R10: switch (bits)
+			{
+				case 16: return "R10W"; case 32:return "R10D";  case 64: default: return "R10";
+			}
+			case R11: switch (bits)
+			{
+				case 16: return "R11W"; case 32:return "R11D";  case 64: default: return "R11";
+			}
+			case R12: switch (bits) {
+				case 16: return "R12W"; case 32:return "R12D";  case 64: default: return "R12";
+			}
+			case R13: switch (bits) {
+				case 16: return "R13W"; case 32:return "R13D";  case 64: default: return "R13";
+			}
+			case R14: switch (bits) {
+				case 16: return "R14W"; case 32:return "R14D";  case 64: default: return "R14";
+			}
+			case R15: switch (bits) {
+				case 16: return "R15W"; case 32:return "R15D";  case 64: default: return "R15";
+			}
 			case None:
-			default: return INSTRUCTIONS::RegisterToString(reg);
+			default: return "None";
 
 		}
 	}
@@ -221,10 +130,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	{
 		ZoneScoped;//NOLINT
 		switch (sizeBytes) {
-			[[likely]] case 1: return memoryBus->Read8(address); 
-			case 2: return memoryBus->Read16(address); 
-			case 4: return memoryBus->Read32(address); 
-			case 8: return memoryBus->Read64(address); 
+			[[likely]] case 1: return memoryBus->Read8(address);
+			case 2: return memoryBus->Read16(address);
+			case 4: return memoryBus->Read32(address);
+			case 8: return memoryBus->Read64(address);
 			default: throw std::out_of_range("sizeBytes out of allowed range (1,2,4,8 ) for VirtualCore.FetchBytes");
 		}
 	}
@@ -271,7 +180,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	{
 		ZoneScoped;//NOLINT
 		ExecutionEngine::HandlerFuncs[std::to_underlying(instruction.Type)](*this, instruction);
-		
+
 
 	}
 	void VirtualCore::PrintCoreState() const
@@ -440,7 +349,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	bool VirtualCore::StartCore() noexcept//NOLINT(bugprone-exception-escape) Throw in std::print is non recoverable so its not handled
 	{
-		
+
 		DeepZoneScoped;
 		isRunning.store(true);
 		hasShutdown.store(false);
@@ -451,10 +360,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				FrameMark;
 				RunIfMinimalOrHigherTraceMode(std::print("\nDecoding instruction at RIP: {:#X}\n", RIP.GetValue());)
 
-				const INSTRUCTIONS::Instruction instruction = decodeInstruction();
+					const INSTRUCTIONS::Instruction instruction = decodeInstruction();
 				RIP.SetValue(RIP.GetValue() + instruction.InstructionLengthBytes);
 				RunIfReducedOrHigherTraceMode(PrintInstruction(instruction);)
-				executeInstruction(instruction);
+					executeInstruction(instruction);
 			}
 		}
 		catch (EXCEPTIONS::UNDEFINED_OPCODE& e) {
@@ -463,7 +372,35 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			PrintCoreState();
 		}
 		hasShutdown.store(true);
-		
+
 		return true;
 	}
+
+	REGISTERS::Register& VirtualCore::GetRegister(INSTRUCTIONS::TargetRegister reg) noexcept
+	{
+		switch (reg) {
+			case INSTRUCTIONS::TargetRegister::RAX: return RAX;
+			case INSTRUCTIONS::TargetRegister::RBX: return RBX;
+			case INSTRUCTIONS::TargetRegister::RCX: return RCX;
+			case INSTRUCTIONS::TargetRegister::RDX: return RDX;
+			case INSTRUCTIONS::TargetRegister::RSI: return RSI;
+			case INSTRUCTIONS::TargetRegister::RDI: return RDI;
+			case INSTRUCTIONS::TargetRegister::RSP: return RSP;
+			case INSTRUCTIONS::TargetRegister::RBP: return RBP;
+			case INSTRUCTIONS::TargetRegister::R8: return R8;
+			case INSTRUCTIONS::TargetRegister::R9: return R9;
+			case INSTRUCTIONS::TargetRegister::R10: return R10;
+			case INSTRUCTIONS::TargetRegister::R11: return R11;
+			case INSTRUCTIONS::TargetRegister::R12: return R12;
+			case INSTRUCTIONS::TargetRegister::R13: return R13;
+			case INSTRUCTIONS::TargetRegister::R14: return R14;
+			case INSTRUCTIONS::TargetRegister::R15: return R15;
+			case INSTRUCTIONS::TargetRegister::CR0: return CR0;
+			case INSTRUCTIONS::TargetRegister::MSR_EFER: return EFER;
+			case INSTRUCTIONS::TargetRegister::None:
+			default: NeverOrAssert(false);
+		}
+		__assume(false);
+	}
+
 }// namespace X86_64_EMU_SOFT::SYSTEM::CPU

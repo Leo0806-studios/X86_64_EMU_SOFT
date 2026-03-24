@@ -66,6 +66,17 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		R14,
 		R15,
 
+
+		CR0,
+		//CR2,
+		//CR3,
+		//CR4,
+		//CR8,
+
+
+
+		MSR_EFER,
+
 		//the folowing 8 bit registers are listed excplicitly since they arent just masked of lower parts of 64 bit registers (eg i cant just set the operand size to 8)
 
 		AH,
@@ -92,6 +103,12 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 			case TargetRegister::R13: return "R13";
 			case TargetRegister::R14: return "R14";
 			case TargetRegister::R15: return "R15";
+			case TargetRegister::CR0: return "CR0";
+			case TargetRegister::MSR_EFER: return "EFER";
+			case TargetRegister::AH: return "AH";
+			case TargetRegister::BH:return "BH";
+			case TargetRegister::CH:return "CH";
+			case TargetRegister::DH:return "DH";
 			case TargetRegister::None:
 			default: return "None";
 		}
