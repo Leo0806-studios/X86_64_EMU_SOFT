@@ -56,6 +56,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_r8_rm8_0x2)] = Handle_ADD_r8_rm8_0x2;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_r16r32r64_rm16rm32rm64_0x3)] = Handle_ADD_r16r32r64_rm16rm32rm64_0x3;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_AL_imm8_0x4)] = Handle_ADD_AL_imm8_0x4;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_AxEaxRax_imm16imm32_0x5)] = Handle_ADD_AxEaxRax_imm16imm32_0x5;
 			
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_rm16rm32_r16r32_0x9)] = Handle_OR_rm16rm32_r16r32_0x9;
 

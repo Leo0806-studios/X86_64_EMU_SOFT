@@ -22,6 +22,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 		ADD_r8_rm8_0x2 =0x2,
 		ADD_r16r32r64_rm16rm32rm64_0x3=0x3,
 		ADD_AL_imm8_0x4 = 0x4,
+		ADD_AxEaxRax_imm16imm32_0x5 = 0x5,
 
 		OR_rm16rm32_r16r32_0x9 = 0x9,//handled partial
 
