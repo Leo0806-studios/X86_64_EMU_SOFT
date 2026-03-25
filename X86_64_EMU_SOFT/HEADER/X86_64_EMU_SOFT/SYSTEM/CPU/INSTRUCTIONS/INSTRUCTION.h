@@ -98,7 +98,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		enum class OperandType : uint8_t {
 			Memory,
 			Register,
-			Immediate
+			Immediate,
+			None = 0xFF
 		};
 
 		enum class RegisterOperandFlags : uint8_t {
@@ -109,11 +110,18 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 			isModelSpecificRegister = 1U << 4U,
 			isDebugRegister = 1U << 5U,
 		};
+
+
 		struct RegisterOperand {
 			std::array<uint8_t, 8> RegisterPointer{ 0,0,0,0,0,0,0,0 };
 			uint8_t SizeBits=0;
 			uint8_t Flags = 0;//Bitfield for various flags
+			//[[nodiscard]]RegisterOperand() = default;
+			//[[nodiscard]] explicit RegisterOperand(uint8_t regSelector, uint8_t sizeBits,uint8_t flags) noexcept;
 		};
+
+
+
 		struct MemoryOperand {
 			std::array<uint8_t,8> Address{ 0,0,0,0,0,0,0,0 };
 			uint8_t SizeBits=0;
@@ -124,7 +132,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		};
 		struct [[nodiscard("discarding operands can lead to the emulator misbehaving")]] Operand {
 			std::variant<RegisterOperand, MemoryOperand, ImmediateOperand> Data;
-			OperandType Type = OperandType::Register;
+			OperandType Type=OperandType::None;
+			//[[nodiscard]] Operand() = default;
+			//[[nodiscard]] explicit Operand(uint8_t regSelector, uint8_t sizeBits, uint8_t flags) noexcept :Data(RegisterOperand(regSelector, sizeBits, flags)), Type(OperandType::Register) {};
+			// [[nodiscard]] explicit Operand(MemoryOperand memOp) noexcept :Data(memOp), Type(OperandType::Memory) {};
+			// [[nodiscard]] explicit Operand(ImmediateOperand immOp) noexcept :Data(immOp), Type(OperandType::Immediate) {};
 		};
 	}// namespace OPERANDS
 	[[nodiscard]] constexpr std::string RegisterToString(TargetRegister reg) {

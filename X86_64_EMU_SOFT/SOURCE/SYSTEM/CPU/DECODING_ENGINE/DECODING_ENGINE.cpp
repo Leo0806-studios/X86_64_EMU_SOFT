@@ -10,12 +10,12 @@
 #include <tuple>
 #include <utility>
 #include <HELPERS/MACROS.h>
+#include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h"
 #include "SYSTEM/CPU/DECODING_ENGINE/DECODING_ENGINE.h"
 #include "SYSTEM/CPU/DECODING_ENGINE/DECODING_HANDLERS/HANDLERS_ALU.h"
 #include "SYSTEM/CPU/DECODING_ENGINE/DECODING_HANDLERS/HANDLERS_SPECIAL.h"
 #include "SYSTEM/CPU/DECODING_ENGINE/DECODING_HANDLERS/PREFIX_HANDLERS.h"
 #include "SYSTEM/CPU/EXCEPTIONS/UNDEFINED_OPCODE.h"
-#include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h"
 #include "SYSTEM/CPU/INSTRUCTIONS/OPCODE_BYTES.h"
 #include "SYSTEM/CPU/VCORE.h"
 
@@ -53,7 +53,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			//ALU
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_rm8_r8_0x0)] = Handle_ADD_rm8_r8_0x0;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_rm16rm32rm64_r16r32r64_0x1)] = Handle_ADD_rm16rm32rm64_r16r32r64_0x1;
-
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_r8_rm8_0x2)] = Handle_ADD_r8_rm8_0x2;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_r16r32r64_rm16rm32rm64_0x3)] = Handle_ADD_r16r32r64_rm16rm32rm64_0x3;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_AL_imm8_0x4)] = Handle_ADD_AL_imm8_0x4;
+			
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_rm16rm32_r16r32_0x9)] = Handle_OR_rm16rm32_r16r32_0x9;
 
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_rm16rm32_r16r32_0X29)] = Handle_SUB_rm16rm32_r16r32_0X29;
@@ -114,12 +117,41 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 
+	INSTRUCTIONS::TargetRegister DecodingEngine::DecodeTargetRegister(uint8_t regSelector) noexcept
+	{
+		DeepZoneScoped;//NOLINT
+		switch (regSelector) {
+			using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
+			case 0: return RAX;
+			case 1: return RCX;
+			case 2: return RDX;
+			case 3: return RBX;
+			case 4: return RSP;
+			case 5: return RBP;
+			case 6: return RSI;
+			case 7: return RDI;
+			case 8: return R8;
+			case 9: return R9;
+			case 10: return R10;
+			case 11: return R11;
+			case 12: return R12;
+			case 13: return R13;
+			case 14: return R14;
+			case 15: return R15;
+			default: {
+				NeverOrAssert(false);
+			}
+		}
+		__assume(false);
+	}
+
 	inline INSTRUCTIONS::TargetRegister DecodingEngine::DecodeRegisterFromModRMRegField(uint8_t regField) noexcept {
 		DeepZoneScoped;//NOLINT
 		switch (regField) {
 			using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
 			case 0: return RAX;
 			case 1: return RCX;
+
 			case 2: return RDX;
 			case 3: return RBX;
 			case 4: return RSP;

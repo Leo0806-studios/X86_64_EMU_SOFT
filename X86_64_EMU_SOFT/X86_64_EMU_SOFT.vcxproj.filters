@@ -161,6 +161,9 @@
     <ClCompile Include="SOURCE\SYSTEM\CPU\EXECUTING_ENGINE\EXECUTION_ENGINE.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SOURCE\SYSTEM\CPU\INSTRUCTIONS\INSTRUCTION.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />

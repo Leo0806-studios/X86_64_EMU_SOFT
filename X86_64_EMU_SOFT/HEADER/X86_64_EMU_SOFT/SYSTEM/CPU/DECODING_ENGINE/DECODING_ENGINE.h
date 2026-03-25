@@ -22,19 +22,21 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	public:
 		static std::array<HandlerFunc, 256> HandlerFuncs;
 
+		static INSTRUCTIONS::TargetRegister DecodeTargetRegister(uint8_t regSelector)noexcept;
+
 		/// <summary>
 		/// decodes the target register from the reg field of MODRM. is also capable of decoding REX extended registers if the bitIndex 3 is set in the regField
 		/// </summary>
 		/// <param name="regField"></param>
 		/// <returns></returns>
-		static INSTRUCTIONS::TargetRegister DecodeRegisterFromModRMRegField(uint8_t regField)noexcept;
+		[[deprecated("use the generic DecodeTargetRegister instead")]] static INSTRUCTIONS::TargetRegister DecodeRegisterFromModRMRegField(uint8_t regField)noexcept;
 
 		/// <summary>
 		/// decodes the target register from the rm field of MODRM. is also capable of decoding REX extended registers if the bitIndex 3 is set in the rmField
 		/// </summary>
 		/// <param name="rmField"></param>
 		/// <returns></returns>
-		static INSTRUCTIONS::TargetRegister DecodeRegisterFromModRMRMField(uint8_t rmField)noexcept;
+		[[deprecated("use the generic DecodeTargetRegister instead")]] static INSTRUCTIONS::TargetRegister DecodeRegisterFromModRMRMField(uint8_t rmField)noexcept;
 
 		/// <summary>
 		/// decodes the target register from the additive part of the opcode. is also capable of decoding REX extended registers if the bitIndex 3 is set in the rmField
