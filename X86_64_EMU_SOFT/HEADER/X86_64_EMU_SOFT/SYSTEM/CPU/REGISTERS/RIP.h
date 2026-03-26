@@ -12,5 +12,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS
 		[[nodiscard]] uint64_t GetValue() const noexcept {
 			return storage;
 		}
+
+		void Increment(uint8_t len)noexcept {
+			storage += len;
+		}
+		
 	};
 }// namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS

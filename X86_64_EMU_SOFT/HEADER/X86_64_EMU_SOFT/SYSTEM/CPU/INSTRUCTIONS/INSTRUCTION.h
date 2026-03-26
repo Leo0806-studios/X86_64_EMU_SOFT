@@ -116,8 +116,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 			std::array<uint8_t, 8> RegisterPointer{ 0,0,0,0,0,0,0,0 };
 			uint8_t SizeBits=0;
 			uint8_t Flags = 0;//Bitfield for various flags
-			//[[nodiscard]]RegisterOperand() = default;
-			//[[nodiscard]] explicit RegisterOperand(uint8_t regSelector, uint8_t sizeBits,uint8_t flags) noexcept;
+
 		};
 
 
@@ -133,10 +132,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		struct [[nodiscard("discarding operands can lead to the emulator misbehaving")]] Operand {
 			std::variant<RegisterOperand, MemoryOperand, ImmediateOperand> Data;
 			OperandType Type=OperandType::None;
-			//[[nodiscard]] Operand() = default;
-			//[[nodiscard]] explicit Operand(uint8_t regSelector, uint8_t sizeBits, uint8_t flags) noexcept :Data(RegisterOperand(regSelector, sizeBits, flags)), Type(OperandType::Register) {};
-			// [[nodiscard]] explicit Operand(MemoryOperand memOp) noexcept :Data(memOp), Type(OperandType::Memory) {};
-			// [[nodiscard]] explicit Operand(ImmediateOperand immOp) noexcept :Data(immOp), Type(OperandType::Immediate) {};
+
 		};
 	}// namespace OPERANDS
 	[[nodiscard]] constexpr std::string RegisterToString(TargetRegister reg) {
@@ -175,12 +171,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		PrefixGroup2 Prefix2 = PrefixGroup2::NONE;
 		uint8_t OpcodeSizeBytes = 0;
 		std::array<uint8_t, 3> OpcodeBytes{};
+		uint8_t OperandCount = 0;
 		InstructionType Type = InstructionType::UD;
-		uint8_t ExtendedType = 0;//for instruction types wich have the EXTENDED_[cpu extension] instruction type. for example with EXTENDED_AVX 0x60 might be a generic ADD handler  wheile with EXTENDED_AVX2 0x60 might be a generic MUL handler
 		//the format of this type is anagolus to intel nasm syntax. with operand0 being the leftmost while writing the instruction and operand3 being the rightmost. for example in "ADD RAX, [RBX+4]", operand0 would be RAX while operand1 would be [RBX+4] and operand2 and operand3 would be unused
 
 
-		uint8_t OperandCount = 0;
 		OPERANDS::Operand Operand0{};
 		OPERANDS::Operand Operand1{};
 		OPERANDS::Operand Operand2{};

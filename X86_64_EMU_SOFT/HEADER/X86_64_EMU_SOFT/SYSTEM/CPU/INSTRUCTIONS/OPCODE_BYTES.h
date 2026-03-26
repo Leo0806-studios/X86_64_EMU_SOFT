@@ -2,7 +2,7 @@
 #include <cstdint>
 namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 {
-	enum class InstructionType:uint8_t{
+	enum class InstructionType:uint16_t{
 		MOV,
 
 		ADD,

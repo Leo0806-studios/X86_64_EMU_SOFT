@@ -87,7 +87,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			}
 		}
 
-		const INSTRUCTIONS::TargetRegister sourceRegister = DecodingEngine::DecodeRegisterFromModRMRegField(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.B << 3ULL));
+		const INSTRUCTIONS::TargetRegister sourceRegister = DecodingEngine::DecodeTargetRegister(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.B << 3ULL));
 		const INSTRUCTIONS::OPERANDS::RegisterOperand SourceOperand
 		{
 			.RegisterPointer = std::bit_cast<std::array<uint8_t,8>>(&core.GetRegister(sourceRegister)),
@@ -98,9 +98,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 		if (ModrmSib.first.mod == 3) {
-			const INSTRUCTIONS::TargetRegister destinationregister = DecodingEngine::DecodeRegisterFromModRMRMField(ModrmSib.first.rm | static_cast<uint8_t> (prefixes.RexPrefix.R << 3ULL));
+			const INSTRUCTIONS::TargetRegister destinationRegister = DecodingEngine::DecodeTargetRegister(ModrmSib.first.rm | static_cast<uint8_t> (prefixes.RexPrefix.R << 3ULL));
 			const auto destinationOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
-				.RegisterPointer = std::bit_cast<std::array<uint8_t, 8>>(&core.GetRegister(destinationregister)),
+				.RegisterPointer = std::bit_cast<std::array<uint8_t, 8>>(&core.GetRegister(destinationRegister)),
 				.SizeBits = operandSize,
 				.Flags = std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister)
 			};
@@ -146,6 +146,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			};
 			instruction.Operand1 = INSTRUCTIONS::OPERANDS::Operand{ .Data = sourceOperand,.Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
 		}
+		else {
+			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not yet supported for ADD 0x2");
+		}
+		return true;
 	}
 
 	inline DEFINE_HANDLER(Handle_ADD_r16r32r64_rm16rm32rm64_0x3) {
@@ -264,8 +268,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		instruction.Operand0 = INSTRUCTIONS::OPERANDS::Operand{ .Data = destinationOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
 		if (operandSize == 16) {
 			const auto immediateValue = std::bit_cast<std::array<uint8_t, 2>>(static_cast<uint16_t>(core.FetchBytes(address, 2)));
-			address += 4;
-			instruction.InstructionLengthBytes += 4;
+			address += 2;
+			instruction.InstructionLengthBytes += 2;
 			const auto immediateOperand = INSTRUCTIONS::OPERANDS::ImmediateOperand{
 				.Value = {immediateValue[0],immediateValue[1],0,0,0,0,0,0},
 				.SizeBits = 32
@@ -284,8 +288,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 		else if (operandSize == 64) {
 			const auto immediateValue = static_cast<uint64_t>(static_cast<int64_t>(core.FetchBytes(address, 4)));
-			address += 8;
-			instruction.InstructionLengthBytes += 8;
+			address += 4;
+			instruction.InstructionLengthBytes += 8;//sign extension takes up the rest of the 8 bytes. si its 4 bytes immediate + 4 bytes of sign extension
 			const auto immediateOperand = INSTRUCTIONS::OPERANDS::ImmediateOperand{
 				.Value = std::bit_cast<std::array<uint8_t,8>>(immediateValue),
 				.SizeBits = 64

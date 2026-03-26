@@ -368,7 +368,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				RunIfMinimalOrHigherTraceMode(std::print("\nDecoding instruction at RIP: {:#X}\n", RIP.GetValue());)
 
 					const INSTRUCTIONS::Instruction instruction = decodeInstruction();
-				RIP.SetValue(RIP.GetValue() + instruction.InstructionLengthBytes);
+				RIP.Increment( instruction.InstructionLengthBytes);
 				RunIfReducedOrHigherTraceMode(PrintInstruction(instruction);)
 					executeInstruction(instruction);
 			}
