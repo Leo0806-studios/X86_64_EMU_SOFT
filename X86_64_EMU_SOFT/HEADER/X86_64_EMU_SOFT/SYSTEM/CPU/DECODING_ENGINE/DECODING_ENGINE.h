@@ -16,7 +16,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		/// instruction is the current instruction
 		/// byte is the byte current byte of the instruction 
 		/// </summary>
-		using HandlerFunc = bool(*)( VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction,INSTRUCTIONS::Prefixes& prefixes, uint8_t byte);
+		using HandlerFunc = bool(*)(VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, INSTRUCTIONS::Prefixes& prefixes, uint8_t byte);
 		const static bool HandlerFuncSetupDone;
 
 	public:
@@ -45,13 +45,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		/// <returns></returns>
 		static INSTRUCTIONS::TargetRegister GetTargetRegisterfromAdditiveID(uint8_t regSelector)noexcept;
 
-		/// <summary>
-		/// decodes the target register from the MODRM Reg field of the instruction. is also capable of decoding REX extended registers if the bitIndex 3 is set in the rmField
-		/// </summary>
-		/// <param name="core"></param>
-		/// <param name="regField"></param>
-		/// <returns></returns>
-		static INSTRUCTIONS::TargetRegister GetTargetRegister8BitFromModRMRegField(const VirtualCore& core, uint8_t  regField)noexcept;
+
+		[[nodiscard]] static INSTRUCTIONS::TargetRegister DecodeTarget8BitRegister(const VirtualCore& core, uint8_t regSelector)noexcept;
 
 		/// <summary>
 		/// decodes the target register from the MODRM Reg field of the instruction. is also capable of decoding REX extended registers if the bitIndex 3 is set in the rmField
@@ -59,7 +54,15 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		/// <param name="core"></param>
 		/// <param name="regField"></param>
 		/// <returns></returns>
-		static INSTRUCTIONS::TargetRegister GetTargetRegister8BitFromModRMRMField(const VirtualCore& core, uint8_t  regField)noexcept;
+		[[deprecated("use the generic DecodeTarget8BitRegister instead")]] static INSTRUCTIONS::TargetRegister GetTargetRegister8BitFromModRMRegField(const VirtualCore& core, uint8_t  regField)noexcept;
+
+		/// <summary>
+		/// decodes the target register from the MODRM Reg field of the instruction. is also capable of decoding REX extended registers if the bitIndex 3 is set in the rmField
+		/// </summary>
+		/// <param name="core"></param>
+		/// <param name="regField"></param>
+		/// <returns></returns>
+		[[deprecated("use the generic DecodeTarget8BitRegister instead")]] static INSTRUCTIONS::TargetRegister GetTargetRegister8BitFromModRMRMField(const VirtualCore& core, uint8_t  regField)noexcept;
 
 		/// <summary>
 		/// gets the full register from the input high register
@@ -82,9 +85,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		/// <param name="memoryBus"></param>
 		/// <param name="instruction"></param>
 		/// <returns>true if a SIB byte was consumed</returns>
-		[[nodiscard]] static  bool digestModRMAndSIB(uint64_t& address, const  VirtualCore& core, INSTRUCTIONS::Instruction& instruction,std::pair<INSTRUCTIONS::ModRM,INSTRUCTIONS::SIB>& ModrmSib)noexcept;
+		[[nodiscard]] static  bool digestModRMAndSIB(uint64_t& address, const  VirtualCore& core, INSTRUCTIONS::Instruction& instruction, std::pair<INSTRUCTIONS::ModRM, INSTRUCTIONS::SIB>& ModrmSib)noexcept;
 	};
 #define DEFINE_HANDLER(funcName) bool funcName( VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction,INSTRUCTIONS::Prefixes& prefixes, uint8_t byte)
 #define DigestModrmSib(PairName,retName) std::pair<INSTRUCTIONS::ModRM, INSTRUCTIONS::SIB> PairName{};const bool retName = DecodingEngine::digestModRMAndSIB(address, core, instruction, PairName)//NOLINT(bugprone-macro-parentheses)
-	#define IsHighRegister(reg) (reg == INSTRUCTIONS::TargetRegister::AH || reg == INSTRUCTIONS::TargetRegister::BH || reg == INSTRUCTIONS::TargetRegister::CH || reg == INSTRUCTIONS::TargetRegister::DH)
-}
+#define IsHighRegister(reg) (reg == INSTRUCTIONS::TargetRegister::AH || reg == INSTRUCTIONS::TargetRegister::BH || reg == INSTRUCTIONS::TargetRegister::CH || reg == INSTRUCTIONS::TargetRegister::DH)
+
+
+}// namespace 86_64_EMU_SOFT::SYSTEM::CPU
+
+
+

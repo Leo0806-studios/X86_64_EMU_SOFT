@@ -6,6 +6,8 @@
 #include <string>
 #include "OPCODE_BYTES.h"
 #include <SYSTEM/CPU/REGISTERS/REGISTER_BASE.h>
+#include <bit>
+
 namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 
 	enum class PrefixGroup1 : uint8_t {
@@ -32,28 +34,28 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 	};
 
 	struct ModRM {//NOLINT(altera-struct-pack-align)
-		uint8_t rm : 3=0;
-		uint8_t reg : 3=0;
-		uint8_t mod : 2=0;
+		uint8_t rm : 3 = 0;
+		uint8_t reg : 3 = 0;
+		uint8_t mod : 2 = 0;
 	};
 	struct SIB {//NOLINT(altera-struct-pack-align)
-		uint8_t base : 3=0;
-		uint8_t index : 3=0;
-		uint8_t scale : 2=0;
+		uint8_t base : 3 = 0;
+		uint8_t index : 3 = 0;
+		uint8_t scale : 2 = 0;
 	};
 
 	struct REX {
-		uint8_t B : 1=0;
-		uint8_t X : 1=0;
-		uint8_t R : 1=0;
-		uint8_t W : 1=0;
-		uint8_t reserved: 4 =0; //reserved, should be 6
+		uint8_t B : 1 = 0;
+		uint8_t X : 1 = 0;
+		uint8_t R : 1 = 0;
+		uint8_t W : 1 = 0;
+		uint8_t reserved : 4 = 0; //reserved, should be 6
 	};
 
 	struct Prefixes {
 		bool OperandSizeOverride = false;
 		bool AddressSizeOverride = false;
-		REX RexPrefix{ .B = 0, .X=0,.R=0,.W=0,.reserved =0 };
+		REX RexPrefix{ .B = 0, .X = 0,.R = 0,.W = 0,.reserved = 0 };
 
 	};
 
@@ -103,8 +105,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		};
 
 		enum class RegisterOperandFlags : uint8_t {
-			isSegmentRegister = 1U<<0U,
-			isControlRegister = 1U<<1U,
+			isSegmentRegister = 1U << 0U,
+			isControlRegister = 1U << 1U,
 			isGeneralPurposeRegister = 1U << 2U,
 			isHighByteRegister = 1U << 3U,
 			isModelSpecificRegister = 1U << 4U,
@@ -113,17 +115,22 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 
 
 		struct RegisterOperand {
-			std::array<uint8_t, 8> RegisterPointer{ 0,0,0,0,0,0,0,0 };
-			uint8_t SizeBits=0;
-			uint8_t Flags = 0;//Bitfield for various flags
+		private:
 
+		public:
+			std::array<uint8_t, 8> RegisterPointer{ 0,0,0,0,0,0,0,0 };
+			uint8_t SizeBits = 0;
+			uint8_t Flags = 0;//Bitfield for various flags
+			[[nodiscard]] RegisterOperand(REGISTERS::Register& reg, uint8_t size_bits, uint8_t flags) :
+				RegisterPointer(std::bit_cast<std::array<uint8_t, 8>>(&reg))
+			{}
 		};
 
 
 
 		struct MemoryOperand {
-			std::array<uint8_t,8> Address{ 0,0,0,0,0,0,0,0 };
-			uint8_t SizeBits=0;
+			std::array<uint8_t, 8> Address{ 0,0,0,0,0,0,0,0 };
+			uint8_t SizeBits = 0;
 		};
 		struct ImmediateOperand {
 			std::array<uint8_t, 8> Value{ 0,0,0,0,0,0,0,0 };
@@ -131,7 +138,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		};
 		struct [[nodiscard("discarding operands can lead to the emulator misbehaving")]] Operand {
 			std::variant<RegisterOperand, MemoryOperand, ImmediateOperand> Data;
-			OperandType Type=OperandType::None;
+			OperandType Type = OperandType::None;
 
 		};
 	}// namespace OPERANDS
