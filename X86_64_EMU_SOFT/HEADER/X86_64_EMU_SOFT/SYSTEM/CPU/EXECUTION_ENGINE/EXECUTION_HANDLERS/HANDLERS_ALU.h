@@ -70,35 +70,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 
-		if (instruction.ImmediateSizeBytes > 0) {
-			RunIfMinimalOrHigherTraceMode(std::print("Executing instruction: ADD r/m{} {}, imm{} \n", instruction.DestinationSize, VirtualCore::getSubregisterFromSize(instruction.DestinationRegister, instruction.DestinationSize), instruction.SourceSize););
-			uint64_t sourceVal = 0;
-			std::memcpy(&sourceVal, instruction.ImmediateBytes.data(), instruction.InstructionLengthBytes);
-			const uint64_t destVal = core.GetRegisterValue(instruction.DestinationRegister);
-			RunIfFullTraceMode(std::print("value of Destintion register: {:#X} (signed {}), value of immediat {:#X} (signed: {} before execution\n", destVal, static_cast<int64_t>(destVal), sourceVal, static_cast<int64_t>(sourceVal)););
-			core.SetRegisterValueMasked(instruction.DestinationRegister, destVal + sourceVal, instruction.DestinationSize);
-			RunIfFullTraceMode(std::print("value of Destiontion Register: {:#X} (signed {}) after execution\n", core.GetRegisterValue(instruction.DestinationRegister), static_cast<int64_t>(core.GetRegisterValue(instruction.DestinationRegister))););
-			return;
-		}
-		if (instruction.ModRM.mod == 0b11) {
-
-			RunIfMinimalOrHigherTraceMode(std::print("Executing instruction: ADD r/m{} {}, r{} {}\n", instruction.DestinationSize, VirtualCore::getSubregisterFromSize(instruction.DestinationRegister, instruction.DestinationSize), instruction.SourceSize, VirtualCore::getSubregisterFromSize(instruction.SourceRegister, instruction.SourceSize)););
-			const uint64_t sourceVal = core.GetRegisterValue(instruction.SourceRegister);
-			const uint64_t destVal = core.GetRegisterValue(instruction.DestinationRegister);
-			RunIfFullTraceMode(std::print("value of Destintion register: {:#X} (signed: {}), value of Source Register {:#X} (signed: {}) before execution\n", destVal, static_cast<int64_t>(destVal), sourceVal, static_cast<int64_t>(sourceVal)););
-			core.SetRegisterValueMasked(instruction.DestinationRegister, destVal + sourceVal, instruction.DestinationSize);
-			RunIfFullTraceMode(std::print("value of Destiontion Register: {:#X} (signed: {}) after execution\n", core.GetRegisterValue(instruction.DestinationRegister), static_cast<int64_t>(core.GetRegisterValue(instruction.DestinationRegister))););
-			return;
-		}
-		switch (instruction.ModRM.mod) {
-			case 0b00:
-			case 0b01:
-			case 0b10:
-				std::print("Memory operands are not supported yet for ADD\n");
-				throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not supported yet for ADD");
-			default:
-				throw EXCEPTIONS::UNDEFINED_OPCODE("Invalid ModRM mod field for ADD instruction");
-		}
+		
 
 
 
