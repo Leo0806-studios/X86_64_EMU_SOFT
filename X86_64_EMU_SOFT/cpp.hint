@@ -1,0 +1,4 @@
+// Hint files help the Visual Studio IDE interpret Visual C++ identifiers
+// such as names of functions and macros.
+// For more information see https://go.microsoft.com/fwlink/?linkid=865984
+#define DEFINE_HANDLER(funcName) bool funcName( VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction,INSTRUCTIONS::Prefixes& prefixes, uint8_t byte)

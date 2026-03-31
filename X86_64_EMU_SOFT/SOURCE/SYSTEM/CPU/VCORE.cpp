@@ -21,12 +21,13 @@
 #include "SYSTEM/MEMORY/MEMORY.h"
 #include "HELPERS/GLOBALS.h"
 #include <HELPERS/MACROS.h>
+#include <cstdarg>
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 
-	INSTRUCTIONS::Instruction VirtualCore::decodeInstruction() const
+	INSTRUCTIONS::Instruction VirtualCore::decodeInstruction()
 	{
 		ZoneScoped;//NOLINT
 		uint64_t address = RIP.GetValue();
@@ -35,7 +36,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		auto instructionByte = static_cast<uint8_t>(FetchBytes(address, 1));
 		address++;
 		INSTRUCTIONS::Prefixes prefixes = {};
-		while (!DecodingEngine::HandlerFuncs[instructionByte](*this, address, instruction,prefixes, instructionByte)) {
+		while (!DecodingEngine::HandlerFuncs[instructionByte](*this, address, instruction, prefixes, instructionByte)) {
 			instructionByte = static_cast<uint8_t>(FetchBytes(address, 1));
 			address++;
 		}
@@ -52,73 +53,123 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 	[[nodiscard]]
-	std::string VirtualCore::getSubregisterFromSize(CPU::INSTRUCTIONS::TargetRegister reg, uint8_t bits) {
+	std::string VirtualCore::getSubregisterFromSize(REGISTERS::Register* registerPtr, uint8_t bits, bool high) {
 		DeepZoneScoped;//NOLINT
-		switch (reg) {
-			using enum CPU::INSTRUCTIONS::TargetRegister;
-			using enum CPU::vCoreMode;
-			case RAX: switch (bits) {
+		if (registerPtr == static_cast<REGISTERS::Register*>(&RAX)) {
+			if (high) {
+				return "AH";
+			}
+			switch (bits) {
+
 				case 8: return "AL"; case 16: return "AX"; case 32:return "EAX";  case 64: default: return "RAX";
 			}
-			case RBX: switch (bits) {
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&RBX)) {
+			if (high) {
+				return "BH";
+			}
+			switch (bits) {
 				case 8: return "BL"; case 16: return "BX"; case 32:return "EBX";  case 64: default: return "RBX";
 			}
-			case RCX: switch (bits) {
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&RCX)) {
+			switch (bits) {
+				if (high) {
+					return "CH";
+				}
 				case 8: return "CL"; case 16: return "CX"; case 32:return "ECX";  case 64: default: return "RCX";
 			}
-			case RDX: switch (bits) {
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&RDX)) {
+			if (high) {
+				return "DH";
+			}
+			switch (bits) {
 				case 8:return "DL";	case 16: return "DX"; case 32:return "EDX";  case 64: default: return "RDX";
 			}
-			case RSI: switch (bits) {
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&RSI)) {
+			switch (bits) {
 				case 8: return "SIL"; case 16: return "SI"; case 32:return "ESI";  case 64: default: return "RSI";
 			}
-			case RDI: switch (bits) {
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&RDI)) {
+			switch (bits) {
 				case 8: return "DIL"; case 16: return "DI"; case 32:return "EDI";  case 64: default: return "RDI";
 			}
-			case RSP: switch (bits) {
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&RSP)) {
+			switch (bits) {
 				case 8: return "SPL"; case 16: return "SP"; case 32:return "ESP";  case 64: default: return "RSP";
 			}
-			case RBP: switch (bits) {
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&RBP)) {
+			switch (bits) {
 				case 8: return "BPL"; case 16: return "BP"; case 32:return "EBP";  case 64: default: return "RBP";
 			}
-			case R8: switch (bits)
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&R8)) {
+			switch (bits)
 			{
 				case 8: return "R8B"; case 16: return "R8W"; case 32:return "R8D";  case 64: default: return "R8";
 			}
-			case R9: switch (bits)
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&R9)) {
+			switch (bits)
 			{
 				case 8: return "R9B"; case 16: return "R9W"; case 32:return "R9D";  case 64: default: return "R9";
 			}
-			case R10: switch (bits)
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&R10)) {
+			switch (bits)
 			{
 				case 8: return "R10B"; case 16: return "R10W"; case 32:return "R10D";  case 64: default: return "R10";
 			}
-			case R11: switch (bits)
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&R11)) {
+			switch (bits)
 			{
 				case 8: return "R11B"; case 16: return "R11W"; case 32:return "R11D";  case 64: default: return "R11";
 			}
-			case R12: switch (bits) {
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&R12)) {
+			switch (bits) {
 				case 8: return "R12B"; case 16: return "R12W"; case 32:return "R12D";  case 64: default: return "R12";
 			}
-			case R13: switch (bits) {
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&R13)) {
+			switch (bits) {
 				case 8: return "R13B"; case 16: return "R13W"; case 32:return "R13D";  case 64: default: return "R13";
 			}
-			case R14: switch (bits) {
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&R14)) {
+			switch (bits) {
 				case 8: return "R14B"; case 16: return "R14W"; case 32:return "R14D";  case 64: default: return "R14";
 			}
-			case R15: switch (bits) {
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&R15)) {
+			switch (bits) {
 				case 8: return "R15B"; case 16: return "R15W"; case 32:return "R15D";  case 64: default: return "R15";
 			}
-			case CR0: return "CR0";
-			case MSR_EFER: return "EFER";
-			case AH: return "AH";
-			case BH: return "BH";
-			case CH: return "CH";
-			case DH: return "DH";
-			case None: return "None";
-			default: return "Undefined";
-
 		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&CR0)) {
+			return "CR0";
+		}
+		else if (registerPtr == static_cast<REGISTERS::Register*>(&EFER)) {
+			return "EFER";
+		}
+
+		else if (registerPtr == nullptr) {
+			return "None";
+		}
+		else {
+			return "Undefined";
+		}
+
+
+
+
+
 	}
 
 	void VirtualCore::WriteBytes(uint64_t address, const uint64_t value, uint8_t sizeBytes)
@@ -145,43 +196,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 	}
 
-	inline void VirtualCore::PrintInstruction(const INSTRUCTIONS::Instruction& instruction) noexcept {//NOLINT(bugprone-exception-escape) Throw in std::print is non recoverable so its not handled
-		ZoneScoped;//NOLINT
-		std::print("Instruction Length: {} bytes\n", instruction.InstructionLengthBytes);
-		if (std::to_underlying(instruction.Prefix1)) {
-			std::print("Prefix Group 1: {:#X}\n", std::to_underlying(instruction.Prefix1));
-		}
-		if (std::to_underlying(instruction.Prefix2)) {
-			std::print("Prefix Group 2: {:#X}\n", std::to_underlying(instruction.Prefix2));
-		}
-		if (instruction.OperandOverride) {
-			std::print("Operand-size override prefix is present\n");
-		}
-		if (instruction.AddressOverride) {
-			std::print("Address-size override prefix is present\n");
-		}
-		std::print("Opcode Size: {} bytes\n", instruction.OpcodeSizeBytes);
-		std::print("Opcode Bytes: ");
-		for (size_t i = 0; i < instruction.OpcodeSizeBytes; i++) {
-			std::print("{:#X} ", instruction.OpcodeBytes[i]);
-		}
-		std::print("\n");
-		if (instruction.hasModRM) {
 
-			std::print("ModRM: mod={}, reg={}, rm={}\n", instruction.ModRM.mod, instruction.ModRM.reg, instruction.ModRM.rm);
-		}
-		if (instruction.hasSIB) {
-			std::print("SIB: scale={}, index={}, base={}\n", instruction.SIB.scale, instruction.SIB.index, instruction.SIB.base);
-		}
-		if (instruction.ImmediateSizeBytes > 0) {
-			std::print("Immediate Bytes: ");
-			for (uint64_t i = 0; i < instruction.ImmediateSizeBytes; i++) {
-				std::print("{:#X} ", instruction.ImmediateBytes[i]);
-			}
-			std::print("\n");
-		}
-
-	}
 
 	void VirtualCore::executeInstruction(const INSTRUCTIONS::Instruction& instruction)
 	{
@@ -368,9 +383,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				RunIfMinimalOrHigherTraceMode(std::print("\nDecoding instruction at RIP: {:#X}\n", RIP.GetValue());)
 
 					const INSTRUCTIONS::Instruction instruction = decodeInstruction();
-				RIP.Increment( instruction.InstructionLengthBytes);
-				RunIfReducedOrHigherTraceMode(PrintInstruction(instruction);)
-					executeInstruction(instruction);
+				RIP.Increment(instruction.InstructionLengthBytes);
+				executeInstruction(instruction);
 			}
 		}
 		catch (EXCEPTIONS::UNDEFINED_OPCODE& e) {

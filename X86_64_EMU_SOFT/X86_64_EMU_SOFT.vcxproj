@@ -105,6 +105,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
+    <None Include="cpp.hint" />
     <None Include="very_strict.ruleset" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

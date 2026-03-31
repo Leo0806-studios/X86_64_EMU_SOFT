@@ -168,5 +168,6 @@
   <ItemGroup>
     <None Include=".clang-tidy" />
     <None Include="very_strict.ruleset" />
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

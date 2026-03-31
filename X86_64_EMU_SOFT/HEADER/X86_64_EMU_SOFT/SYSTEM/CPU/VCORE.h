@@ -73,7 +73,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		static const uint64_t EFER_MSR_NUMBER = 0xC0000080ULL;
 
 		std::shared_ptr<MEMORY::MemoryBus> memoryBus;
-		[[nodiscard]] INSTRUCTIONS::Instruction decodeInstruction() const;
+		[[nodiscard]] INSTRUCTIONS::Instruction decodeInstruction() ;
 		void executeInstruction(const INSTRUCTIONS::Instruction& instruction);
 		void PrintCoreState()const;
 	public:
@@ -113,6 +113,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		}
 		[[nodiscard]] uint8_t GetDefaultOperandSize() const noexcept
 		{
+			DeepZoneScoped;//NOLINT
+			//TODO : implement real Segmentation checks
 			switch (getMode()) {
 				case vCoreMode::realMode:return 16;
 				case vCoreMode::protectedMode: 
@@ -121,10 +123,41 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 			}
 		}
 
+		/// <summary>
+		/// sets the entire FLAGS register(EEFLAGS,RFLAGS) to the provided value.
+		/// </summary>
+		/// <param name="flags"></param>
+		void SetFlags(uint64_t flags)noexcept;
+
+		/// <summary>
+		/// sets FLAGs(EEFLAGS,RFLAGS)according to Value. bits set to one in the KeepMask will be carried over unchagend from the original Flags value. bits set to zero in the KeepMask will be overwritten by the corresponding bit in the value parameter
+		/// </summary>
+		/// <param name="keepMask"></param>
+		/// <param name="value"></param>
+		void Setflags(uint64_t keepMask, uint64_t value)noexcept;
+
+		/// <summary>
+		/// Gets the value of the entire FLAGS register (EFLAGS,RFLAGS)
+		/// </summary>
+		/// <returns></returns>
+		[[nodiscard]] uint64_t GetFlags() const noexcept;
+
+		/// <summary>
+		/// Sets a singular Flag bit in the FLAGS register (EFLAGS,RFLAGS) according to "enabled".
+		/// </summary>
+		/// <param name="flagBit"></param>
+		/// <param name="enabled"></param>
+		void SetFlag(uint8_t flagBit, bool enabled) noexcept;
+
+		/// <summary>
+		/// gets a singualr Flag bit from the FLAGS register (EFLAGS,RFLAGS)
+		/// </summary>
+		/// <param name="flagBit"></param>
+		/// <returns></returns>
+		[[nodiscard]] bool GetFlag(uint8_t flagBit) const noexcept;
 
 
-
-		[[nodiscard]] static std::string getSubregisterFromSize(SYSTEM::CPU::INSTRUCTIONS::TargetRegister reg, uint8_t bits);
+		[[nodiscard]]  std::string getSubregisterFromSize(REGISTERS::Register* registerPtr, uint8_t bits,bool high);
 		/// <summary>
 		/// writes "sizeBytes" amount of bytes from "value" to the memory bus while performing all necesary validation of the target address
 		/// sizebytes must one of 1,2,4,8
@@ -143,7 +176,6 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		/// <returns></returns>
 		[[nodiscard]] uint64_t FetchBytes(uint64_t address, uint8_t sizeBytes) const;
 
-		static void PrintInstruction(const INSTRUCTIONS::Instruction& instruction)noexcept;
 	};
 
 }//  namespace X86_64_EMU_SOFT::SYSTEM::CPU

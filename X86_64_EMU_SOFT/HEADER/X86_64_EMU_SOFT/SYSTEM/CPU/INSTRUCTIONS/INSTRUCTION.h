@@ -121,9 +121,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 			std::array<uint8_t, 8> RegisterPointer{ 0,0,0,0,0,0,0,0 };
 			uint8_t SizeBits = 0;
 			uint8_t Flags = 0;//Bitfield for various flags
-			[[nodiscard]] RegisterOperand(REGISTERS::Register& reg, uint8_t size_bits, uint8_t flags) :
-				RegisterPointer(std::bit_cast<std::array<uint8_t, 8>>(&reg))
-			{}
+
 		};
 
 
@@ -143,6 +141,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		};
 	}// namespace OPERANDS
 	[[nodiscard]] constexpr std::string RegisterToString(TargetRegister reg) {
+
+
 		switch (reg) {
 			case TargetRegister::RAX: return "RAX";
 			case TargetRegister::RBX: return "RBX";

@@ -8,9 +8,9 @@
 #include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h"
 #include "SYSTEM/CPU/DECODING_ENGINE/DECODING_ENGINE.h"
 #include <HELPERS/MACROS.h>
-#include <HELPERS/REDEFINE_MACROS.h>
+
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
-	inline bool HandlePrefix(const VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction,uint8_t byte) {//NOSONAR
+	inline DEFINE_HANDLER(Handle_Prefix) {//NOSONAR
 		ZoneScoped;
 		std::ignore = core;
 		std::ignore = address;
@@ -35,11 +35,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				break;
 			}
 			case std::to_underlying(OPERAND_SIZE_OVERRIDE): {
-				instruction.OperandOverride = true;
+				prefixes.OperandSizeOverride = true;
 				break;
 			}
 			case std::to_underlying(ADDRESS_SIZE_OVERRIDE): {
-				instruction.AddressOverride = true;
+				prefixes.AddressSizeOverride = true;
 				break;
 			}
 			default: {
