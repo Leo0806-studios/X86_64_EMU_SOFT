@@ -38,14 +38,15 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			}
 		}
 		DigestModrmSib(ModrmSib, hasSIB);
-		const INSTRUCTIONS::TargetRegister sourceRegister = DecodingEngine::DecodeTargetRegister(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL));
+		std::ignore = hasSIB;
+		const INSTRUCTIONS::TargetRegister sourceRegister = DecodingEngine::DecodeTargetRegister(static_cast<uint8_t>(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)));
 		const auto sourceOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
 			.RegisterPointer = std::bit_cast<std::array<uint8_t, 8>>(&core.GetRegister(sourceRegister)),
 			.SizeBits = operandSize,
 			.Flags = std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister)
 		};
 		if (ModrmSib.first.mod == 0b11) {
-			const INSTRUCTIONS::TargetRegister destinationRegister = DecodingEngine::DecodeTargetRegister(ModrmSib.first.rm | static_cast<uint8_t>(prefixes.RexPrefix.B << 3ULL));
+			const INSTRUCTIONS::TargetRegister destinationRegister = DecodingEngine::DecodeTargetRegister(static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t>(prefixes.RexPrefix.B << 3ULL)));
 			const auto destinationOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
 				.RegisterPointer = std::bit_cast<std::array<uint8_t, 8>>(&core.GetRegister(destinationRegister)),
 				.SizeBits = operandSize,
@@ -79,6 +80,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			sourceOperand.SizeBits = 64;
 			const auto immediateValue = core.FetchBytes(address, 8);
 			sourceOperand.Value = std::bit_cast<std::array<uint8_t, 8>>(immediateValue);
+			instruction.InstructionLengthBytes += 8;
 		}
 		else {
 			if (operandSize == 32 && prefixes.OperandSizeOverride) {
@@ -87,6 +89,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				const std::array<uint8_t, 2> immediateValue = std::bit_cast<std::array<uint8_t, 2>>(static_cast<uint16_t>(core.FetchBytes(address, 2)));
 				sourceOperand.Value[0] = immediateValue[0];
 				sourceOperand.Value[1] = immediateValue[1];
+				instruction.InstructionLengthBytes += 2;
 			}
 			else if (operandSize == 16 && prefixes.OperandSizeOverride) {
 				operandSize = 32;
@@ -96,6 +99,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				sourceOperand.Value[1] = immediateValue[1];
 				sourceOperand.Value[2] = immediateValue[2];
 				sourceOperand.Value[3] = immediateValue[3];
+				instruction.InstructionLengthBytes += 4;
 			}
 		}
 		const INSTRUCTIONS::TargetRegister destinationRegister = DecodingEngine::GetTargetRegisterfromAdditiveID(static_cast<uint8_t>(byte & static_cast<uint8_t>(0b111)));
@@ -119,6 +123,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 		std::ignore = core;
 		std::ignore = address;
+		std::ignore = prefixes;
 		
 		instruction.Type = INSTRUCTIONS::InstructionType::NOP;
 
@@ -132,6 +137,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 		std::ignore = core;
 		std::ignore = address;
+		std::ignore = prefixes;
 		
 		instruction.Type = INSTRUCTIONS::InstructionType::UD;
 		return true;

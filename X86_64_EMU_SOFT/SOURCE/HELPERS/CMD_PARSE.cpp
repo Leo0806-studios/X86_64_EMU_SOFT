@@ -10,7 +10,7 @@
 #include <vector>
 #include <tracy/Tracy.hpp>
 #include "HELPERS/CMD_PARSE.h"
-#include "HELPERS/REDEFINE_MACROS.h"
+#include "HELPERS/MACROS.h"
 X86_64_EMU_SOFT::HELPERS::CmdArgs::CmdArgs(int argc, const char** argv)
 {
 	ZoneNamed(CmdArgs, true);

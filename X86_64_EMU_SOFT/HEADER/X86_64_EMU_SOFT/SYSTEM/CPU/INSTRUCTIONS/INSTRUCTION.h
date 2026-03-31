@@ -103,7 +103,15 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 			Immediate,
 			None = 0xFF
 		};
-
+		inline std::string OperandTypeToString(const OperandType type)noexcept {
+			switch (type) {
+				case OperandType::Memory:return "Memory";
+				case OperandType::Register:return "Register";
+				case OperandType::Immediate:return "Immediate";
+				case OperandType::None:
+				default:return "NA";
+			}
+		}
 		enum class RegisterOperandFlags : uint8_t {
 			isSegmentRegister = 1U << 0U,
 			isControlRegister = 1U << 1U,
@@ -118,7 +126,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		private:
 
 		public:
-			std::array<uint8_t, 8> RegisterPointer{ 0,0,0,0,0,0,0,0 };
+			std::array<uint8_t, 8> RegisterPointer{ {0,0,0,0,0,0,0,0 } };
 			uint8_t SizeBits = 0;
 			uint8_t Flags = 0;//Bitfield for various flags
 
@@ -127,11 +135,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 
 
 		struct MemoryOperand {
-			std::array<uint8_t, 8> Address{ 0,0,0,0,0,0,0,0 };
+			std::array<uint8_t, 8> Address{ {0,0,0,0,0,0,0,0 }};
 			uint8_t SizeBits = 0;
 		};
 		struct ImmediateOperand {
-			std::array<uint8_t, 8> Value{ 0,0,0,0,0,0,0,0 };
+			std::array<uint8_t, 8> Value{ { 0,0,0,0,0,0,0,0 } };
 			uint8_t SizeBits = 0;
 		};
 		struct [[nodiscard("discarding operands can lead to the emulator misbehaving")]] Operand {

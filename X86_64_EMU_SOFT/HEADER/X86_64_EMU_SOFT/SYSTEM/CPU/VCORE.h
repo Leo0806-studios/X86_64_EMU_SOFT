@@ -175,6 +175,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		/// <param name="sizeBytes"></param>
 		/// <returns></returns>
 		[[nodiscard]] uint64_t FetchBytes(uint64_t address, uint8_t sizeBytes) const;
+		void PrintInstruction(const INSTRUCTIONS::Instruction& instruction) const;
 
 	};
 

@@ -23,7 +23,7 @@
 #include <SYSTEM/IO_DEVICES/DEVICE_BASE.h>
 #include <SYSTEM/MEMORY/MEMORY.h>
 #include "HELPERS/GLOBALS.h"
-#include "HELPERS/REDEFINE_MACROS.h"
+#include "HELPERS/MACROS.h"
 
 namespace X86_64_EMU_SOFT::SYSTEM {
 	namespace {

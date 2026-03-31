@@ -26,6 +26,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		DeepZoneScoped;//NOLINT
 		std::ignore = core;
 		std::ignore = instruction;
+		std::ignore = prefixes;
 		std::stringstream msg;
 		const auto asIntegerType = static_cast<uint16_t>(byte);
 		msg << "\n\n #UD exception \n \n byte: 0x" << std::hex << asIntegerType << " at RIP: 0x" << std::hex << address << " corresponds to no valid opcode " << std::dec;
@@ -418,6 +419,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case R13:
 			case R14:
 			case R15:
+			case CR0:
+			case MSR_EFER:
 			case None:
 			default: NeverOrAssert(false);
 		}

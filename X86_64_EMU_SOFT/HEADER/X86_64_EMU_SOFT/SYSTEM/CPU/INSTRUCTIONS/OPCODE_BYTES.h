@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <string>
 namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 {
 	enum class InstructionType:uint16_t{
@@ -16,6 +17,19 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 		NOP,
 
 	};
+	inline std::string InstrucionTypeToString(InstructionType type)noexcept {
+		switch (type) {
+			case InstructionType::MOV:return"MOV";
+			case InstructionType::ADD:return"ADD";
+			case InstructionType::SUB:return"SUB";
+			case InstructionType::INC:return"INC";
+			case InstructionType::DEC:return"DEC";
+			case InstructionType::OR:return"OR";
+			case InstructionType::NOP:return"NOP";
+			case InstructionType::UD:return "UD";
+			default:return "Undefined";
+		}
+	}
 	enum class PrimaryOpcodeByteValue :uint8_t {
 		ADD_rm8_r8_0x0 = 0x0,//not handled yet
 		ADD_rm16rm32rm64_r16r32r64_0x1 = 0x1,//handled partial

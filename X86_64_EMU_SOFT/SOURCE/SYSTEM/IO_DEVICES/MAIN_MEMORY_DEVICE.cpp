@@ -3,7 +3,6 @@
 #include "SYSTEM/IO_DEVICES/MAIN_MEMORY_DEVICE.h"
 #include "SYSTEM/IO_DEVICES/DEVICE_BASE.h"
 #include <HELPERS/MACROS.h>
-#include <HELPERS/REDEFINE_MACROS.h>
 namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 	MainMemoryDevice::MainMemoryDevice(size_t sizeKB) noexcept//NOLINT(bugprone-exception-escape)
 	{

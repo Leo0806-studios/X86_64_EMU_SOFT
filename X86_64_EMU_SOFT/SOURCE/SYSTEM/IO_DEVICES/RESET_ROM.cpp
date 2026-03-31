@@ -6,7 +6,6 @@
 #include "SYSTEM/IO_DEVICES/RESET_ROM.h"
 #include "SYSTEM/IO_DEVICES/DEVICE_BASE.h"
 #include <HELPERS/MACROS.h>
-#include <HELPERS/REDEFINE_MACROS.h>
 namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 
 	ResetROMDevice::ResetROMDevice(std::vector<uint8_t> data) noexcept :memory(std::move(data))

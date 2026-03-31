@@ -16,7 +16,7 @@
 #include "SYSTEM/CPU/DECODING_ENGINE/DECODING_ENGINE.h"
 #include "SYSTEM/CPU/EXECUTION_ENGINE/EXECUTION_HANDLERS/HANDLERS_ALU.h"
 #include "SYSTEM/CPU/EXECUTION_ENGINE/EXECUTION_HANDLERS/HANDLER_SPECIAL.h"
-#include "HELPERS/REDEFINE_MACROS.h"
+#include <HELPERS/MACROS.h>
 namespace X86_64_EMU_SOFT::SYSTEM::CPU{
 	namespace {
 		[[noreturn]] void UndefinedOpcodeHandler(VirtualCore& core,const INSTRUCTIONS::Instruction& instruction) {

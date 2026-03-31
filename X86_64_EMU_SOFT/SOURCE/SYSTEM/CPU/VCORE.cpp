@@ -73,10 +73,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			}
 		}
 		else if (registerPtr == static_cast<REGISTERS::Register*>(&RCX)) {
+			if (high) {
+				return "CH";
+			}
 			switch (bits) {
-				if (high) {
-					return "CH";
-				}
 				case 8: return "CL"; case 16: return "CX"; case 32:return "ECX";  case 64: default: return "RCX";
 			}
 		}
@@ -194,6 +194,25 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case 8: return memoryBus->Read64(address);
 			default: throw std::out_of_range("sizeBytes out of allowed range (1,2,4,8 ) for VirtualCore.FetchBytes");
 		}
+	}
+
+	void VirtualCore::PrintInstruction(const INSTRUCTIONS::Instruction& instruction) const
+	{
+		using namespace INSTRUCTIONS;
+		using namespace OPERANDS;
+		std::print("Instruction {} {}, {}, {}, {} \n", InstrucionTypeToString(instruction.Type),OperandTypeToString(instruction.Operand0.Type),OperandTypeToString(instruction.Operand1.Type), OperandTypeToString(instruction.Operand2.Type), OperandTypeToString(instruction.Operand3.Type));
+		if (instruction.OpcodeSizeBytes == 1) {
+			std::print("Raw Opcode : {:#X}\n", instruction.OpcodeBytes[0]);
+		}
+		else if (instruction.OpcodeSizeBytes == 2) {
+			std::print("Raw Opcode: {:#X} {:#X}\n", instruction.OpcodeBytes[0], instruction.OpcodeBytes[1]);
+		}
+		else {
+			std::print("Raw Opcode: {:#X} {:#X} {:#X}\n", instruction.OpcodeBytes[0], instruction.OpcodeBytes[1],instruction.OpcodeBytes[2]);
+
+		}
+		std::print("Instructio Length: {}\n", instruction.InstructionLengthBytes);
+
 	}
 
 
@@ -381,8 +400,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			while (true) {
 				FrameMark;
 				RunIfMinimalOrHigherTraceMode(std::print("\nDecoding instruction at RIP: {:#X}\n", RIP.GetValue());)
-
 					const INSTRUCTIONS::Instruction instruction = decodeInstruction();
+				RunIfReducedOrHigherTraceMode(PrintInstruction(instruction));
 				RIP.Increment(instruction.InstructionLengthBytes);
 				executeInstruction(instruction);
 			}
