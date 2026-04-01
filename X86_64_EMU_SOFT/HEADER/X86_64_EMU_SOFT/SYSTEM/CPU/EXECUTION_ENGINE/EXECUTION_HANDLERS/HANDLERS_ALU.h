@@ -64,6 +64,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case 8: {
 				if (destinationOperand.Flags & std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister)) {
 					destinationRegister.SetHigh8Bits(static_cast<uint8_t>(destinationRegister.GetHigh8Bits() + static_cast<uint8_t>(sourceVal)));
+
 				}
 				else {
 
@@ -127,6 +128,12 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		{
 			case 8: {
 				if (destinationOperand.Flags & std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister)) {
+					RunIfMinimalOrHigherTraceMode(std::print("Executing SUB {}, {}",
+															 core.getSubregisterFromSize(std::bit_cast<REGISTERS::Register*>(destinationOperand.RegisterPointer), 8, true),
+															 instruction.Operand1.Type == INSTRUCTIONS::OPERANDS::OperandType::Register ?
+															 core.getSubregisterFromSize(std::bit_cast<REGISTERS::Register*>(std::get<INSTRUCTIONS::OPERANDS::RegisterOperand>(instruction.Operand1.Data).RegisterPointer), 8, std::get<INSTRUCTIONS::OPERANDS::RegisterOperand>(instruction.Operand1.Data).Flags & std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) ? true : false) :
+															 instruction.Operand1.Type == INSTRUCTIONS::OPERANDS::OperandType::Immediate ? "immediate value" : std::string("[" + std::to_string(std::bit_cast<uint64_t>(std::get<INSTRUCTIONS::OPERANDS::MemoryOperand>(instruction.Operand1.Data).Address)) + "]")
+					));
 					destinationRegister.SetHigh8Bits(static_cast<uint8_t>(destinationRegister.GetHigh8Bits() - static_cast<uint8_t>(sourceVal)));
 				}
 				else {
