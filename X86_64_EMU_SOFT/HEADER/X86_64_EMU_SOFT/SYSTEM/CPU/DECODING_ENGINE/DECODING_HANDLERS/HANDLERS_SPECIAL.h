@@ -106,14 +106,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				sourceOperand.Value[1] = immediateValue[1];
 				instruction.InstructionLengthBytes += 2;
 			}
-			else if (operandSize == 64) {
-				const auto immediateValue = core.FetchBytes(address, 8);
-				sourceOperand.Value = std::bit_cast<std::array<uint8_t, 8>>(immediateValue);
-				instruction.InstructionLengthBytes += 8;
-			}
 			else {
 				NeverOrAssert(false);
 			}
+		}
+		if (operandSize == 64) {
+			const auto immediateValue = core.FetchBytes(address, 8);
+			sourceOperand.Value = std::bit_cast<std::array<uint8_t, 8>>(immediateValue);
+			instruction.InstructionLengthBytes += 8;
 		}
 		const INSTRUCTIONS::TargetRegister destinationRegister = DecodingEngine::GetTargetRegisterfromAdditiveID(static_cast<uint8_t>(byte & static_cast<uint8_t>(0b111)));
 		const auto destinationOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{

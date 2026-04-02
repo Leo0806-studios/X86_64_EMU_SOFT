@@ -6,7 +6,7 @@
 int main(int argc, const char** argv)
 {
 	X86_64_EMU_SOFT::SYSTEM::System EmulatorState(argc, argv);
-	EmulatorState.Start();
+	std::ignore =EmulatorState.Start();
 	std::cin >> std::ws;
 }
 

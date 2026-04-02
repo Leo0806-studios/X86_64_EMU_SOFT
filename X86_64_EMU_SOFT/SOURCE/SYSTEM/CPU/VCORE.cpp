@@ -53,7 +53,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 	[[nodiscard]]
-	std::string VirtualCore::getSubregisterFromSize(REGISTERS::Register* registerPtr, uint8_t bits, bool high) {
+	std::string VirtualCore::getSubregisterFromSize(const REGISTERS::Register* registerPtr, uint8_t bits, bool high) {
 		DeepZoneScoped;//NOLINT
 		if (registerPtr == static_cast<REGISTERS::Register*>(&RAX)) {
 			if (high) {
@@ -172,7 +172,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	}
 
-	void VirtualCore::WriteBytes(uint64_t address, const uint64_t value, uint8_t sizeBytes)
+	void VirtualCore::WriteBytes(uint64_t address, const uint64_t value, uint8_t sizeBytes)noexcept
 	{
 		ZoneScoped;//NOLINT
 		switch (sizeBytes) {
@@ -180,11 +180,13 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case 2: memoryBus->Write16(address, static_cast<uint16_t>(value)); break;
 			case 4: memoryBus->Write32(address, static_cast<uint32_t>(value)); break;
 			case 8: memoryBus->Write64(address, value); break;
-			default: throw std::out_of_range("sizeBytes out of allowed range (1,2,4,8 ) for VirtualCore.WriteBytes");
+			default: NeverOrAssert("size Bytes in " __FUNCTION__ " can only be 1,2,4 or 8");
+
 		}
+		__assume(false);
 	}
 
-	inline	uint64_t  VirtualCore::FetchBytes(uint64_t address, uint8_t sizeBytes) const
+	inline	uint64_t  VirtualCore::FetchBytes(uint64_t address, uint8_t sizeBytes) const noexcept
 	{
 		ZoneScoped;//NOLINT
 		switch (sizeBytes) {
@@ -192,8 +194,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			case 2: return memoryBus->Read16(address);
 			case 4: return memoryBus->Read32(address);
 			case 8: return memoryBus->Read64(address);
-			default: throw std::out_of_range("sizeBytes out of allowed range (1,2,4,8 ) for VirtualCore.FetchBytes");
+			default: NeverOrAssert("size Bytes in " __FUNCTION__ " can only be 1,2,4 or 8");
 		}
+		__assume(false);
 	}
 
 	void VirtualCore::PrintInstruction(const INSTRUCTIONS::Instruction& instruction) const

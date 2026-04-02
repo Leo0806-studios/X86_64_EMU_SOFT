@@ -157,7 +157,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		[[nodiscard]] bool GetFlag(uint8_t flagBit) const noexcept;
 
 
-		[[nodiscard]]  std::string getSubregisterFromSize(REGISTERS::Register* registerPtr, uint8_t bits,bool high);
+		[[nodiscard]]  std::string getSubregisterFromSize(const REGISTERS::Register* registerPtr, uint8_t bits,bool high);
 		/// <summary>
 		/// writes "sizeBytes" amount of bytes from "value" to the memory bus while performing all necesary validation of the target address
 		/// sizebytes must one of 1,2,4,8
@@ -165,7 +165,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		/// <param name="address"></param>
 		/// <param name="value"></param>
 		/// <param name="sizeBytes"></param>
-		void WriteBytes(uint64_t address, const uint64_t value, uint8_t sizeBytes);
+		void WriteBytes(uint64_t address, const uint64_t value, uint8_t sizeBytes)noexcept;
 
 		/// <summary>
 		/// fetches "sizeBtes" amount of bytes.
@@ -174,7 +174,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		/// <param name="address"></param>
 		/// <param name="sizeBytes"></param>
 		/// <returns></returns>
-		[[nodiscard]] uint64_t FetchBytes(uint64_t address, uint8_t sizeBytes) const;
+		[[nodiscard]] uint64_t FetchBytes(uint64_t address, uint8_t sizeBytes) const noexcept;
 		void PrintInstruction(const INSTRUCTIONS::Instruction& instruction) const;
 
 	};

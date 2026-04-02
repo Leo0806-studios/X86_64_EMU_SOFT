@@ -35,7 +35,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 		uint64_t sourceVal = 0;
 		if (instruction.Operand1.Type == INSTRUCTIONS::OPERANDS::OperandType::Register) {
-			const auto& sourceOperand = std::get<INSTRUCTIONS::OPERANDS::RegisterOperand>(instruction.Operand0.Data);
+			const auto& sourceOperand = std::get<INSTRUCTIONS::OPERANDS::RegisterOperand>(instruction.Operand1.Data);
 			assert(sourceOperand.Flags & std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister));//the generic add handler only works for gprs
 			const REGISTERS::GPR& sourceRegister = static_cast<REGISTERS::GPR&>(*std::bit_cast<REGISTERS::Register*>(sourceOperand.RegisterPointer));
 			sourceVal = [&]() -> uint64_t {
@@ -47,7 +47,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 						return sourceRegister.GetLow8Bits();
 					}
 					case 16:return sourceRegister.GetLow16Bits();
-					case 32:return sourceRegister.GetLow32Bits();
+					case 32:
+						RunIfFullTraceMode(PrintRegister("Source Register", sourceRegister, "Before Execution:", 32, false, sourceRegister.GetLow32Bits(), int32_t));
+						return sourceRegister.GetLow32Bits();
 					case 64:return sourceRegister.GetValue();
 					default:NeverOrAssert(false);
 				}
@@ -57,6 +59,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 		else if (instruction.Operand1.Type == INSTRUCTIONS::OPERANDS::OperandType::Immediate) {
 			sourceVal = std::bit_cast<uint64_t>(std::get<INSTRUCTIONS::OPERANDS::ImmediateOperand>(instruction.Operand1.Data).Value);
+			RunIfFullTraceMode(PrintImmediate("Source Immediate Value", sourceVal, std::get<INSTRUCTIONS::OPERANDS::ImmediateOperand>(instruction.Operand1.Data).SizeBits););
 		}
 		else {
 			NeverOrAssert(false);
@@ -79,7 +82,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				break;
 			}
 			case 16:destinationRegister.SetLow16Bits( static_cast<uint16_t>(sourceVal)); break;
-			case 32:destinationRegister.SetValue( 0ULL|static_cast<uint32_t>(sourceVal)); break;
+			case 32:
+				RunIfFullTraceMode(PrintRegister("Destination Register", destinationRegister, "Before Execution:", 32, false, destinationRegister.GetLow32Bits(), int32_t));
+				destinationRegister.SetValue( 0ULL|static_cast<uint32_t>(sourceVal)); 
+				RunIfFullTraceMode(PrintRegister("Destination Register", destinationRegister, "After Execution:", 32, false, destinationRegister.GetLow32Bits(), int32_t));
+				break;
 			case 64:destinationRegister.SetValue( sourceVal); break;
 			default:NeverOrAssert(false); break;
 		}

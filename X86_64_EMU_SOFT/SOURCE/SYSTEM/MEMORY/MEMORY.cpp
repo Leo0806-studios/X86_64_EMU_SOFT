@@ -307,7 +307,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 	uint32_t  MemoryBus::Read32(uint64_t address) const noexcept
 	{
 		uint32_t value = 0;
-		std::array<uint8_t, sizeof(value)> arr = { Read8(address + 0U),Read8(8 + 1U),Read8(address + 2U),Read8(address + 3U) };
+		std::array<uint8_t, sizeof(value)> arr = { Read8(address + 0U),Read8(address + 1U),Read8(address + 2U),Read8(address + 3U) };
 		static_assert(sizeof(value) == sizeof(arr), "value and tmp buffer are not the same size (uint32_t)");
 		std::memcpy(&value, arr.data(), sizeof(value));
 		return value;

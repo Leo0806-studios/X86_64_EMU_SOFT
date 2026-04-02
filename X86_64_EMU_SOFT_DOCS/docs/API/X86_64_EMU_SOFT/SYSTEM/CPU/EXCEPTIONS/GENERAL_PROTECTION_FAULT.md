@@ -40,20 +40,19 @@ a type that represents the General Protection fault cpu exception
                     <li>const & to the stored message</li>
                 </ul>
         </dd>
-    <dt>GetArgMap</dt>
-        <dd>
-            <p>gets a const reference to the internal storage</p>
-        </dd>
 </dl>
 
 ###### Private Members
 <dl class ="CmdArgsAPIPrivate">
-    dt
+    <dt>message</dt>
+        <dd>
+            <p>signature: <code>std::string message;</code></p>
+            <p>The internal storage of the exception message. to read call <code>GetMessage()</code></p>
+        </dd>
 </dl>
 __________________________________________________
 
 ## Implementation Notes
-
 
 
 

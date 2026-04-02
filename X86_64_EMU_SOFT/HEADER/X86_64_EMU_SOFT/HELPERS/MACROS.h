@@ -2,7 +2,7 @@
 #include <source_location>
 #include <tracy/Tracy.hpp>
 #include "GLOBALS.h"
-#define RunIfFullTraceMode(...) if(X86_64_EMU_SOFT::HELPERS::Tracemode == X86_64_EMU_SOFT::HELPERS::TraceMode::full) { __VA_ARGS__;}
+#define RunIfFullTraceMode(...) if(X86_64_EMU_SOFT::HELPERS::Tracemode == X86_64_EMU_SOFT::HELPERS::TraceMode::full) { __VA_ARGS__;}(void)nullptr
 #define RunIfReducedOrHigherTraceMode(...) if(X86_64_EMU_SOFT::HELPERS::Tracemode == X86_64_EMU_SOFT::HELPERS::TraceMode::reduced || X86_64_EMU_SOFT::HELPERS::Tracemode == X86_64_EMU_SOFT::HELPERS::TraceMode::full) { __VA_ARGS__;}
 #define RunIfMinimalOrHigherTraceMode(...) if(X86_64_EMU_SOFT::HELPERS::Tracemode == X86_64_EMU_SOFT::HELPERS::TraceMode::minimal || X86_64_EMU_SOFT::HELPERS::Tracemode == X86_64_EMU_SOFT::HELPERS::TraceMode::reduced || X86_64_EMU_SOFT::HELPERS::Tracemode == X86_64_EMU_SOFT::HELPERS::TraceMode::full) { __VA_ARGS__;}
 
