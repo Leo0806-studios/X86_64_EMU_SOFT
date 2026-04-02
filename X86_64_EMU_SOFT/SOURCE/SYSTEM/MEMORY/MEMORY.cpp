@@ -285,7 +285,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 			if (inPageOffset >= section.pageOffset && inPageOffset < (section.pageOffset + section.size)) {
 				const uint64_t off = inPageOffset - section.pageOffset;
 
-				if (section.Flags & std::to_underlying(PageEntry::PageSection::Flags::DirectAccess) && !(section.Flags & std::to_underlying(PageEntry::PageSection::Flags::SideEffectRead))) {
+				if (section.Flags & std::to_underlying(PageEntry::PageSection::Flags::DirectAccess) && !(section.Flags & std::to_underlying(PageEntry::PageSection::Flags::SideEffectRead))) [[likely]]{
 					return section.dataPtr[off];//NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				}
 				return section.device->Read8(section.DeviceOffset + off);
