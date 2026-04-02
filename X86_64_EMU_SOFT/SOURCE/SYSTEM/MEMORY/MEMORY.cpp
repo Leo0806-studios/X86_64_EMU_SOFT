@@ -149,7 +149,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 				currentPage.Sections[0].DeviceOffset = 0;
 				currentPage.Sections[0].pageOffset = 0;
 				currentPage.Sections[0].size = static_cast<uint32_t>(sizeBytes);
-				currentPage.Sections[0].deviceTag = PageEntry::PageSection::DeviceTag::ResetRom;
+				currentPage.Sections[0].Flags = std::to_underlying(PageEntry::PageSection::Flags::DirectAccess);
+				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::SideEffectWrite);
+				currentPage.Sections[0].dataPtr = static_cast<IO_DEVICES::ResetROMDevice*>(device.get())->GetDataPtr();
 				currentPage.Sections.push_back(newSection);
 				currentPage.SortSections();
 
@@ -162,7 +164,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 				currentPage.Sections[0].DeviceOffset = 0;
 				currentPage.Sections[0].pageOffset = static_cast<uint32_t>(inPageOffet);
 				currentPage.Sections[0].size = static_cast<uint32_t>(sizeBytes);
-				currentPage.Sections[0].deviceTag = PageEntry::PageSection::DeviceTag::ResetRom;
+				currentPage.Sections[0].Flags = std::to_underlying(PageEntry::PageSection::Flags::DirectAccess);
+				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::SideEffectWrite);
+				currentPage.Sections[0].dataPtr = static_cast<IO_DEVICES::ResetROMDevice*>(device.get())->GetDataPtr();
 				currentPage.Sections.push_back(newSection);
 				currentPage.SortSections();
 
@@ -178,7 +182,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 				currentPage.Sections[0].DeviceOffset = 0;
 				currentPage.Sections[0].pageOffset = static_cast<uint32_t>(inPageOffet);
 				currentPage.Sections[0].size = static_cast<uint32_t>(sizeBytes);
-				currentPage.Sections[0].deviceTag = PageEntry::PageSection::DeviceTag::ResetRom;
+				currentPage.Sections[0].Flags = std::to_underlying(PageEntry::PageSection::Flags::DirectAccess);
+				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::SideEffectWrite);
+				currentPage.Sections[0].dataPtr = static_cast<IO_DEVICES::ResetROMDevice*>(device.get())->GetDataPtr();
 				currentPage.Sections.push_back(newSectionBefore);
 				currentPage.Sections.push_back(newSectionAfter);
 				currentPage.SortSections();
@@ -220,7 +226,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 						section.DeviceOffset = 0;
 						section.pageOffset = static_cast<uint32_t>(inPageOffet);
 						section.size = static_cast<uint32_t>(sizeBytes);
-						section.deviceTag = PageEntry::PageSection::DeviceTag::FirmwareRom;
+						section.Flags = std::to_underlying(PageEntry::PageSection::Flags::DirectAccess);
+						section.Flags |= std::to_underlying(PageEntry::PageSection::Flags::SideEffectWrite);
+						section.dataPtr = static_cast<IO_DEVICES::FirmwareRomDevice*>(device.get())->GetDataPtr();
 						//currentPage.Sections.push_back(newSectionBefore);
 						currentPage.Sections.push_back(newSectionAfter);
 						remainingDeviceBytes = 0;
@@ -254,7 +262,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 			page.Sections[0].pageOffset = 0;
 			page.Sections[0].DeviceOffset = deviceOffset;
 			page.Sections[0].size = 4096;
-			page.Sections[0].deviceTag = PageEntry::PageSection::DeviceTag::MainMemory;
+			page.Sections[0].Flags = std::to_underlying(PageEntry::PageSection::Flags::DirectAccess);
+			page.Sections[0].dataPtr = static_cast<IO_DEVICES::MainMemoryDevice*>(device.get())->GetDataPtr();
 			deviceOffset += page.Sections[0].size;
 		}
 		return true;
@@ -275,21 +284,12 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 		for (const auto& section : page.Sections) {
 			if (inPageOffset >= section.pageOffset && inPageOffset < (section.pageOffset + section.size)) {
 				const uint64_t off = inPageOffset - section.pageOffset;
-				switch (section.deviceTag) {
-					case PageEntry::PageSection::DeviceTag::MainMemory: {
-						return static_cast<IO_DEVICES::MainMemoryDevice*>(section.device)->Read8(section.DeviceOffset + off);
-					}
-					case PageEntry::PageSection::DeviceTag::ResetRom: {
-						return static_cast<IO_DEVICES::ResetROMDevice*>(section.device)->Read8(section.DeviceOffset + off);
-					}
-					case PageEntry::PageSection::DeviceTag::FirmwareRom: {
-						return static_cast<IO_DEVICES::FirmwareRomDevice*>(section.device)->Read8(section.DeviceOffset + off);
-					}
-					case PageEntry::PageSection::DeviceTag::OtherDevice:
-					default: {
-						return section.device->Read8(section.DeviceOffset + off);
-					}
+
+				if (section.Flags & std::to_underlying(PageEntry::PageSection::Flags::DirectAccess) && !(section.Flags & std::to_underlying(PageEntry::PageSection::Flags::SideEffectRead))) {
+					return section.dataPtr[off];//NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				}
+				return section.device->Read8(section.DeviceOffset + off);
+
 			}
 		}
 		return 0xFF;

@@ -26,6 +26,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES {
 		void Write32(uint64_t offset, uint32_t value) noexcept override;
 
 		void Write64(uint64_t offset, uint64_t value) noexcept override;
+		[[nodiscard]] uint8_t* GetDataPtr() noexcept {
+			return memory.data();
+		}
+
 
 	};
 }// namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES
