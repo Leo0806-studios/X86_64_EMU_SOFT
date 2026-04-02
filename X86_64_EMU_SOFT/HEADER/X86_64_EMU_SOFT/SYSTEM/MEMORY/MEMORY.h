@@ -14,17 +14,28 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 		struct PageEntry
 		{
 			struct PageSection {
-				enum class DeviceTag {
+				enum class DeviceTag:std::uint8_t {
 					MainMemory,
 					ResetRom,
 					FirmwareRom,
 					OtherDevice
 				};
-				IO_DEVICES::DeviceBase* device = nullptr;
-				DeviceTag deviceTag = DeviceTag::OtherDevice;
+				enum class Flags : uint8_t {
+					SideEffectFree = 0U,
+					SideEffectRead = 1U << 0U,
+					SideEffectWrite = 1U << 1U,
+					DirectAccess = 1U << 2U,
+				};
+
+				union {
+				IO_DEVICES::DeviceBase* device=0;
+				uint8_t* dataPtr;
+				};
+				uint8_t Flags = 0;
 				uint64_t DeviceOffset = 0;
 				uint32_t pageOffset = 0;
 				uint32_t size = 4096;
+
 			};
 			std::vector<PageSection> Sections = std::vector<PageSection>(1);//NOLINT(misc-non-private-member-variables-in-classes)
 			[[nodiscard ]] bool IsPageContiguous()const noexcept;
