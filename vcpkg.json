@@ -2,7 +2,9 @@
   "dependencies": [
     "boost-algorithm",
     "boost-program-options",
-  "tracy"
-    
+    {
+      "name": "tracy",
+      "features": [ "on-demand" ]
+    }
   ]
 }

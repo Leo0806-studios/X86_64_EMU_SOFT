@@ -3,6 +3,7 @@
     <BuildType Name="Debug_long" />
     <BuildType Name="Debug_protected" />
     <BuildType Name="Debug_real" />
+    <BuildType Name="Debug_TEST" />
     <BuildType Name="Release_long" />
     <BuildType Name="Release_protected" />
     <BuildType Name="Release_real" />

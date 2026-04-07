@@ -856,7 +856,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 
 		throw EXCEPTIONS::UNDEFINED_OPCODE("Handeling for INCr16AXr32 is not yet implemnted ");
-		return true;
+		//return true;
 	}
 
 

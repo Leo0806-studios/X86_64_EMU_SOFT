@@ -9,21 +9,25 @@
 
 #pragma warning(push)
 #pragma warning(disable:4005)
-# define ZoneNamed( varname, active ) static constexpr tracy::SourceLocationData __tracy_source_location { nullptr, TracyFunction,  TracyFile, (uint32_t)std::source_location::current().line(), 0 }; tracy::ScopedZone varname( &__tracy_source_location, active )
-#define ZoneScoped ZoneNamed( ___tracy_scoped_zone, true )
-#pragma warning(pop)
+#ifdef TRACY_ENABLE	
+#	define ZoneNamed( varname, active ) static constexpr tracy::SourceLocationData __tracy_source_location { nullptr, TracyFunction,  TracyFile, (uint32_t)std::source_location::current().line(), 0 }; tracy::ScopedZone varname( &__tracy_source_location, active )
+#	define ZoneScoped ZoneNamed( ___tracy_scoped_zone, true )
 
 
-#ifdef DEEP_PROFILING
-#define DeepZoneScoped ZoneScoped; ZoneColor(0xff00ff)
+#	ifdef DEEP_PROFILING
+#		define DeepZoneScoped ZoneScoped; ZoneColor(0xff00ff)
+#	else
+#		define DeepZoneScoped
+#	endif
 #else
-#define DeepZoneScoped
+#	define DeepZoneScoped
 #endif
+#	pragma warning(pop)
 
 
 #ifdef _DEBUG
-#include <cassert>
-#define NeverOrAssert(...) assert(__VA_ARGS__)
+#	include <cassert>
+#	define NeverOrAssert(...) assert(__VA_ARGS__)
 #else
-#define NeverOrAssert(...) __assume(false)
+#	define NeverOrAssert(...) __assume(false)
 #endif 
