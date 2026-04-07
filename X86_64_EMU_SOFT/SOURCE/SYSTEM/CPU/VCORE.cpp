@@ -165,11 +165,6 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		else {
 			return "Undefined";
 		}
-
-
-
-
-
 	}
 
 	void VirtualCore::WriteBytes(uint64_t address, const uint64_t value, uint8_t sizeBytes)noexcept
@@ -183,7 +178,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			default: NeverOrAssert("size Bytes in " __FUNCTION__ " can only be 1,2,4 or 8");
 
 		}
-		__assume(false);
+		
 	}
 
 	inline	uint64_t  VirtualCore::FetchBytes(uint64_t address, uint8_t sizeBytes) const noexcept

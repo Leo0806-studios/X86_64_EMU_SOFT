@@ -129,11 +129,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 			std::array<uint8_t, 8> RegisterPointer{ {0,0,0,0,0,0,0,0 } };
 			uint8_t SizeBits = 0;
 			uint8_t Flags = 0;//Bitfield for various flags
-
 		};
-
-
-
 		struct MemoryOperand {
 			std::array<uint8_t, 8> Address{ {0,0,0,0,0,0,0,0 }};
 			uint8_t SizeBits = 0;
