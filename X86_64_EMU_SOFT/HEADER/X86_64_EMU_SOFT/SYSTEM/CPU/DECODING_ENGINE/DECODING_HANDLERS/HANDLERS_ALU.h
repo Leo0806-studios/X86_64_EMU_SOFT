@@ -874,11 +874,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			.Value = {0,0,0,0,0,0,0,0},//will be set later
 			.SizeBits = 0,//will be set later
 		};
+		DigestModrmSib(ModrmSib, hasSIB);
+		std::ignore = hasSIB;
 		if (std::bit_cast<bool>(prefixes.RexPrefix) && prefixes.RexPrefix.W) {
 			operandSize = 64;
 			sourceOperand.SizeBits = 64;
 			const auto immediateValue = static_cast<uint64_t>(static_cast<int64_t>(core.FetchBytes(address, 1)));
 			sourceOperand.Value = std::bit_cast<std::array<uint8_t, 8>>(immediateValue);
+			sourceOperand.SizeBits = 64;
 			instruction.InstructionLengthBytes += 1;
 		}
 		else {
@@ -893,17 +896,19 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 			}
 			if (operandSize == 32) {
-				const std::array<uint8_t, 4> immediateValue = std::bit_cast<std::array<uint8_t, 4>>(static_cast<uint32_t>(core.FetchBytes(address, 1)));
+				const std::array<uint8_t, 4> immediateValue = std::bit_cast<std::array<uint8_t, 4>>(static_cast<int32_t>(core.FetchBytes(address, 1)));
 				sourceOperand.Value[0] = immediateValue[0];
 				sourceOperand.Value[1] = immediateValue[1];
 				sourceOperand.Value[2] = immediateValue[2];
 				sourceOperand.Value[3] = immediateValue[3];
+				sourceOperand.SizeBits = 32;
 				instruction.InstructionLengthBytes += 1;
 			}
 			else if (operandSize == 16) {
-				const std::array<uint8_t, 2> immediateValue = std::bit_cast<std::array<uint8_t, 2>>(static_cast<uint16_t>(core.FetchBytes(address, 1)));
+				const std::array<uint8_t, 2> immediateValue = std::bit_cast<std::array<uint8_t, 2>>(static_cast<int16_t>(core.FetchBytes(address, 1)));
 				sourceOperand.Value[0] = immediateValue[0];
 				sourceOperand.Value[1] = immediateValue[1];
+				sourceOperand.SizeBits = 16;
 				instruction.InstructionLengthBytes += 1;
 			}
 			else {
@@ -911,8 +916,6 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			}
 		}
 
-		DigestModrmSib(ModrmSib, hasSIB);
-		std::ignore = hasSIB;
 		if (ModrmSib.first.mod == 0b11) {
 			const INSTRUCTIONS::TargetRegister destinationRegister = DecodingEngine::DecodeTargetRegister(static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t>(prefixes.RexPrefix.B << 3ULL)));
 			const auto destinationOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{

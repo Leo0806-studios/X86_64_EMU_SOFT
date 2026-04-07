@@ -16,5 +16,6 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 #define PrintRegister(beforeText,Reg,middleText,sizeBits,highByte,value,castTypeSigned) std::print("{} {} {} {:#X}, {:#B}, {}, signed {}\n",beforeText, core.getSubregisterFromSize(&(Reg), (sizeBits), (highByte)),middleText, (value), (value), (value), static_cast<castTypeSigned>((value)));
-#define PrintImmediate(beforeText, value, sizeBits) std::print("{} Immediate value: {:#X}, {:#B}, size: {} bits\n", beforeText, (value), (value), (sizeBits));
+#define CastToSignedByBits(sizeBits,val) sizeBits == 8 ? static_cast<int8_t>((val)) : sizeBits == 16 ? static_cast<int16_t>((val)) : sizeBits == 32 ? static_cast<int32_t>((val)) : static_cast<int64_t>((val))
+#define PrintImmediate(beforeText, value, sizeBits) std::print("{} Immediate value: {:#X}, {:#B},{} ,signed {} size: {} bits\n", beforeText, (value), (value),(value),CastToSignedByBits((sizeBits),(value)), (sizeBits));
 }//X86_64_EMU_SOFT::SYSTEM::CPU
