@@ -29,6 +29,14 @@ namespace X86_64_EMU_SOFT::TESTS::ALU_DECODING_TESTS
 	
 
 	TEST_CLASS(Test_Handle_ADD_rm8_r8_0x0) {
+
+		TestEnvironment env;
+		TEST_METHOD_INITIALIZE(Init) {
+			env = TestEnvironment();
+			Boilerplate::SetRegistersAscending(env.vCoreLong);
+			Boilerplate::SetRegistersAscending(env.vCoreProtected);
+			Boilerplate::SetRegistersAscending(env.vCoreReal);
+		}
 		TEST_METHOD(TestRegisterToRegister){
 		
 		}
