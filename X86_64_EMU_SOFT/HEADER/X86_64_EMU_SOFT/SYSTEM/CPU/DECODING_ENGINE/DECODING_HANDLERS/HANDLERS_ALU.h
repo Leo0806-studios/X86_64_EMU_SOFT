@@ -31,7 +31,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		DigestModrmSib(ModrmSib, hasSIB);
 		std::ignore = hasSIB;
 		assert(std::bit_cast<uint8_t>(INSTRUCTIONS::REX()) == false);
-		const auto sourceRegister = DecodingEngine::DecodeTarget8BitRegister(core, static_cast<uint8_t>((ModrmSib.first.reg) | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)));
+		const auto cpuMode = core.getMode();
+		const auto sourceRegister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>((ModrmSib.first.reg) | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)),std::bit_cast<bool>(prefixes.RexPrefix));
 		const uint8_t sourceFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
 			(IsHighRegister(sourceRegister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
 		const INSTRUCTIONS::OPERANDS::RegisterOperand SourceOperand =
@@ -44,7 +45,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 		if (ModrmSib.first.mod == 3) {
-			const auto destinationregister = DecodingEngine::DecodeTarget8BitRegister(core, static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t> (prefixes.RexPrefix.B << 3ULL)));
+			const auto destinationregister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t> (prefixes.RexPrefix.B << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
 			const uint8_t destinationFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
 				(IsHighRegister(destinationregister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
 			const auto destinationOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
@@ -125,8 +126,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		DigestModrmSib(ModrmSib, hasSIB);
 		std::ignore = hasSIB;
 		assert(std::bit_cast<uint8_t>(INSTRUCTIONS::REX()) == false);
-
-		const auto destinationRegister = DecodingEngine::DecodeTarget8BitRegister(core, static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t>(prefixes.RexPrefix.B << 3ULL)));
+		const auto cpuMode = core.getMode();
+		const auto destinationRegister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
 		const uint8_t destinationFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
 			(IsHighRegister(destinationRegister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
 		const auto destinationOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
@@ -136,7 +137,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		};
 		instruction.Operand0 = INSTRUCTIONS::OPERANDS::Operand{ .Data = destinationOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
 		if (ModrmSib.first.mod == 0b11) {
-			const auto sourceRegister = DecodingEngine::DecodeTarget8BitRegister(core, static_cast<uint8_t>(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)));
+			const auto sourceRegister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t>(prefixes.RexPrefix.B << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
 			const uint8_t sourceFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
 				(IsHighRegister(destinationRegister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
 			const auto sourceOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
@@ -149,6 +150,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		else {
 			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not yet supported for ADD 0x2");
 		}
+		instruction.OperandCount = 2;
 		return true;
 	}
 
@@ -297,6 +299,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		else {
 			NeverOrAssert(false);
 		}
+		instruction.OperandCount = 2;
 		return true;
 	}
 
@@ -312,8 +315,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 		DigestModrmSib(ModrmSib, hasSIB);
 		std::ignore = hasSIB;
+		const auto cpuMode = core.getMode();
 		assert(std::bit_cast<uint8_t>(INSTRUCTIONS::REX()) == false);
-		const auto sourceRegister = DecodingEngine::DecodeTarget8BitRegister(core, static_cast<uint8_t>(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)));
+		const auto sourceRegister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
 		const uint8_t sourceFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
 			(IsHighRegister(sourceRegister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
 		const INSTRUCTIONS::OPERANDS::RegisterOperand SourceOperand =
@@ -326,7 +330,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 		if (ModrmSib.first.mod == 3) {
-			const auto destinationregister = DecodingEngine::DecodeTarget8BitRegister(core, static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t> (prefixes.RexPrefix.B << 3ULL)));
+			const auto destinationregister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t> (prefixes.RexPrefix.B << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
 			const uint8_t destinationFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
 				(IsHighRegister(destinationregister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
 			const auto destinationOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
@@ -408,8 +412,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		DigestModrmSib(ModrmSib, hasSIB);
 		std::ignore = hasSIB;
 		assert(std::bit_cast<uint8_t>(INSTRUCTIONS::REX()) == false);
+		const auto cpuMode = core.getMode();
 
-		const auto destinationRegister = DecodingEngine::DecodeTarget8BitRegister(core, static_cast<uint8_t>(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)));
+		const auto destinationRegister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
 		const uint8_t destinationFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
 			(IsHighRegister(destinationRegister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
 		const auto destinationOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
@@ -419,7 +424,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		};
 		instruction.Operand0 = INSTRUCTIONS::OPERANDS::Operand{ .Data = destinationOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
 		if (ModrmSib.first.mod == 0b11) {
-			const auto sourceRegister = DecodingEngine::DecodeTarget8BitRegister(core, static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t>(prefixes.RexPrefix.B << 3ULL)));
+			const auto sourceRegister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t>(prefixes.RexPrefix.B << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
 			const uint8_t sourceFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
 				(IsHighRegister(destinationRegister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
 			const auto sourceOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
@@ -595,8 +600,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		instruction.InstructionLengthBytes++;
 		DigestModrmSib(ModrmSib, hasSIB);
 		std::ignore = hasSIB;
+		const auto cpuMode = core.getMode();
 		assert(std::bit_cast<uint8_t>(INSTRUCTIONS::REX()) == false);
-		const auto sourceRegister = DecodingEngine::DecodeTarget8BitRegister(core, static_cast<uint8_t>(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)));
+		const auto sourceRegister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
 		const uint8_t sourceFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
 			(IsHighRegister(sourceRegister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
 		const INSTRUCTIONS::OPERANDS::RegisterOperand SourceOperand =
@@ -608,7 +614,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		instruction.Operand1 = INSTRUCTIONS::OPERANDS::Operand{ .Data = SourceOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
 
 		if (ModrmSib.first.mod == 0b11) {
-			const auto destinationRegister = DecodingEngine::DecodeTarget8BitRegister(core, static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t>(prefixes.RexPrefix.B << 3ULL)));
+			const auto destinationRegister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t>(prefixes.RexPrefix.B << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
 			const uint8_t destinationFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
 				(IsHighRegister(destinationRegister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
 			const auto destinationOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
@@ -677,8 +683,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		instruction.OpcodeSizeBytes++;
 		instruction.InstructionLengthBytes++;
 		DigestModrmSib(ModrmSib, hasSIB);
+		const auto cpuMode = core.getMode();
 		std::ignore = hasSIB;
-		INSTRUCTIONS::TargetRegister destinationRegister = DecodingEngine::DecodeTarget8BitRegister(core, static_cast<uint8_t>(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)));
+		INSTRUCTIONS::TargetRegister destinationRegister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
 		const uint8_t destinationFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
 			(IsHighRegister(destinationRegister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
 		const auto destinationOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
@@ -688,7 +695,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		};
 		instruction.Operand0 = INSTRUCTIONS::OPERANDS::Operand{ .Data = destinationOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
 		if (ModrmSib.first.mod == 0b11) {
-			const auto sourceRegister = DecodingEngine::DecodeTarget8BitRegister(core, static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t>(prefixes.RexPrefix.B << 3ULL)));
+			const auto sourceRegister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t>(prefixes.RexPrefix.B << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
 			const uint8_t sourceFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
 				(IsHighRegister(destinationRegister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
 			const auto sourceOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{

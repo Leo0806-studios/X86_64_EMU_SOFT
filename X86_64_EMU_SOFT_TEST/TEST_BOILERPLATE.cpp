@@ -44,7 +44,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 		}
 		return a;
 	}
-	inline void Boilerplate::SetRegistersAscending(std::shared_ptr<SYSTEM::CPU::VirtualCore>& vCore) noexcept {
+	 void Boilerplate::SetRegistersAscending(std::shared_ptr<SYSTEM::CPU::VirtualCore>& vCore) noexcept {
 		using namespace SYSTEM::CPU;
 		static_cast<REGISTERS::GPR&>(vCore->GetRegister(INSTRUCTIONS::TargetRegister::RAX)).SetValue(1);
 		static_cast<REGISTERS::GPR&>(vCore->GetRegister(INSTRUCTIONS::TargetRegister::RBX)).SetValue(2);
@@ -62,5 +62,34 @@ namespace X86_64_EMU_SOFT::TESTS {
 		static_cast<REGISTERS::GPR&>(vCore->GetRegister(INSTRUCTIONS::TargetRegister::R13)).SetValue(14);
 		static_cast<REGISTERS::GPR&>(vCore->GetRegister(INSTRUCTIONS::TargetRegister::R14)).SetValue(15);
 		static_cast<REGISTERS::GPR&>(vCore->GetRegister(INSTRUCTIONS::TargetRegister::R15)).SetValue(16);
+	}
+	uint8_t Boilerplate::TargetRegisterToID(SYSTEM::CPU::INSTRUCTIONS::TargetRegister reg) noexcept
+	{
+		switch (reg) {
+			using enum SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
+			case RAX: return 0;
+			case RCX: return 1;
+			case RDX: return 2;
+			case RBX: return 3;
+			case RSP: return 4;
+			case RBP: return 5;
+			case RSI: return 6;
+			case RDI: return 7;
+			case R8: return 8;
+			case R9: return 9;
+			case R10: return 10;
+			case R11: return 11;
+			case R12: return 12;
+			case R13: return 13;
+			case R14: return 14;
+			case R15: return 15;
+			case AH: return 4;
+			case BH: return 7;
+			case CH: return 5;
+			case DH: return 6;
+		
+
+		}
+		return 0;
 	}
 }

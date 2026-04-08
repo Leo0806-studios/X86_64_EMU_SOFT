@@ -46,7 +46,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		static INSTRUCTIONS::TargetRegister GetTargetRegisterfromAdditiveID(uint8_t regSelector)noexcept;
 
 
-		[[nodiscard]] static INSTRUCTIONS::TargetRegister DecodeTarget8BitRegister(const VirtualCore& core, uint8_t regSelector)noexcept;
+		[[nodiscard]] static INSTRUCTIONS::TargetRegister DecodeTarget8BitRegister(vCoreMode cpuMode, uint8_t regSelector, bool hasRex)noexcept;
 
 		/// <summary>
 		/// decodes the target register from the MODRM Reg field of the instruction. is also capable of decoding REX extended registers if the bitIndex 3 is set in the rmField

@@ -102,7 +102,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		{
 			DeepZoneScoped;//NOLINT
 			vCoreMode ret = vCoreMode::realMode;
-			if (EFER.GetLMA() && CR0.GetPE()) {
+			if (EFER.GetLMA() && !CR0.GetPE()) {
 				ret = vCoreMode::longMode;
 			}
 			else if (!EFER.GetLMA() && CR0.GetPE()) {

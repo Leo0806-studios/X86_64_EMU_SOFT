@@ -239,54 +239,60 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		__assume(false);
 	}
 
-	INSTRUCTIONS::TargetRegister DecodingEngine::DecodeTarget8BitRegister(const VirtualCore& core,uint8_t regSelector) noexcept
+	INSTRUCTIONS::TargetRegister DecodingEngine::DecodeTarget8BitRegister(vCoreMode cpuMode,uint8_t regSelector, bool hasRex) noexcept
 	{
 		DeepZoneScoped;//NOLINT
-		if (core.getMode() == vCoreMode::longMode) {
-			switch (regSelector) {
-				using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
-				case 0: return RAX;
-				case 1: return RCX;
-				case 2: return RDX;
-				case 3: return RBX;
-				case 4: return AH;
-				case 5: return CH;
-				case 6: return DH;
-				case 7: return BH;
-				case 8:
-				case 9:
-				case 10:
-				case 11:
-				case 12:
-				case 13:
-				case 14:
-				case 15:
-				default: NeverOrAssert(false);
-			}
-		}
-		else {
-			switch (regSelector) {
-				using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
-				case 0: return RAX;
-				case 1: return RCX;
-				case 2: return RDX;
-				case 3: return RBX;
-				case 4: return RSP;
-				case 5: return RBP;
-				case 6: return RSI;
-				case 7: return RDI;
-				case 8: return R8;
-				case 9: return R9;
-				case 10: return R10;
-				case 11: return R11;
-				case 12: return R12;
-				case 13: return R13;
-				case 14: return R14;
-				case 15: return R15;
-				default: NeverOrAssert(false);
-			}
 
+
+		switch(regSelector) {
+			using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
+			case 0: return RAX;
+			case 1: return RCX;
+			case 2: return RDX;
+			case 3: return RBX;
+			case 4: {
+				if (hasRex&&(cpuMode == vCoreMode::longMode)) {
+					return RSP;
+				}
+				else {
+					return AH;
+				}
+			}
+			case 5: {
+				if (hasRex && (cpuMode == vCoreMode::longMode)) {
+					return RBP;
+				}
+				else {
+					return CH;
+				}
+			}
+			case 6: {
+				if (hasRex && (cpuMode == vCoreMode::longMode)) {
+					return RSI;
+				}
+				else {
+					return DH;
+				}
+			}
+			case 7: {
+				if (hasRex && (cpuMode == vCoreMode::longMode)) {
+					return RDI;
+				}
+				else {
+					return BH;
+				}
+			}
+			case 8: return R8;
+			case 9: return R9;
+			case 10: return R10;
+			case 11: return R11;
+			case 12: return R12;
+			case 13: return R13;
+			case 14: return R14;
+			case 15: return R15;
+			default: NeverOrAssert(false);
 		}
+
 		__assume(false);
 
 	}
