@@ -648,4 +648,233 @@ namespace X86_64_EMU_SOFT::TESTS::ALU_DECODING_TESTS
 			RunTest(env.vCoreReal, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"REAL Operand Size Override");
 		}
 	};
+
+
+
+	TEST_CLASS(Test_Handle_OR_rm8_r8_0x8) {
+		TestEnvironment env;
+		TEST_METHOD_INITIALIZE(Init) {
+			env = TestEnvironment();
+			Boilerplate::SetRegistersAscending(env.vCoreLong);
+			Boilerplate::SetRegistersAscending(env.vCoreProtected);
+			Boilerplate::SetRegistersAscending(env.vCoreReal);
+		}
+		TEST_METHOD(TestRegisterToRegister) {
+			using namespace SYSTEM::CPU::INSTRUCTIONS;
+			using namespace SYSTEM::CPU;
+			auto RunTest = [&](std::shared_ptr<SYSTEM::CPU::VirtualCore> core, SYSTEM::CPU::INSTRUCTIONS::TargetRegister dst, SYSTEM::CPU::INSTRUCTIONS::TargetRegister src, uint8_t flags, const wchar_t* msg) {
+				uint64_t address = 0xFULL;
+				SYSTEM::CPU::INSTRUCTIONS::Instruction instruction{};
+				if (flags & std::to_underlying(Boilerplate::FlagMask::UseRex))
+				{
+					instruction.InstructionLengthBytes++; // account for rex prefix
+				}
+				SYSTEM::CPU::INSTRUCTIONS::Prefixes prefixes{
+					.OperandSizeOverride = false,
+					.AddressSizeOverride = false,
+					.RexPrefix = flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? REX{
+						.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
+						.X = 0,
+						.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
+						.W = 0,
+						.reserved = 6U
+					} : REX{ 0,0,0,0,0 }
+				};
+				ModRM modrm{
+					.rm = Boilerplate::TargetRegisterToID(dst),
+					.reg = Boilerplate::TargetRegisterToID(src),
+					.mod = 0b11,
+				};
+				env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
+
+				bool Handled = Handle_OR_rm8_r8_0x8(*core, address, instruction, prefixes, 0x8);
+				Assert::IsTrue(Handled, msg);
+				Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::OR), msg);
+				Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
+				Assert::IsTrue(std::holds_alternative<OPERANDS::RegisterOperand>(instruction.Operand0.Data), msg);
+				Assert::IsTrue(std::holds_alternative<OPERANDS::RegisterOperand>(instruction.Operand1.Data), msg);
+				Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).SizeBits == 8, msg);
+				Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).SizeBits == 8, msg);
+				Assert::IsTrue((std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).Flags & std::to_underlying(OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister)) != 0, msg);
+				Assert::IsTrue((std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).Flags & std::to_underlying(OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister)) != 0, msg);
+				Assert::AreEqual(std::bit_cast<uint64_t>(std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).RegisterPointer), std::bit_cast<uint64_t>(&core->GetRegister(dst)), msg);
+				Assert::AreEqual(std::bit_cast<uint64_t>(std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).RegisterPointer), std::bit_cast<uint64_t>(&core->GetRegister(src)), msg);
+				Assert::AreEqual(instruction.OpcodeSizeBytes, static_cast<uint8_t>(1), msg);
+				Assert::AreEqual(instruction.OpcodeBytes[0], static_cast<uint8_t>(0x8), msg);
+				Assert::AreEqual(instruction.InstructionLengthBytes, static_cast<uint8_t>(2 + (flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 1 : 0)), msg);
+				};
+
+			RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+			RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
+			RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::AH, INSTRUCTIONS::TargetRegister::BH, 0, L"LONG HIGH");
+
+			RunTest(env.vCoreProtected, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"PROTECTED");
+			RunTest(env.vCoreProtected, INSTRUCTIONS::TargetRegister::AH, INSTRUCTIONS::TargetRegister::BH, 0, L"PROTECTED HIGH");
+
+			RunTest(env.vCoreReal, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"REAL");
+			RunTest(env.vCoreReal, INSTRUCTIONS::TargetRegister::AH, INSTRUCTIONS::TargetRegister::BH, 0, L"REAL HIGH");
+		}
+
+		TEST_METHOD(TestRegisterToMemory) {
+			using namespace SYSTEM::CPU::INSTRUCTIONS;
+			using namespace SYSTEM::CPU;
+			auto RunTest = [&](std::shared_ptr<SYSTEM::CPU::VirtualCore> core, SYSTEM::CPU::INSTRUCTIONS::TargetRegister dst, SYSTEM::CPU::INSTRUCTIONS::TargetRegister src, uint8_t flags, const wchar_t* msg) {
+				uint64_t address = 0xFULL;
+				SYSTEM::CPU::INSTRUCTIONS::Instruction instruction{};
+				if (flags & std::to_underlying(Boilerplate::FlagMask::UseRex))
+				{
+					instruction.InstructionLengthBytes++; // account for rex prefix
+				}
+				SYSTEM::CPU::INSTRUCTIONS::Prefixes prefixes{
+					.OperandSizeOverride = false,
+					.AddressSizeOverride = false,
+					.RexPrefix = flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? REX{
+						.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
+						.X = 0,
+						.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
+						.W = 0,
+						.reserved = 6U
+					} : REX{ 0,0,0,0,0 }
+				};
+				ModRM modrm{
+					.rm = Boilerplate::TargetRegisterToID(dst),
+					.reg = Boilerplate::TargetRegisterToID(src),
+					.mod = 0b00,
+				};
+				env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
+
+				Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
+					std::ignore = Handle_OR_rm8_r8_0x8(*core, address, instruction, prefixes, 0x8);
+				}, msg);
+				};
+
+			RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+			RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
+			RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::AH, INSTRUCTIONS::TargetRegister::BH, 0, L"LONG HIGH");
+
+			RunTest(env.vCoreProtected, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"PROTECTED");
+			RunTest(env.vCoreProtected, INSTRUCTIONS::TargetRegister::AH, INSTRUCTIONS::TargetRegister::BH, 0, L"PROTECTED HIGH");
+
+			RunTest(env.vCoreReal, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"REAL");
+			RunTest(env.vCoreReal, INSTRUCTIONS::TargetRegister::AH, INSTRUCTIONS::TargetRegister::BH, 0, L"REAL HIGH");
+		}
+	};
+
+	TEST_CLASS(Test_Handle_OR_rm16rm32rm64_r16r32r64_0x9) {
+		TestEnvironment env;
+		TEST_METHOD_INITIALIZE(Init) {
+			env = TestEnvironment();
+			Boilerplate::SetRegistersAscending(env.vCoreLong);
+			Boilerplate::SetRegistersAscending(env.vCoreProtected);
+			Boilerplate::SetRegistersAscending(env.vCoreReal);
+		}
+
+		TEST_METHOD(TestRegisterToRegister) {
+			using namespace SYSTEM::CPU::INSTRUCTIONS;
+			using namespace SYSTEM::CPU;
+			auto RunTest = [&](std::shared_ptr<SYSTEM::CPU::VirtualCore> core, SYSTEM::CPU::INSTRUCTIONS::TargetRegister dst, SYSTEM::CPU::INSTRUCTIONS::TargetRegister src, uint16_t flags, const wchar_t* msg) {
+				uint64_t address = 0xFULL;
+				SYSTEM::CPU::INSTRUCTIONS::Instruction instruction{};
+				if (flags & std::to_underlying(Boilerplate::FlagMask::UseRex))
+				{
+					instruction.InstructionLengthBytes++;//account for rex prefix
+				}
+				SYSTEM::CPU::INSTRUCTIONS::Prefixes prefixes{
+				.OperandSizeOverride = flags & std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride) ? true : false ,
+				.AddressSizeOverride = flags & std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride) ? true : false ,
+					.RexPrefix = flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? REX{
+						.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
+						.X = 0,
+						.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
+						.W = 0,
+						.reserved = 6U
+					} : REX{0,0,0,0,0 }
+				};
+				ModRM modrm{
+					.rm = Boilerplate::TargetRegisterToID(dst),
+					.reg = Boilerplate::TargetRegisterToID(src),
+					.mod = 0b11,
+				};
+				env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
+				bool Handled = Handle_OR_rm16rm32rm64_r16r32r64_0x9(*core, address, instruction, prefixes, 0x9);
+				Assert::IsTrue(Handled, msg);
+				Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::OR), msg);
+				Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
+				Assert::IsTrue(std::holds_alternative<OPERANDS::RegisterOperand>(instruction.Operand0.Data), msg);
+				Assert::IsTrue(std::holds_alternative<OPERANDS::RegisterOperand>(instruction.Operand1.Data), msg);
+				const auto defaultOperandSize = core->GetDefaultOperandSize();
+				if (defaultOperandSize == 16 && flags & std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride)) {
+
+					Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).SizeBits == 32, msg);
+					Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).SizeBits == 32, msg);
+				}
+				else if (defaultOperandSize == 32 && flags & std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride)) {
+					Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).SizeBits == 16, msg);
+					Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).SizeBits == 16, msg);
+				}
+				else {
+					Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).SizeBits == defaultOperandSize, msg);
+					Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).SizeBits == defaultOperandSize, msg);
+				}
+
+				Assert::IsTrue((std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).Flags & std::to_underlying(OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister)) != 0, msg);
+				Assert::IsTrue((std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).Flags & std::to_underlying(OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister)) != 0, msg);
+				Assert::AreEqual(std::bit_cast<uint64_t>(std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).RegisterPointer), std::bit_cast<uint64_t>(&core->GetRegister(dst)), msg);
+				Assert::AreEqual(std::bit_cast<uint64_t>(std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).RegisterPointer), std::bit_cast<uint64_t>(&core->GetRegister(src)), msg);
+				Assert::AreEqual(instruction.OpcodeSizeBytes, static_cast<uint8_t>(1), msg);
+				Assert::AreEqual(instruction.OpcodeBytes[0], static_cast<uint8_t>(0x9), msg);
+				Assert::AreEqual(instruction.InstructionLengthBytes, static_cast<uint8_t>(2 + (flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 1 : 0)), msg);
+				};
+			RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+			RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
+			RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"LONG Operand Size Override");
+			RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride), L"LONG Address Size Override");
+			RunTest(env.vCoreProtected, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"PROTECTED");
+			RunTest(env.vCoreProtected, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"PROTECTED Operand Size Override");
+			RunTest(env.vCoreProtected, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride), L"PROTECTED Address Size Override");
+			RunTest(env.vCoreReal, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"REAL");
+			RunTest(env.vCoreReal, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"REAL Operand Size Override");
+			RunTest(env.vCoreReal, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride), L"REAL Address Size Override");
+		}
+		TEST_METHOD(TestRegisterToMemory) {
+			using namespace SYSTEM::CPU::INSTRUCTIONS;
+			using namespace SYSTEM::CPU;
+			auto RunTest = [&](std::shared_ptr<SYSTEM::CPU::VirtualCore> core, SYSTEM::CPU::INSTRUCTIONS::TargetRegister dst, SYSTEM::CPU::INSTRUCTIONS::TargetRegister src, uint16_t flags, const wchar_t* msg) {
+				uint64_t address = 0xFULL;
+				SYSTEM::CPU::INSTRUCTIONS::Instruction instruction{};
+				SYSTEM::CPU::INSTRUCTIONS::Prefixes prefixes{
+				.OperandSizeOverride = flags & std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride) ? true : false,
+				.AddressSizeOverride = flags & std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride) ? true : false,
+					.RexPrefix = flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? REX{
+						.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
+						.X = 0,
+						.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
+						.W = 0,
+
+						.reserved = 6U
+					} : REX{0,0,0,0,0 }
+				};
+				ModRM modrm{
+					.rm = Boilerplate::TargetRegisterToID(dst),
+					.reg = Boilerplate::TargetRegisterToID(src),
+					.mod = 0b00,
+				};
+				env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
+				Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
+					std::ignore = Handle_OR_rm16rm32rm64_r16r32r64_0x9(*core, address, instruction, prefixes, 0x9);
+				}, msg);
+				};
+			RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+			RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
+			RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"LONG Operand Size Override");
+			RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride), L"LONG Address Size Override");
+			RunTest(env.vCoreProtected, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"PROTECTED");
+			RunTest(env.vCoreProtected, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"PROTECTED Operand Size Override");
+			RunTest(env.vCoreProtected, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride), L"PROTECTED Address Size Override");
+			RunTest(env.vCoreReal, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"REAL");
+			RunTest(env.vCoreReal, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"REAL Operand Size Override");
+			RunTest(env.vCoreReal, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride), L"REAL Address Size Override");
+
+		}
+	};
 }
