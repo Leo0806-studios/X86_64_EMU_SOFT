@@ -99,9 +99,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				sourceOperand.Value[1] = immediateValue[1];
 				sourceOperand.Value[2] = immediateValue[2];
 				sourceOperand.Value[3] = immediateValue[3];
+				sourceOperand.SizeBits = 32;
 				instruction.InstructionLengthBytes += 4;
 			}
 			else if (operandSize == 16) {
+				sourceOperand.SizeBits = 16;	
 				const std::array<uint8_t, 2> immediateValue = std::bit_cast<std::array<uint8_t, 2>>(static_cast<uint16_t>(core.FetchBytes(address, 2)));
 				sourceOperand.Value[0] = immediateValue[0];
 				sourceOperand.Value[1] = immediateValue[1];
@@ -124,6 +126,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		};
 		instruction.Operand0 = INSTRUCTIONS::OPERANDS::Operand{ .Data = destinationOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
 		instruction.Operand1 = INSTRUCTIONS::OPERANDS::Operand{ .Data = sourceOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Immediate };
+		instruction.OperandCount = 2;
 		return true;
 	}
 	

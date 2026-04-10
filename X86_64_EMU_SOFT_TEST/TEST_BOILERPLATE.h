@@ -23,11 +23,13 @@ namespace X86_64_EMU_SOFT::TESTS {
 		[[nodiscard]] static std::shared_ptr<SYSTEM::IO_DEVICES::MainMemoryDevice> CreateMainMemoryDevicePreFilled(const std::vector<uint8_t>& bytes);
 		void static SetRegistersAscending(std::shared_ptr<SYSTEM::CPU::VirtualCore>& vCore) noexcept;
 		[[nodiscard]] static uint8_t TargetRegisterToID(SYSTEM::CPU::INSTRUCTIONS::TargetRegister reg) noexcept;
+		[[nodiscard]] static uint8_t TargetRegisterToAdditiveID(SYSTEM::CPU::INSTRUCTIONS::TargetRegister reg) noexcept;
 		enum class FlagMask :uint16_t {
 			HighRegister = 1U << 0U,
 			UseRex = 1U << 1U,
 			AddressSizeOverride = 1U << 2U,
 			OperandSizeOverride = 1U << 3U,
+			UseRexW = 1U << 4U,
 		};
 	};
 }

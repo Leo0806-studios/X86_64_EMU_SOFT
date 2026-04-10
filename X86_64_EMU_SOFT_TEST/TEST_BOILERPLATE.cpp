@@ -92,4 +92,29 @@ namespace X86_64_EMU_SOFT::TESTS {
 		}
 		return 0;
 	}
+	uint8_t Boilerplate::TargetRegisterToAdditiveID(SYSTEM::CPU::INSTRUCTIONS::TargetRegister reg) noexcept
+	{
+		switch (reg) {
+			using enum X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS::TargetRegister;
+			case RAX:return 0;
+			case RCX: return 1;
+			case RDX:return 2;
+			case RBX:return 3;
+			case RSP:return 4;
+			case RBP:return 5;
+			case RSI:return 6;
+			case RDI:return 7;
+			case R8: return 8;
+			case R9: return 9;
+			case R10: return 10;
+			case R11: return 11;
+			case R12: return 12;
+			case R13: return 13;
+			case R14: return 14;
+			case R15: return  15;
+			default: NeverOrAssert(false);
+
+		}
+		__assume(false);
+	}
 }
