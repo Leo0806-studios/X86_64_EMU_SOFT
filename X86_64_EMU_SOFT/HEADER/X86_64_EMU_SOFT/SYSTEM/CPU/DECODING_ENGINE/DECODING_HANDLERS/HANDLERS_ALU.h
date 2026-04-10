@@ -437,6 +437,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		else {
 			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not yet supported for ADD 0x2");
 		}
+		instruction.OperandCount = 2;
 		return true;
 	}
 
@@ -587,6 +588,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		else {
 			NeverOrAssert(false);
 		}
+		instruction.OperandCount = 2;
 		return true;
 	}
 
@@ -627,6 +629,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		else {
 			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not yet supported for SUB 0x28");
 		}
+		instruction.OperandCount = 2;
 		return true;
 	}
 
@@ -674,6 +677,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		else {
 			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands not supported yet for SUB 0x29 decoding");
 		}
+		instruction.OperandCount = 2;
 		return true;
 	}
 	inline DEFINE_HANDLER(Handle_SUB_r8_rm8_0x2A) {
@@ -708,6 +712,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		else {
 			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not yet supported for SUB 0x2A");
 		}
+		instruction.OperandCount = 2;
 		return true;
 	}
 
@@ -752,6 +757,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		else {
 			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands not supported yet for SUB 0x2B decoding");
 		}
+		instruction.OperandCount = 2;
 		return true;
 	}
 
@@ -850,6 +856,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		else {
 			NeverOrAssert(false);
 		}
+		instruction.OperandCount = 2;
 		return true;
 	}
 	inline DEFINE_HANDLER(Handle_REX_INCr16AXr32_BASE) {

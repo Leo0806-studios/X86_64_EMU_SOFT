@@ -58,6 +58,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		else {
 			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not yet supported for MOV 0x89");
 		}
+		instruction.OperandCount = 2;
 		return true;
 	}
 
