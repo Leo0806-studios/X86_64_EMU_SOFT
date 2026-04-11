@@ -12,6 +12,7 @@
   </Configurations>
   <Folder Name="/Solution Items/">
     <File Path="Fahrplan.md" />
+    <File Path="NASM_CALL.bat" />
     <File Path="TEST_PROTECTED.asm" />
     <File Path="TEST_REAL.asm" />
   </Folder>

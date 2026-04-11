@@ -362,7 +362,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
-							.W = 0,
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
 							.reserved = 6U
 						}:REX{0,0,0,0,0 }
 					};
@@ -380,6 +380,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::AH, INSTRUCTIONS::TargetRegister::BH, 0, L"LONG HIGH");
 
@@ -489,7 +490,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
-							.W = 0,
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
 
 							.reserved = 6U
 						} : REX{0,0,0,0,0 }
@@ -505,6 +506,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					}, msg);
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"LONG Operand Size Override");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride), L"LONG Address Size Override");
@@ -763,7 +765,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
-							.W = 0,
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
 							.reserved = 6U
 						} : REX{ 0,0,0,0,0 }
 					};
@@ -780,6 +782,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::AH, INSTRUCTIONS::TargetRegister::BH, 0, L"LONG HIGH");
 
@@ -818,7 +821,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
-							.reserved = 6U
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
 						} : REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
@@ -888,9 +891,9 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
-							.W = 0,
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
 
-							.reserved = 6U
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
 						} : REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
@@ -904,6 +907,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					}, msg);
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"LONG Operand Size Override");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride), L"LONG Address Size Override");
@@ -944,7 +948,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
 							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
-							.reserved = 6U
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
 						}:REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
@@ -973,6 +977,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::AH, INSTRUCTIONS::TargetRegister::BH, 0, L"LONG HIGH");
 
@@ -1000,8 +1005,8 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
-							.W = 0,
-							.reserved = 6U
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
 						}:REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
@@ -1018,6 +1023,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::AH, INSTRUCTIONS::TargetRegister::BH, 0, L"LONG HIGH");
 
@@ -1057,7 +1063,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
 							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
-							.reserved = 6U
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
 						} : REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
@@ -1133,8 +1139,8 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
-							.W = 0,
-							.reserved = 6U
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
 						} : REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
@@ -1150,6 +1156,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"LONG Operand Size Override");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride), L"LONG Address Size Override");
@@ -1248,7 +1255,8 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.X = 0, 
 							.R = 0, 
 							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
-							.reserved = 0U} : REX{0,0,0,0,0}
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
+						} : REX{0,0,0,0,0 }
 					};
 
 					// The handler fetches 2 bytes for 16-bit operation, 4 bytes for 32/64-bit operations.
@@ -1344,9 +1352,9 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
-							.W = 0,
-							.reserved = 6U
-						} : REX{ 0,0,0,0,0 }
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
+						} : REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
 						.rm = Boilerplate::TargetRegisterToID(dst),
@@ -1373,6 +1381,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::AH, INSTRUCTIONS::TargetRegister::BH, 0, L"LONG HIGH");
 
@@ -1400,9 +1409,9 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
-							.W = 0,
-							.reserved = 6U
-						} : REX{ 0,0,0,0,0 }
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
+						} : REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
 						.rm = Boilerplate::TargetRegisterToID(dst),
@@ -1418,6 +1427,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::AH, INSTRUCTIONS::TargetRegister::BH, 0, L"LONG HIGH");
 
@@ -1455,7 +1465,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
-							.reserved = 6U
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
 						} : REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
@@ -1527,8 +1537,8 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
-							.W = 0,
-							.reserved = 6U
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
 						} : REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
@@ -1542,6 +1552,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					}, msg);
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"LONG Operand Size Override");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride), L"LONG Address Size Override");
@@ -1579,8 +1590,8 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
-							.W = 0,
-							.reserved = 6U
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
 						} : REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
@@ -1609,6 +1620,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::AH, INSTRUCTIONS::TargetRegister::BH, 0, L"LONG HIGH");
 
@@ -1636,9 +1648,9 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
-							.W = 0,
-							.reserved = 6U
-						} : REX{ 0,0,0,0,0 }
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
+						} : REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
 						.rm = Boilerplate::TargetRegisterToID(src),
@@ -1654,6 +1666,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::AH, INSTRUCTIONS::TargetRegister::BH, 0, L"LONG HIGH");
 
@@ -1690,8 +1703,8 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
-							.W = 0,
-							.reserved = 0U
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
 						} : REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
@@ -1709,23 +1722,26 @@ namespace X86_64_EMU_SOFT::TESTS {
 					Assert::IsTrue(std::holds_alternative<OPERANDS::RegisterOperand>(instruction.Operand0.Data), msg);
 					Assert::IsTrue(std::holds_alternative<OPERANDS::RegisterOperand>(instruction.Operand1.Data), msg);
 
-					const auto defaultOperandSize = core->GetDefaultOperandSize();
-					if (defaultOperandSize == 16 && flags & std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride)) {
-						Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).SizeBits == 32, msg);
-						Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).SizeBits == 32, msg);
-					}
-					else if (defaultOperandSize == 32 && flags & std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride)) {
-						Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).SizeBits == 16, msg);
-						Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).SizeBits == 16, msg);
-					}
-					else if (flags & std::to_underlying(Boilerplate::FlagMask::UseRex)) {
-						Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).SizeBits == defaultOperandSize, msg);
+					uint8_t expectedOperandSize = core->GetDefaultOperandSize();
+					if (std::bit_cast<bool>(prefixes.RexPrefix) && prefixes.RexPrefix.W) {
+						expectedOperandSize = 64;
 					}
 					else {
-						Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).SizeBits == defaultOperandSize, msg);
-						Assert::IsTrue(std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).SizeBits == defaultOperandSize, msg);
+						if (expectedOperandSize == 32 && prefixes.OperandSizeOverride) expectedOperandSize = 16;
+						else if (expectedOperandSize == 16 && prefixes.OperandSizeOverride) expectedOperandSize = 32;
 					}
-
+					if (expectedOperandSize == 16 && flags & std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride)) {
+						Assert::AreEqual(std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).SizeBits, expectedOperandSize, msg);
+						Assert::AreEqual(std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).SizeBits, expectedOperandSize, msg);
+					}
+					else if (expectedOperandSize == 32 && flags & std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride)) {
+						Assert::AreEqual(std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).SizeBits, expectedOperandSize, msg);
+						Assert::AreEqual(std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).SizeBits, expectedOperandSize, msg);
+					}
+					else {
+						Assert::AreEqual(std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).SizeBits, expectedOperandSize, msg);
+						Assert::AreEqual(std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).SizeBits, expectedOperandSize, msg);
+					}
 					Assert::IsTrue((std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).Flags & std::to_underlying(OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister)) != 0, msg);
 					Assert::IsTrue((std::get<OPERANDS::RegisterOperand>(instruction.Operand1.Data).Flags & std::to_underlying(OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister)) != 0, msg);
 					Assert::AreEqual(std::bit_cast<uint64_t>(std::get<OPERANDS::RegisterOperand>(instruction.Operand0.Data).RegisterPointer), std::bit_cast<uint64_t>(&core->GetRegister(dst)), msg);
@@ -1736,6 +1752,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"LONG Operand Size Override");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride), L"LONG Address Size Override");
@@ -1762,8 +1779,8 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
-							.W = 0,
-							.reserved = 0U
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
 						} : REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
@@ -1780,6 +1797,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreProtected, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"PROTECTED");
 				RunTest(env.vCoreReal, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"REAL");
@@ -1867,7 +1885,13 @@ namespace X86_64_EMU_SOFT::TESTS {
 						.OperandSizeOverride = (flags & std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride)) != 0,
 						.AddressSizeOverride = (flags & std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride)) != 0,
 						.RexPrefix = (flags & std::to_underlying(Boilerplate::FlagMask::UseRex)) ?
-							REX{.B = 0, .X = 0, .R = 0, .W = 1, .reserved = 0U} : REX{0,0,0,0,0}
+							REX{
+							.B = 0,
+							.X = 0,
+							.R = 0, 
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
+						} : REX{0,0,0,0,0 }
 					};
 
 					// The handler fetches 2 bytes for 16-bit operation, 4 bytes for 32/64-bit operations.
@@ -1930,6 +1954,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 
 				RunTest(env.vCoreLong, std::to_underlying(Boilerplate::FlagMask::UseRex), L"LONG REX");
+				RunTest(env.vCoreLong, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"LONG REXW");
 				RunTest(env.vCoreLong, 0, L"LONG");
 				RunTest(env.vCoreLong, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"LONG Operand Size Override");
 				RunTest(env.vCoreProtected, 0, L"PROTECTED");
@@ -1965,8 +1990,8 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
-							.W = 0,
-							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 0U : 6U)
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
 						} : REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
@@ -1991,6 +2016,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					Assert::AreEqual(instruction.InstructionLengthBytes, static_cast<uint8_t>(2 + (flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 1 : 0)), msg);
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"LONG Operand Size Override");
 				RunTest(env.vCoreProtected, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"PROTECTED");
@@ -2012,8 +2038,8 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(src) >> 3ULL) & 1U),
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToID(dst) >> 3ULL) & 1U),
-							.W = 0,
-							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 0U : 6U)
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
 						} : REX{0,0,0,0,0 }
 					};
 					ModRM modrm{
@@ -2027,7 +2053,8 @@ namespace X86_64_EMU_SOFT::TESTS {
 					}, msg);
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
-				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride), L"Long REX AO");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::AddressSizeOverride), L"LONG");
 				RunTest(env.vCoreProtected, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, 0, L"PROTECTED");
@@ -2059,8 +2086,8 @@ namespace X86_64_EMU_SOFT::TESTS {
 							.B = 0,
 							.X = 0,
 							.R = static_cast<uint8_t>((Boilerplate::TargetRegisterToAdditiveID(dst) >> 3ULL) & 1U),
-							.W = 0,
-							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 0U : 6U)
+							.W = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRexW) ? 1U : 0U),
+							.reserved = static_cast<uint8_t>(flags & std::to_underlying(Boilerplate::FlagMask::UseRex) ? 6U : 0U)
 						} : REX{0,0,0,0,0 }
 					};
 
@@ -2107,6 +2134,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					}
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
+				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, std::to_underlying(Boilerplate::FlagMask::UseRex) | std::to_underlying(Boilerplate::FlagMask::UseRexW), L"Long REXW");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, 0, L"LONG");
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, std::to_underlying(Boilerplate::FlagMask::OperandSizeOverride), L"LONG Operand Size Override");
 				RunTest(env.vCoreProtected, INSTRUCTIONS::TargetRegister::RAX, 0, L"PROTECTED");

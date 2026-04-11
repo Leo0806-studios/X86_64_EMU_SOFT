@@ -8,6 +8,7 @@
 #include <source_location>
 #include <utility>
 #include <variant>
+#include <intrin.h>
 #include <tracy/Tracy.hpp>
 #include <SYSTEM/CPU/REGISTERS/GPR.h>
 #include <SYSTEM/CPU/REGISTERS/REGISTER_BASE.h>
@@ -26,7 +27,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		if (instruction.Operand0.Type == INSTRUCTIONS::OPERANDS::OperandType::Memory || instruction.Operand2.Type == INSTRUCTIONS::OPERANDS::OperandType::Memory) {
 			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not supported yet for ADD");
 		}
-
+		
 		uint64_t sourceVal = 0;
 		if (instruction.Operand1.Type == INSTRUCTIONS::OPERANDS::OperandType::Register) {
 			const auto& sourceOperand = std::get<INSTRUCTIONS::OPERANDS::RegisterOperand>(instruction.Operand1.Data);
