@@ -8,6 +8,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 
 		ADD,
 		SUB,
+		AND,
 		INC,
 		DEC,
 
@@ -24,9 +25,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 			case InstructionType::SUB:return"SUB";
 			case InstructionType::INC:return"INC";
 			case InstructionType::DEC:return"DEC";
+			case InstructionType::AND:return"AND";
 			case InstructionType::OR:return"OR";
 			case InstructionType::NOP:return"NOP";
 			case InstructionType::UD:return "UD";
+
 			default:return "Undefined";
 		}
 	}

@@ -170,4 +170,7 @@
     <None Include="very_strict.ruleset" />
     <None Include="cpp.hint" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="HEADER\X86_64_EMU_SOFT\SYSTEM\CPU\DECODING_ENGINE\DECODING_HANDLERS\DECODE_TEMPLATES.txt" />
+  </ItemGroup>
 </Project>

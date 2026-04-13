@@ -39,4 +39,9 @@
   <ItemGroup>
     <None Include="cpp.hint" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="ALU_TEST_TEMPLATES.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

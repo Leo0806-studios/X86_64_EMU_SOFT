@@ -19,6 +19,53 @@
 
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
+	template<INSTRUCTIONS::InstructionType Type>
+	inline DEFINE_HANDLER(Handler_rm8_r8) {
+		ZoneScoped;//NOLINT
+		instruction.Type = Type;
+		instruction.OpcodeBytes[0] = byte;
+		instruction.OpcodeSizeBytes++;
+		instruction.InstructionLengthBytes++;
+		instruction.OperandCount = 2;
+
+
+
+		DigestModrmSib(ModrmSib, hasSIB);
+		std::ignore = hasSIB;
+		assert(std::bit_cast<uint8_t>(INSTRUCTIONS::REX()) == false);
+		const auto cpuMode = core.getMode();
+		const auto sourceRegister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>((ModrmSib.first.reg) | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
+		const auto sourceFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
+			(IsHighRegister(sourceRegister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
+		const INSTRUCTIONS::OPERANDS::RegisterOperand SourceOperand =
+		{
+			.RegisterPointer = std::bit_cast<std::array<uint8_t,8>>(&core.GetRegister(sourceRegister)),
+			.SizeBits = 8,
+			.Flags = sourceFlags
+		};
+		instruction.Operand1 = INSTRUCTIONS::OPERANDS::Operand{ .Data = SourceOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
+
+
+		if (ModrmSib.first.mod == 3) {
+			const auto destinationregister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t> (prefixes.RexPrefix.B << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
+			const uint8_t destinationFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
+				(IsHighRegister(destinationregister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
+			const auto destinationOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
+				.RegisterPointer = std::bit_cast<std::array<uint8_t, 8>>(&core.GetRegister(destinationregister)),
+				.SizeBits = 8,
+				.Flags = destinationFlags
+			};
+			instruction.Operand0 = INSTRUCTIONS::OPERANDS::Operand{ .Data = destinationOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
+		}
+		else {
+			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not yet supported for ADD 0x0");
+		}
+		return true;
+	}
+
+
+
+
 	inline DEFINE_HANDLER(Handle_ADD_rm8_r8_0x0) {
 		ZoneScoped;//NOLINT
 		instruction.Type = INSTRUCTIONS::InstructionType::ADD;
@@ -593,6 +640,113 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 
 	//TODO: insert handlers from 0xE to 0x27
+
+
+	inline DEFINE_HANDLER(Handle_AND_rm8_r8_0x20) {
+		ZoneScoped;//NOLINT
+		instruction.Type = INSTRUCTIONS::InstructionType::AND;
+		instruction.OpcodeBytes[0] = byte;
+		instruction.OpcodeSizeBytes++;
+		instruction.InstructionLengthBytes++;
+
+
+
+		DigestModrmSib(ModrmSib, hasSIB);
+		std::ignore = hasSIB;
+		assert(std::bit_cast<uint8_t>(INSTRUCTIONS::REX()) == false);
+		const auto cpuMode = core.getMode();
+		const auto sourceRegister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>((ModrmSib.first.reg) | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
+		const uint8_t sourceFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
+			(IsHighRegister(sourceRegister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
+		const INSTRUCTIONS::OPERANDS::RegisterOperand SourceOperand =
+		{
+			.RegisterPointer = std::bit_cast<std::array<uint8_t,8>>(&core.GetRegister(sourceRegister)),
+			.SizeBits = 8,
+			.Flags = sourceFlags
+		};
+		instruction.Operand1 = INSTRUCTIONS::OPERANDS::Operand{ .Data = SourceOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
+
+
+		if (ModrmSib.first.mod == 3) {
+			const auto destinationregister = DecodingEngine::DecodeTarget8BitRegister(cpuMode, static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t> (prefixes.RexPrefix.B << 3ULL)), std::bit_cast<bool>(prefixes.RexPrefix));
+			const uint8_t destinationFlags = static_cast<uint8_t>(std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister) |
+				(IsHighRegister(destinationregister) ? std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isHighByteRegister) : static_cast<uint8_t>(0U)));
+			const auto destinationOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
+				.RegisterPointer = std::bit_cast<std::array<uint8_t, 8>>(&core.GetRegister(destinationregister)),
+				.SizeBits = 8,
+				.Flags = destinationFlags
+			};
+			instruction.Operand0 = INSTRUCTIONS::OPERANDS::Operand{ .Data = destinationOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
+		}
+		else {
+			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands are not yet supported for ADD 0x0");
+		}
+		instruction.OperandCount = 2;
+		return true;
+	}
+	inline DEFINE_HANDLER(Handle_AND_rm16rm23rm64_r16r32r64_0x21) {
+		ZoneScoped;//NOLINT
+		instruction.Type = INSTRUCTIONS::InstructionType::AND;
+		instruction.OpcodeBytes[0] = byte;
+		instruction.OpcodeSizeBytes++;
+		instruction.InstructionLengthBytes++;
+
+
+		DigestModrmSib(ModrmSib, hasSIB);
+		std::ignore = hasSIB;
+
+		uint8_t operandSize = core.GetDefaultOperandSize();
+		assert(std::bit_cast<uint8_t>(INSTRUCTIONS::REX()) == false);
+		static_assert(!std::bit_cast<uint8_t>(INSTRUCTIONS::REX().reserved));//reserved is guaranteed to be 0100 for a present REX prefix (true)
+		if (std::bit_cast<bool>(prefixes.RexPrefix) && prefixes.RexPrefix.W) {
+			operandSize = 64;
+		}
+		else {
+			if (operandSize == 32 && prefixes.OperandSizeOverride) {
+				operandSize = 16;
+			}
+			else if (operandSize == 16 && prefixes.OperandSizeOverride) {
+				operandSize = 32;
+			}
+		}
+
+		const INSTRUCTIONS::TargetRegister sourceRegister = DecodingEngine::DecodeTargetRegister(static_cast<uint8_t>(ModrmSib.first.reg | static_cast<uint8_t>(prefixes.RexPrefix.R << 3ULL)));
+		const INSTRUCTIONS::OPERANDS::RegisterOperand SourceOperand
+		{
+			.RegisterPointer = std::bit_cast<std::array<uint8_t,8>>(&core.GetRegister(sourceRegister)),
+			.SizeBits = operandSize,
+			.Flags = std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister)
+		};
+		instruction.Operand1 = INSTRUCTIONS::OPERANDS::Operand{ .Data = SourceOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
+
+
+		if (ModrmSib.first.mod == 3) {
+			const INSTRUCTIONS::TargetRegister destinationregister = DecodingEngine::DecodeTargetRegister(static_cast<uint8_t>(ModrmSib.first.rm | static_cast<uint8_t> (prefixes.RexPrefix.B << 3ULL)));
+			const auto destinationOperand = INSTRUCTIONS::OPERANDS::RegisterOperand{
+				.RegisterPointer = std::bit_cast<std::array<uint8_t, 8>>(&core.GetRegister(destinationregister)),
+				.SizeBits = operandSize,
+				.Flags = std::to_underlying(INSTRUCTIONS::OPERANDS::RegisterOperandFlags::isGeneralPurposeRegister)
+			};
+			instruction.Operand0 = INSTRUCTIONS::OPERANDS::Operand{ .Data = destinationOperand, .Type = INSTRUCTIONS::OPERANDS::OperandType::Register };
+		}
+		else {
+			throw EXCEPTIONS::UNDEFINED_OPCODE("Memory operands not supported yet for ADD 0x1 decoding");
+		}
+		instruction.OperandCount = 2;
+		return true;
+	}
+	inline DEFINE_HANDLER(Handle_AND_r8_rm8_0x22) {
+
+	}
+	inline DEFINE_HANDLER(Handle_AND_r16r32r64_rm16rm32rm64_0x23) {
+
+	}
+	inline DEFINE_HANDLER(Handle_AND_AL_imm8_0x24) {
+
+	}
+	inline DEFINE_HANDLER(Handle_AND_AxEaxRax_imm16imm32_0x25) {
+
+	}
 
 	inline DEFINE_HANDLER(Handle_SUB_rm8_r8_0x28) {
 		ZoneScoped;//NOLINT

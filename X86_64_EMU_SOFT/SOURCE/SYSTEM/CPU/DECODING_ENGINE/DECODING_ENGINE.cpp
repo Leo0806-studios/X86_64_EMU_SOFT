@@ -52,7 +52,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			HandlerFuncs[0x67] = Handle_Prefix; //Address-size override
 
 			//ALU
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_rm8_r8_0x0)] = Handle_ADD_rm8_r8_0x0;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_rm8_r8_0x0)] = Handler_rm8_r8<INSTRUCTIONS::InstructionType::ADD>;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_rm16rm32rm64_r16r32r64_0x1)] = Handle_ADD_rm16rm32rm64_r16r32r64_0x1;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_r8_rm8_0x2)] = Handle_ADD_r8_rm8_0x2;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_r16r32r64_rm16rm32rm64_0x3)] = Handle_ADD_r16r32r64_rm16rm32rm64_0x3;
