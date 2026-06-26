@@ -18,13 +18,91 @@
 #include "SYSTEM/CPU/VCORE.h"
 #include "SYSTEM/CPU/DECODING_ENGINE/DECODING_ENGINE.h"
 #include "SYSTEM/CPU/EXECUTION_ENGINE/EXECUTION_ENGINE.h"
+#include <SYSTEM/CPU/DECODING_ENGINE/DECODING_HANDLERS/HANDLERS_ALU.h>
+#include <SYSTEM/CPU/DECODING_ENGINE/DECODING_HANDLERS/HANDLERS_SPECIAL.h>
+#include <SYSTEM/CPU/DECODING_ENGINE/DECODING_HANDLERS/PREFIX_HANDLERS.h>
 #include "SYSTEM/MEMORY/MEMORY.h"
 #include "HELPERS/GLOBALS.h"
 #include <HELPERS/MACROS.h>
 #include <cstdarg>
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
+	[[noreturn]] inline static bool ThrowUndefinedOpcode(VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, INSTRUCTIONS::Prefixes& prefixes, uint8_t byte) {//NOSONAR
+		DeepZoneScoped;//NOLINT
+		std::ignore = core;
+		std::ignore = instruction;
+		std::ignore = prefixes;
+		std::stringstream msg;
+		const auto asIntegerType = static_cast<uint16_t>(byte);
+		msg << "\n\n #UD exception \n \n byte: 0x" << std::hex << asIntegerType << " at RIP: 0x" << std::hex << address << " corresponds to no valid opcode " << std::dec;
+		throw EXCEPTIONS::UNDEFINED_OPCODE(msg.str());
+	}
+	using HandlerFunc = bool(*)(VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, INSTRUCTIONS::Prefixes& prefixes, uint8_t byte);
+	constexpr  std::array<HandlerFunc, 256> HandlerFuncs =  []() consteval noexcept {
+		std::array<HandlerFunc, 256> arr{};
+		for (auto& func : arr) {
+			func = ThrowUndefinedOpcode;
+		}
+		arr[0xF0] = Handle_Prefix; //LOCK
+		arr[0xF2] = Handle_Prefix; //REPNE/REPNZ
+		arr[0xF3] = Handle_Prefix; //REP/REPE/REPZ
+		arr[0x2E] = Handle_Prefix; //CS segment override
+		arr[0x36] = Handle_Prefix; //SS segment override
+		arr[0x3E] = Handle_Prefix; //DS segment override
+		arr[0x26] = Handle_Prefix; //ES segment override
+		arr[0x64] = Handle_Prefix; //FS segment override
+		arr[0x65] = Handle_Prefix; //GS segment override
+		arr[0x66] = Handle_Prefix; //Operand-size override
+		arr[0x67] = Handle_Prefix; //Address-size override
 
+		//ALU
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_rm8_r8_0x0)] = Handler_rm8_r8<INSTRUCTIONS::InstructionType::ADD>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_rm16rm32rm64_r16r32r64_0x1)] = Handle_r16r32r64_rm16rm32rm64<INSTRUCTIONS::InstructionType::ADD>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_r8_rm8_0x2)] = Handle_r8_rm8<INSTRUCTIONS::InstructionType::ADD>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_r16r32r64_rm16rm32rm64_0x3)] = Handle_r16r32r64_rm16rm32rm64<INSTRUCTIONS::InstructionType::ADD>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_AL_imm8_0x4)] = Handle_AL_imm8<INSTRUCTIONS::InstructionType::ADD>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_AxEaxRax_imm16imm32_0x5)] = Handle_AxEaxRax_imm16imm32<INSTRUCTIONS::InstructionType::ADD>;
+
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_rm8_r8_0x8)] = Handler_rm8_r8<INSTRUCTIONS::InstructionType::OR>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_rm16rm32_r16r32_0x9)] = Handle_r16r32r64_rm16rm32rm64<INSTRUCTIONS::InstructionType::OR>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_r8_rm8_0xA)] = Handle_r8_rm8<INSTRUCTIONS::InstructionType::OR>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_r16r32_rm16rm32_0xB)] = Handle_r16r32r64_rm16rm32rm64<INSTRUCTIONS::InstructionType::OR>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_AL_imm8_0xC)] = Handle_AL_imm8<INSTRUCTIONS::InstructionType::OR>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_AxEaxRax_imm16imm32_0xD)] = Handle_AxEaxRax_imm16imm32<INSTRUCTIONS::InstructionType::OR>;
+
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_rm8_r8_0x28)] = Handler_rm8_r8<INSTRUCTIONS::InstructionType::SUB>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_rm16rm32_r16r32_0X29)] = Handler_rm16rm32rm64_r16r32r64<INSTRUCTIONS::InstructionType::SUB>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_r8_rm8_0x2A)] = Handle_r8_rm8<INSTRUCTIONS::InstructionType::SUB>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_r16r32_rm16rm32_0x2B)] = Handle_r16r32r64_rm16rm32rm64<INSTRUCTIONS::InstructionType::SUB>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_AL_imm8_0x2C)] = Handle_AL_imm8<INSTRUCTIONS::InstructionType::SUB>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_AxEaxRax_imm16imm32_0x2D)] = Handle_AxEaxRax_imm16imm32<INSTRUCTIONS::InstructionType::SUB>;
+
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::GROUP1_0X83)] = Handle_GROUP1_0X83_;
+
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::REX_INCr16AXr32EAX)] = Handle_REX_INCr16AXr32_BASE;//handled partialy
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::REX_INCr16CXr32ECX)] = Handle_REX_INCr16AXr32_BASE;//handled partialy
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::REX_INCr16DXr32EDX)] = Handle_REX_INCr16AXr32_BASE;//handled partialy
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::REX_INCr16BXr32EBX)] = Handle_REX_INCr16AXr32_BASE;//handled partialy
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::REX_INCr16SPr32ESP)] = Handle_REX_INCr16AXr32_BASE;//handled partialy
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::REX_INCr16BPr32EBP)] = Handle_REX_INCr16AXr32_BASE;//handled partialy
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::REX_INCr16SIr32ESI)] = Handle_REX_INCr16AXr32_BASE;//handled partialy
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::REX_INCr16DIr32EDI)] = Handle_REX_INCr16AXr32_BASE;//handled partialy
+
+
+		//SPECIAL
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16AXr32EAXr64RAXimm16imm32imm64_0xB8)] = Handle_MOV_r16r32r64_imm16_imm32_imm64_0xB8_BASE;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16CXr32ECXr64RCXimm16imm32imm64_0xB9)] = Handle_MOV_r16r32r64_imm16_imm32_imm64_0xB8_BASE;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16DXr32EDXr64RDXimm16imm32imm64_0xBA)] = Handle_MOV_r16r32r64_imm16_imm32_imm64_0xB8_BASE;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16BXr32EBXr64RBXimm16imm32imm64_0xBB)] = Handle_MOV_r16r32r64_imm16_imm32_imm64_0xB8_BASE;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16SPr32ESPr64RSPimm16imm32imm64_0xBC)] = Handle_MOV_r16r32r64_imm16_imm32_imm64_0xB8_BASE;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16BPr32EBPr64RBPimm16imm32imm64_0xBD)] = Handle_MOV_r16r32r64_imm16_imm32_imm64_0xB8_BASE;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16SIr32ESIr64RSIimm16imm32imm64_0xBE)] = Handle_MOV_r16r32r64_imm16_imm32_imm64_0xB8_BASE;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOVr16DIr32EDIr64RDIimm16imm32imm64_0xBF)] = Handle_MOV_r16r32r64_imm16_imm32_imm64_0xB8_BASE;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::MOV_rm16rm32rm64_r16r32r64_0x89)] = Handle_MOV_rm16rm32rm64_r16r32r64_0x89;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::NOP_0x90)] = Handle_NOP_0x90;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::UD_0xD6)] = Handle_UD_0xD6;
+		return arr;
+		}();
 
 #pragma warning(suppress: 26440)
 	void VirtualCore::decodeInstruction(INSTRUCTIONS::Instruction& instruction)noexcept(false)
@@ -35,9 +113,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		auto instructionByte = static_cast<uint8_t>(FetchBytes(address, 1));
 		address++;
 		INSTRUCTIONS::Prefixes prefixes = {};
-		while (!DecodingEngine::HandlerFuncs[instructionByte](*this, address, instruction, prefixes, instructionByte)) {
-			instructionByte = static_cast<uint8_t>(FetchBytes(address, 1));
-			address++;
+		while (!HandlerFuncs[instructionByte](*this, address, instruction, prefixes, instructionByte)) {
+			instructionByte = static_cast<uint8_t>(FetchBytes(address++, 1));
+			//address++;
 		}
 
 

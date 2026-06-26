@@ -6,8 +6,6 @@
 #include <SYSTEM/CPU/VCORE.h>
 #include <SYSTEM/MEMORY/MEMORY.h>
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
-	class DecodingEngine {
-	private:
 		/// <summary>
 		/// defines the type for a handler function for instructions. has to return false unless the function finishes handeling of the instruction
 		/// after execution address has to point to the first unconsumed byte 
@@ -17,10 +15,12 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		/// byte is the byte current byte of the instruction 
 		/// </summary>
 		using HandlerFunc = bool(*)(VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, INSTRUCTIONS::Prefixes& prefixes, uint8_t byte);
-		const static bool HandlerFuncSetupDone;
+
+	class DecodingEngine {
+	private:
+		//const static bool HandlerFuncSetupDone;
 
 	public:
-		static std::array<HandlerFunc, 256> HandlerFuncs;
 
 		static INSTRUCTIONS::TargetRegister DecodeTargetRegister(uint8_t regSelector)noexcept;
 
