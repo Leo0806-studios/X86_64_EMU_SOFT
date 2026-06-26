@@ -27,7 +27,7 @@
 
 namespace X86_64_EMU_SOFT::SYSTEM {
 	namespace {
-		
+
 
 		void PrintDevices(const boost::program_options::variables_map& map) {
 			if (map.count("Device") > 0) {
@@ -62,7 +62,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 					LogErrorDeviceDescriptor(deviceDescriptor, "failed to register reset rom device");
 					return false;
 				}
-				
+
 			}
 			else if (deviceDescriptor.at(DeviceDescriptorParts::DeviceType) == "FIRMWARE") {
 				if (!RegisterFirmwareDevice(deviceDescriptor)) {
@@ -132,7 +132,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 
 		std::shared_ptr<IO_DEVICES::DeviceBase> device = std::make_shared<IO_DEVICES::FirmwareRomDevice>(RomData);
 		RegisteredDevices.push_back(device);
-		auto preferedBase = std::stoull(deviceDescriptor.at(DeviceDescriptorParts::DeviceArg3));
+		const auto preferedBase = std::stoull(deviceDescriptor.at(DeviceDescriptorParts::DeviceArg3));
 		if (!memoryBus->MapFirmwareRom(device, RomData.size(), preferedBase)) {
 			return false;
 		}
@@ -160,12 +160,12 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 			exit(1);
 		}
 		std::cout << "Memory Bus created successfully" << std::endl;
-		HELPERS::Tracemode= [&]() {
-			uint16_t tracemode = cmdArgs.GetArgMap()["TraceMode"].as<uint16_t>();
+		HELPERS::Tracemode = [&]() {
+			const uint16_t tracemode = cmdArgs.GetArgMap()["TraceMode"].as<uint16_t>();
 			if (tracemode == 0) {
 				return HELPERS::TraceMode::none;
 			}
-			else if(tracemode == 1){
+			else if (tracemode == 1) {
 				return HELPERS::TraceMode::minimal;
 			}
 			else if (tracemode == 2) {
@@ -180,7 +180,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 			}();
 		uint16_t Cores = cmdArgs.GetArgMap()["Cores"].as<uint16_t>();
 		CPU::vCoreMode startupMode = CPU::IntToMode(cmdArgs.GetArgMap()["StartupMode"].as<int>());
-		cpu = std::make_shared<CPU::CPU>(Cores,cmdArgs.GetArgMap()["ResetVector"].as<uint64_t>(),memoryBus,startupMode);
+		cpu = std::make_shared<CPU::CPU>(Cores, cmdArgs.GetArgMap()["ResetVector"].as<uint64_t>(), memoryBus, startupMode);
 		if (!cpu) {
 			std::cerr << "failed to create CPU" << std::endl;
 			exit(1);
@@ -202,7 +202,7 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 			DeviceDescriptors.push_back(deviceDescriptorMap);
 
 		}
-		if(!ConstructAndRegisterDevices(DeviceDescriptors)){
+		if (!ConstructAndRegisterDevices(DeviceDescriptors)) {
 			std::cerr << "failed to construct and register devices" << std::endl;
 			exit(1);
 		}
@@ -218,7 +218,6 @@ namespace X86_64_EMU_SOFT::SYSTEM {
 		return true;
 	}
 	System::~System() noexcept
-	{
-	}
+	{}
 }
 

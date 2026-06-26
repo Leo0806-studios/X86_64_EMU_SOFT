@@ -26,11 +26,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::IO_DEVICES
 #ifdef _DEBUG
 	//all parameters must be unsigned
 #define ValidateDeviceAccess(offset,size, maxSize) \
+__pragma (warning(push)) \
+__pragma(warning(disable:26447))\
 	if ((offset) + (size) > (maxSize)) { \
 		std::print("device acces out of range\n"); \
 		__debugbreak();\
 		while(true){}\
-	}
+	}\
+__pragma(warning(pop))
 
 #else
 #define ValidateDeviceAccess(offset,size, maxSize) 

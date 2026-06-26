@@ -15,14 +15,15 @@
 #include <SYSTEM/IO_DEVICES/RESET_ROM.h>
 #include <SYSTEM/IO_DEVICES/FIRMWARE.h>
 namespace {
-	[[nodiscard]] uint64_t GetPageNumber(uint64_t address) {
+	[[nodiscard]] constexpr uint64_t GetPageNumber(uint64_t address)noexcept {
 		return address >> 12U;
 	}
 }// namespace
 
 
 namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
-
+#pragma warning (push)
+#pragma warning (disable :26447)
 	void  MemoryBus::PrintMemoryMap() const noexcept//NOLINT(bugprone-exception-escape)
 	{
 		ZoneNamed(PrintMemoryMap, true);
@@ -51,6 +52,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 			pagenum++;
 		}
 	}
+#pragma warning(pop)
 
 	void  MemoryBus::DumpMemoryToStdout() const noexcept//NOLINT(bugprone-exception-escape)
 	{
@@ -61,15 +63,18 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 				if (section.device) {
 					for (uint64_t i = 0; i < section.size; i++) {//NOSONAR
 						uint8_t value = section.device->Read8(section.DeviceOffset + i);
+#pragma warning(suppress: 26447) 
 						std::print("{:02X} ", value);
 					}
 				}
 				else {
 					for (uint64_t i = 0; i < section.size; i++) {//NOSONAR
+#pragma warning(suppress: 26447) 
 						std::print("?? ");
 					}
 				}
 			}
+#pragma warning(suppress: 26447) 
 			std::print("\n");
 		}
 
@@ -119,8 +124,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 				  });
 	}
 
-	void  MemoryBus::PageEntry::PruneEmptySections()
+	void  MemoryBus::PageEntry::PruneEmptySections()noexcept
 	{
+#pragma warning(suppress:26486)
 		for (auto section = Sections.rbegin(); section != Sections.rend(); section++) {
 			if ((*section).size == 0) {
 				Sections.erase(section.base());
@@ -132,6 +138,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 	bool  MemoryBus::MapResetRom(std::shared_ptr<IO_DEVICES::DeviceBase> device, uint64_t sizeBytes, uint64_t resetVector)//NOLINT(performance-unnecessary-value-param)
 	{
 		ZoneScoped;
+
 
 		const uint64_t resetStartPage = GetPageNumber(resetVector);
 		const uint64_t reserEndPage = GetPageNumber(resetVector + sizeBytes);
@@ -202,7 +209,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 		const uint64_t inPageOffet = FirmwareEntry & 0xFFFULL;
 		const DeviceInfos info{ .device = device,.sizeBytes = sizeBytes,.baseAdress = FirmwareEntry };
 		uint64_t remainingDeviceBytes = sizeBytes;
-		RegisteredDevices.push_back(std::move(info));
+		RegisteredDevices.push_back(info);
 		for (uint64_t page = firmwareStartPage; page < MemoryPages.size(); page++) {
 			PageEntry& currentPage = MemoryPages[page];
 			if (page == firmwareStartPage) {
@@ -282,10 +289,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 		const uint64_t inPageOffset = address & 0xFFFULL;
 		const auto& page = MemoryPages[PageNumber];
 		for (const auto& section : page.Sections) {
-			if (inPageOffset >= section.pageOffset && inPageOffset < (section.pageOffset + section.size)) {
+			if (inPageOffset >= section.pageOffset && inPageOffset < (static_cast<uint64_t>(section.pageOffset) + section.size)) {
 				const uint64_t off = inPageOffset - section.pageOffset;
 
 				if (section.Flags & std::to_underlying(PageEntry::PageSection::Flags::DirectAccess) && !(section.Flags & std::to_underlying(PageEntry::PageSection::Flags::SideEffectRead))) [[likely]]{
+#pragma warning(suppress:26481)
 					return section.dataPtr[off];//NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				}
 				return section.device->Read8(section.DeviceOffset + off);
@@ -330,7 +338,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 		const uint64_t inPageOffset = address & 0xFFFULL;
 		auto& page = MemoryPages[PageNumber];
 		for (auto& section : page.Sections) {
-			if (inPageOffset >= section.pageOffset && inPageOffset < (section.pageOffset + section.size)) {
+			if (inPageOffset >= section.pageOffset && inPageOffset < (static_cast<uint64_t>(section.pageOffset) + section.size)) {
 				const uint64_t off = inPageOffset - section.pageOffset;
 				section.device->Write8(section.DeviceOffset + off, value);
 			}

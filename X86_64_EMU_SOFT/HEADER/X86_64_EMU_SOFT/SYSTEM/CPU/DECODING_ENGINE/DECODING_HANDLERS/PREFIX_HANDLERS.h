@@ -10,7 +10,7 @@
 #include <HELPERS/MACROS.h>
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
-	inline DEFINE_HANDLER(Handle_Prefix) {//NOSONAR
+	inline DEFINE_HANDLER(Handle_Prefix) noexcept{//NOSONAR
 		ZoneScoped;
 		std::ignore = core;
 		std::ignore = address;

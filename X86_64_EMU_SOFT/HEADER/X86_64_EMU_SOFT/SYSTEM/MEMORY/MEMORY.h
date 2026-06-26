@@ -39,7 +39,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 			[[nodiscard ]] uint64_t GetFrreBytesInPage()const noexcept;
 			[[nodiscard ]] std::pair<uint64_t/*in page offset*/, uint64_t/*size Bytes*/> GetNextFreeSection()const noexcept;
 			void SortSections() noexcept;
-			void PruneEmptySections();
+			void PruneEmptySections()noexcept;
 		};
 
 

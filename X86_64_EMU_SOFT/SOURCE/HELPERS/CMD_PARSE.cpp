@@ -41,6 +41,8 @@ DeviceArg1-6 : information about the device that the emulator must know. for inf
 		("Preset", bo::value<std::filesystem::path>(), "path to a .cpuPreset file. follows the exact same syntax as CMD arguments except that different args are seperated by newlines. do not recursively pass the same file. if a preset file is passed all other options are ignored");
 	bo::variables_map ArgMap;
 	bo::store(bo::parse_command_line(argc, argv, desc), ArgMap);
+#pragma warning(push)
+#pragma warning (disable: 26486) 
 	if (ArgMap["help"].as<bool>()) {
 		std::cout << desc << std::endl;
 	}
@@ -57,20 +59,24 @@ DeviceArg1-6 : information about the device that the emulator must know. for inf
 				PresetArgs.push_back(line);
 			}
 		}
+#pragma warning(suppress: 26409)
 		const char** PresetArgsCHR = new const char* [PresetArgs.size()];
 		if (!PresetArgsCHR) {
 			std::cerr << "failed to allocate memory for preset args" << std::endl;
 			exit(1);
 		}
 		for (size_t i = 0; i < PresetArgs.size(); i++) {
+#pragma warning(suppress: 26481)			
 			PresetArgsCHR[i] = PresetArgs[i].c_str();
 		}
 
 
 		bo::store(bo::parse_command_line(static_cast<int>(PresetArgs.size() + 1), PresetArgsCHR, desc), ArgMap);
+#pragma warning(suppress: 26409)
 		delete[] PresetArgsCHR;
 	}
 	this->argMap = std::move(ArgMap);
+#pragma warning(pop)
 }
 
 bool X86_64_EMU_SOFT::HELPERS::CmdArgs::Validate() const noexcept

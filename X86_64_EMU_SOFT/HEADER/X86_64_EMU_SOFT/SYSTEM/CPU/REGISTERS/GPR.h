@@ -56,7 +56,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::REGISTERS {
 		void operator ^=(uint64_t value) noexcept {
 			storage ^= value;
 		}
-		void operator ~(){
+		void operator ~()noexcept{
 			storage = ~storage;
 		}
 		[[nodiscard]] explicit operator uint64_t() const noexcept {

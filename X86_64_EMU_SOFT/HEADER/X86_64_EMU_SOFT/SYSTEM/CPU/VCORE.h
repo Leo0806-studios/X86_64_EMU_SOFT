@@ -21,7 +21,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		protectedMode,
 		longMode,
 	};
-	inline vCoreMode IntToMode(int modeBits) {
+	inline vCoreMode IntToMode(int modeBits)noexcept {
 		switch (modeBits) {
 			case 16: return vCoreMode::realMode;
 			case 32: return vCoreMode::protectedMode;
@@ -73,7 +73,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		static const uint64_t EFER_MSR_NUMBER = 0xC0000080ULL;
 
 		std::shared_ptr<MEMORY::MemoryBus> memoryBus;
-		[[nodiscard]] INSTRUCTIONS::Instruction decodeInstruction() ;
+		 void decodeInstruction(INSTRUCTIONS::Instruction& instruction) ;
 		void executeInstruction(const INSTRUCTIONS::Instruction& instruction);
 		void PrintCoreState()const;
 	public:

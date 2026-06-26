@@ -63,7 +63,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 
 
-	inline DEFINE_HANDLER(Handle_MOV_r16r32r64_imm16_imm32_imm64_0xB8_BASE) {
+	inline DEFINE_HANDLER(Handle_MOV_r16r32r64_imm16_imm32_imm64_0xB8_BASE) noexcept{
 		ZoneScoped;//NOLINT
 		instruction.OpcodeBytes[0] = byte;
 		instruction.OpcodeSizeBytes++;
@@ -131,7 +131,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	
 
-	inline  DEFINE_HANDLER(Handle_NOP_0x90) {//NOSONAR
+	inline  DEFINE_HANDLER(Handle_NOP_0x90)noexcept {//NOSONAR
 
 		ZoneScoped;
 		instruction.OpcodeBytes[0] = byte;
@@ -146,7 +146,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 		return true;
 	}
-	inline DEFINE_HANDLER(Handle_UD_0xD6) {//NOSONAR
+	inline DEFINE_HANDLER(Handle_UD_0xD6) noexcept{//NOSONAR
 		ZoneScoped;
 		instruction.OpcodeBytes[0] = byte;
 		instruction.OpcodeSizeBytes++;

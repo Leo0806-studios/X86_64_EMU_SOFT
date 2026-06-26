@@ -53,25 +53,25 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 			//ALU
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_rm8_r8_0x0)] = Handler_rm8_r8<INSTRUCTIONS::InstructionType::ADD>;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_rm16rm32rm64_r16r32r64_0x1)] = Handle_ADD_rm16rm32rm64_r16r32r64_0x1;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_r8_rm8_0x2)] = Handle_ADD_r8_rm8_0x2;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_r16r32r64_rm16rm32rm64_0x3)] = Handle_ADD_r16r32r64_rm16rm32rm64_0x3;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_AL_imm8_0x4)] = Handle_ADD_AL_imm8_0x4;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_AxEaxRax_imm16imm32_0x5)] = Handle_ADD_AxEaxRax_imm16imm32_0x5;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_rm16rm32rm64_r16r32r64_0x1)] = Handle_r16r32r64_rm16rm32rm64<INSTRUCTIONS::InstructionType::ADD>;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_r8_rm8_0x2)] = Handle_r8_rm8<INSTRUCTIONS::InstructionType::ADD>;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_r16r32r64_rm16rm32rm64_0x3)] = Handle_r16r32r64_rm16rm32rm64<INSTRUCTIONS::InstructionType::ADD>;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_AL_imm8_0x4)] = Handle_AL_imm8<INSTRUCTIONS::InstructionType::ADD>;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::ADD_AxEaxRax_imm16imm32_0x5)] = Handle_AxEaxRax_imm16imm32<INSTRUCTIONS::InstructionType::ADD>;
 			
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_rm8_r8_0x8)] = Handle_OR_rm8_r8_0x8;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_rm16rm32_r16r32_0x9)] = Handle_OR_rm16rm32rm64_r16r32r64_0x9;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_r8_rm8_0xA)] = Handle_OR_r8_rm8_0xA;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_r16r32_rm16rm32_0xB)] = Handle_OR_r16r32r64_rm16rm32rm64_0xB;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_AL_imm8_0xC)] = Handle_OR_AL_imm8_0xC;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_AxEaxRax_imm16imm32_0xD)] = Handle_OR_AxEaxRax_imm16imm32_0xD;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_rm8_r8_0x8)] = Handler_rm8_r8<INSTRUCTIONS::InstructionType::OR>;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_rm16rm32_r16r32_0x9)] = Handle_r16r32r64_rm16rm32rm64<INSTRUCTIONS::InstructionType::OR>;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_r8_rm8_0xA)] = Handle_r8_rm8<INSTRUCTIONS::InstructionType::OR>;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_r16r32_rm16rm32_0xB)] = Handle_r16r32r64_rm16rm32rm64<INSTRUCTIONS::InstructionType::OR>;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_AL_imm8_0xC)] = Handle_AL_imm8<INSTRUCTIONS::InstructionType::OR>;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_AxEaxRax_imm16imm32_0xD)] = Handle_AxEaxRax_imm16imm32<INSTRUCTIONS::InstructionType::OR>;
 
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_rm8_r8_0x28)] = Handle_SUB_rm8_r8_0x28;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_rm16rm32_r16r32_0X29)] = Handle_SUB_rm16rm32rm64_r16r32r64_0x29;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_r8_rm8_0x2A)] = Handle_SUB_r8_rm8_0x2A;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_r16r32_rm16rm32_0x2B)] = Handle_SUB_r16r32r64_rm16rm32rm64_0x2B;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_AL_imm8_0x2C)] = Handle_SUB_AL_imm8_0x2C;
-			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_AxEaxRax_imm16imm32_0x2D)] = Handle_SUB_AxEaxRax_imm16imm32_0x2D;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_rm8_r8_0x28)] = Handler_rm8_r8<INSTRUCTIONS::InstructionType::SUB>;	
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_rm16rm32_r16r32_0X29)] = Handler_rm16rm32rm64_r16r32r64<INSTRUCTIONS::InstructionType::SUB>;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_r8_rm8_0x2A)] = Handle_r8_rm8<INSTRUCTIONS::InstructionType::SUB>;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_r16r32_rm16rm32_0x2B)] = Handle_r16r32r64_rm16rm32rm64<INSTRUCTIONS::InstructionType::SUB>;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_AL_imm8_0x2C)] = Handle_AL_imm8<INSTRUCTIONS::InstructionType::SUB>;
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_AxEaxRax_imm16imm32_0x2D)] = Handle_AxEaxRax_imm16imm32<INSTRUCTIONS::InstructionType::SUB>;
 
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::GROUP1_0X83)] = Handle_GROUP1_0X83_;
 

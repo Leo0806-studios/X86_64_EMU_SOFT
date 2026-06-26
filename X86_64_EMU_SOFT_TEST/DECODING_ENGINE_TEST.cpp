@@ -13,6 +13,7 @@
 namespace X86_64_EMU_SOFT::TESTS {
 	using namespace X86_64_EMU_SOFT::SYSTEM;
 	using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+	using enum CPU::INSTRUCTIONS::InstructionType;
 
 	struct TestEnvironment {
 		std::shared_ptr<SYSTEM::MEMORY::MemoryBus> memoryBus;
@@ -71,7 +72,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 
-					bool Handled = Handle_ADD_rm8_r8_0x0(*core, address, instruction, prefixes, 0x0);
+					bool Handled = Handler_rm8_r8<INSTRUCTIONS::InstructionType::ADD>(*core, address, instruction, prefixes, 0x0);
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::ADD), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
@@ -131,7 +132,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
 
-						std::ignore = Handle_ADD_rm8_r8_0x0(*core, address, instruction, prefixes, 0x0);
+						std::ignore = Handler_rm8_r8<INSTRUCTIONS::InstructionType::ADD>(*core, address, instruction, prefixes, 0x0);
 					}, msg);
 
 
@@ -186,7 +187,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 						.mod = 0b11,
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
-					bool Handled = Handle_ADD_rm16rm32rm64_r16r32r64_0x1(*core, address, instruction, prefixes, 0x1);
+					bool Handled = Handler_rm16rm32rm64_r16r32r64<ADD>(*core, address, instruction, prefixes, 0x1);
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::ADD), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
@@ -260,7 +261,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
-						std::ignore = Handle_ADD_rm16rm32rm64_r16r32r64_0x1(*core, address, instruction, prefixes, 0x1);
+						std::ignore = Handler_rm16rm32rm64_r16r32r64<ADD>(*core, address, instruction, prefixes, 0x1);
 					}, msg);
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
@@ -315,7 +316,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 
-					bool Handled = Handle_ADD_r8_rm8_0x2(*core, address, instruction, prefixes, 0x2);
+					bool Handled = Handle_r8_rm8<ADD>(*core, address, instruction, prefixes, 0x2);
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::ADD), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
@@ -374,7 +375,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
 
-						std::ignore = Handle_ADD_r8_rm8_0x2(*core, address, instruction, prefixes, 0x2);
+						std::ignore = Handle_r8_rm8<ADD>(*core, address, instruction, prefixes, 0x2);
 					}, msg);
 
 
@@ -429,7 +430,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 						.mod = 0b11,
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
-					bool Handled = Handle_ADD_r16r32r64_rm16rm32rm64_0x3(*core, address, instruction, prefixes, 0x3);
+					bool Handled = Handle_r16r32r64_rm16rm32rm64<ADD>(*core, address, instruction, prefixes, 0x3);
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::ADD), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
@@ -502,7 +503,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
-						std::ignore = Handle_ADD_r16r32r64_rm16rm32rm64_0x3(*core, address, instruction, prefixes, 0x3);
+						std::ignore = Handle_r16r32r64_rm16rm32rm64<ADD>(*core, address, instruction, prefixes, 0x3);
 					}, msg);
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
@@ -545,7 +546,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					uint8_t immediateValue = 0x42;
 					env.mainMemoryDevice->Write8(address, immediateValue);
 
-					bool Handled = Handle_ADD_AL_imm8_0x4(*core, address, instruction, prefixes, 0x4);
+					bool Handled = Handle_AL_imm8<ADD>(*core, address, instruction, prefixes, 0x4);
 
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::ADD), msg);
@@ -619,7 +620,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					env.mainMemoryDevice->Write8(address + 2, 0x33);
 					env.mainMemoryDevice->Write8(address + 3, 0x44);
 
-					bool Handled = Handle_ADD_AxEaxRax_imm16imm32_0x5(*core, address, instruction, prefixes, 0x5);
+					bool Handled = Handle_AxEaxRax_imm16imm32<ADD>(*core, address, instruction, prefixes, 0x5);
 
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::ADD), msg);
@@ -719,7 +720,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 
-					bool Handled = Handle_OR_rm8_r8_0x8(*core, address, instruction, prefixes, 0x8);
+					bool Handled = Handler_rm8_r8<OR>(*core, address, instruction, prefixes, 0x8);
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::OR), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
@@ -777,7 +778,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
-						std::ignore = Handle_OR_rm8_r8_0x8(*core, address, instruction, prefixes, 0x8);
+						std::ignore = Handler_rm8_r8<OR>(*core, address, instruction, prefixes, 0x8);
 					}, msg);
 					};
 
@@ -830,7 +831,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 						.mod = 0b11,
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
-					bool Handled = Handle_OR_rm16rm32rm64_r16r32r64_0x9(*core, address, instruction, prefixes, 0x9);
+					bool Handled = Handler_rm16rm32rm64_r16r32r64<OR>(*core, address, instruction, prefixes, 0x9);
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::OR), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
@@ -903,7 +904,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
-						std::ignore = Handle_OR_rm16rm32rm64_r16r32r64_0x9(*core, address, instruction, prefixes, 0x9);
+						std::ignore = Handler_rm16rm32rm64_r16r32r64<OR>(*core, address, instruction, prefixes, 0x9);
 					}, msg);
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
@@ -958,7 +959,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 
-					bool Handled = Handle_OR_r8_rm8_0xA(*core, address, instruction, prefixes, 0x2);
+					bool Handled = Handle_r8_rm8<OR>(*core, address, instruction, prefixes, 0x2);
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::OR), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
@@ -1017,7 +1018,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
 
-						std::ignore = Handle_OR_r8_rm8_0xA(*core, address, instruction, prefixes, 0x2);
+						std::ignore = Handle_r8_rm8<OR>(*core, address, instruction, prefixes, 0x2);
 					}, msg);
 
 
@@ -1072,7 +1073,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 						.mod = 0b11,
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
-					bool Handled = Handle_OR_r16r32r64_rm16rm32rm64_0xB(*core, address, instruction, prefixes, 0xB);
+					bool Handled = Handle_r16r32r64_rm16rm32rm64<OR>(*core, address, instruction, prefixes, 0xB);
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::OR), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
@@ -1151,7 +1152,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 					// Current implementation throws an exception for memory operands
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
-						std::ignore = Handle_OR_r16r32r64_rm16rm32rm64_0xB(*core, address, instruction, prefixes, 0xB);
+						std::ignore = Handle_r16r32r64_rm16rm32rm64<OR>(*core, address, instruction, prefixes, 0xB);
 					}, msg);
 					};
 
@@ -1194,7 +1195,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					uint8_t immediateValue = 0x42;
 					env.mainMemoryDevice->Write8(address, immediateValue);
 
-					bool Handled = Handle_OR_AL_imm8_0xC(*core, address, instruction, prefixes, 0xC);
+					bool Handled = Handle_AL_imm8<OR>(*core, address, instruction, prefixes, 0xC);
 
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::OR), msg);
@@ -1265,7 +1266,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					env.mainMemoryDevice->Write8(address + 2, 0x33);
 					env.mainMemoryDevice->Write8(address + 3, 0x44);
 
-					bool Handled = Handle_OR_AxEaxRax_imm16imm32_0xD(*core, address, instruction, prefixes, 0xD);
+					bool Handled = Handle_AxEaxRax_imm16imm32<OR>(*core, address, instruction, prefixes, 0xD);
 
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::OR), msg);
@@ -1370,7 +1371,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 
-					bool Handled = Handle_AND_rm8_r8_0x20(*core, address, instruction, prefixes, 0x20);
+					bool Handled = Handler_rm8_r8<AND>(*core, address, instruction, prefixes, 0x20);
 						Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::AND), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
@@ -1430,7 +1431,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
 
-						std::ignore = Handle_AND_rm8_r8_0x20(*core, address, instruction, prefixes, 0x20);
+						std::ignore = Handler_rm8_r8<AND>(*core, address, instruction, prefixes, 0x20);
 					}, msg);
 
 
@@ -1485,7 +1486,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 						.mod = 0b11,
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
-					bool Handled = Handle_AND_rm16rm23rm64_r16r32r64_0x21(*core, address, instruction, prefixes, 0x21);
+					bool Handled = Handler_rm16rm32rm64_r16r32r64<AND>(*core, address, instruction, prefixes, 0x21);
 						Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::AND), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
@@ -1559,7 +1560,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
-						std::ignore = Handle_AND_rm16rm23rm64_r16r32r64_0x21(*core, address, instruction, prefixes, 0x21);
+						std::ignore = Handler_rm16rm32rm64_r16r32r64<AND>(*core, address, instruction, prefixes, 0x21);
 					}, msg);
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
@@ -1614,7 +1615,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 
-					bool Handled = Handle_AND_r8_rm8_0x22(*core, address, instruction, prefixes, 0x22);
+					bool Handled = Handle_r8_rm8<AND>(*core, address, instruction, prefixes, 0x22);
 						Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::AND), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
@@ -1673,7 +1674,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
 
-						std::ignore = Handle_AND_r8_rm8_0x22(*core, address, instruction, prefixes, 0x22);
+						std::ignore = Handle_r8_rm8<AND>(*core, address, instruction, prefixes, 0x22);
 					}, msg);
 
 
@@ -1728,7 +1729,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 						.mod = 0b11,
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
-					bool Handled = Handle_AND_r16r32r64_rm16rm32rm64_0x23(*core, address, instruction, prefixes, 0x23);
+					bool Handled = Handle_r16r32r64_rm16rm32rm64<AND>(*core, address, instruction, prefixes, 0x23);
 						Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::AND), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
@@ -1801,7 +1802,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
-						std::ignore = Handle_AND_r16r32r64_rm16rm32rm64_0x23(*core, address, instruction, prefixes, 0x23);
+						std::ignore = Handle_r16r32r64_rm16rm32rm64<AND>(*core, address, instruction, prefixes, 0x23);
 					}, msg);
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
@@ -1844,7 +1845,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					uint8_t immediateValue = 0x42;
 					env.mainMemoryDevice->Write8(address, immediateValue);
 
-					bool Handled = Handle_AND_AL_imm8_0x24(*core, address, instruction, prefixes, 0x24);
+					bool Handled = Handle_AL_imm8<AND>(*core, address, instruction, prefixes, 0x24);
 
 						Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::AND), msg);
@@ -1918,7 +1919,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					env.mainMemoryDevice->Write8(address + 2, 0x33);
 					env.mainMemoryDevice->Write8(address + 3, 0x44);
 
-					bool Handled = Handle_AND_AxEaxRax_imm16imm32_0x25(*core, address, instruction, prefixes, 0x25);
+					bool Handled = Handle_AxEaxRax_imm16imm32<AND>(*core, address, instruction, prefixes, 0x25);
 
 						Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::AND), msg);
@@ -2018,7 +2019,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 
-					bool Handled = Handle_SUB_rm8_r8_0x28(*core, address, instruction, prefixes, 0x28);
+					bool Handled = Handler_rm8_r8<SUB>(*core, address, instruction, prefixes, 0x28);
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::SUB), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
@@ -2077,7 +2078,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 
 					// Memory operands are not yet supported, exception expected
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
-						std::ignore = Handle_SUB_rm8_r8_0x28(*core, address, instruction, prefixes, 0x28);
+						std::ignore = Handler_rm8_r8<SUB>(*core, address, instruction, prefixes, 0x28);
 					}, msg);
 					};
 
@@ -2129,7 +2130,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 						.mod = 0b11,
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
-					bool Handled = Handle_SUB_rm16rm32rm64_r16r32r64_0x29(*core, address, instruction, prefixes, 0x29);
+					bool Handled = Handler_rm16rm32rm64_r16r32r64<SUB>(*core, address, instruction, prefixes, 0x29);
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::SUB), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
@@ -2203,7 +2204,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
-						std::ignore = Handle_SUB_rm16rm32rm64_r16r32r64_0x29(*core, address, instruction, prefixes, 0x29);
+						std::ignore = Handler_rm16rm32rm64_r16r32r64<SUB>(*core, address, instruction, prefixes, 0x29);
 					}, msg);
 					};
 				RunTest(env.vCoreLong, INSTRUCTIONS::TargetRegister::RAX, INSTRUCTIONS::TargetRegister::RBX, std::to_underlying(Boilerplate::FlagMask::UseRex), L"Long REX");
@@ -2256,7 +2257,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 
-					bool Handled = Handle_SUB_r8_rm8_0x2A(*core, address, instruction, prefixes, 0x2A);
+					bool Handled = Handle_r8_rm8<SUB>(*core, address, instruction, prefixes, 0x2A);
 
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::SUB), msg);
@@ -2316,7 +2317,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 
 					// Expect UNDEFINED_OPCODE exception for unsupported memory addressing
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
-						std::ignore = Handle_SUB_r8_rm8_0x2A(*core, address, instruction, prefixes, 0x2A);
+						std::ignore = Handle_r8_rm8<SUB>(*core, address, instruction, prefixes, 0x2A);
 					}, msg);
 					};
 
@@ -2369,7 +2370,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
 
-					bool Handled = Handle_SUB_r16r32r64_rm16rm32rm64_0x2B(*core, address, instruction, prefixes, 0x2B);
+					bool Handled = Handle_r16r32r64_rm16rm32rm64<SUB>(*core, address, instruction, prefixes, 0x2B);
 
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::SUB), msg);
@@ -2447,7 +2448,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 
 					// Verify if the memory operands restriction behaves as intended
 					Assert::ExpectException<EXCEPTIONS::UNDEFINED_OPCODE>([&]() {
-						std::ignore = Handle_SUB_r16r32r64_rm16rm32rm64_0x2B(*core, address, instruction, prefixes, 0x2B);
+						std::ignore = Handle_r16r32r64_rm16rm32rm64<SUB>(*core, address, instruction, prefixes, 0x2B);
 					}, msg);
 					};
 
@@ -2484,7 +2485,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					uint8_t immediateValue = 0x42;
 					env.mainMemoryDevice->Write8(address, immediateValue);
 
-					bool Handled = Handle_SUB_AL_imm8_0x2C(*core, address, instruction, prefixes, 0x2C);
+					bool Handled = Handle_AL_imm8<SUB>(*core, address, instruction, prefixes, 0x2C);
 
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::SUB), msg);
@@ -2556,7 +2557,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 					env.mainMemoryDevice->Write8(address + 3, 0x44);
 
 					// Using 0x2D byte
-					bool Handled = Handle_SUB_AxEaxRax_imm16imm32_0x2D(*core, address, instruction, prefixes, 0x2D);
+					bool Handled = Handle_AxEaxRax_imm16imm32<SUB>(*core, address, instruction, prefixes, 0x2D);
 
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::SUB), msg);
@@ -2655,7 +2656,7 @@ namespace X86_64_EMU_SOFT::TESTS {
 						.mod = 0b11,
 					};
 					env.mainMemoryDevice->Write8(address, std::bit_cast<uint8_t>(modrm));
-					bool Handled = Handle_MOV_rm16rm32rm64_r16r32r64_0x89(*core, address, instruction, prefixes, 0x89);
+					bool Handled = Handler_rm16rm32rm64_r16r32r64<MOV>(*core, address, instruction, prefixes, 0x89);
 					Assert::IsTrue(Handled, msg);
 					Assert::AreEqual(std::to_underlying(instruction.Type), std::to_underlying(InstructionType::MOV), msg);
 					Assert::AreEqual(instruction.OperandCount, static_cast<uint8_t>(2), msg);
