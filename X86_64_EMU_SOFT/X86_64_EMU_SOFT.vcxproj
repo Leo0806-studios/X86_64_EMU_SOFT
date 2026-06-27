@@ -652,6 +652,8 @@
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <ControlFlowGuard>false</ControlFlowGuard>
+      <OmitFramePointers>false</OmitFramePointers>
+      <AdditionalOptions>/Ob3 /favor:INTEL64  /d2FH4 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>
