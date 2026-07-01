@@ -5,15 +5,15 @@
 #include <intrin.h>
 #include <memory>
 #include <print>
+#include <SYSTEM/IO_DEVICES/FIRMWARE.h>
+#include <SYSTEM/IO_DEVICES/RESET_ROM.h>
+#include <tracy/Tracy.hpp>
 #include <tuple>
 #include <utility>
-#include <tracy/Tracy.hpp>
 #include "HELPERS/MACROS.h"
 #include "SYSTEM/IO_DEVICES/DEVICE_BASE.h"
 #include "SYSTEM/IO_DEVICES/MAIN_MEMORY_DEVICE.h"
 #include "SYSTEM/MEMORY/MEMORY.h"
-#include <SYSTEM/IO_DEVICES/RESET_ROM.h>
-#include <SYSTEM/IO_DEVICES/FIRMWARE.h>
 namespace {
 	[[nodiscard]] constexpr uint64_t GetPageNumber(uint64_t address)noexcept {
 		return address >> 12U;
@@ -158,6 +158,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 				currentPage.Sections[0].size = static_cast<uint32_t>(sizeBytes);
 				currentPage.Sections[0].Flags = std::to_underlying(PageEntry::PageSection::Flags::DirectAccess);
 				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::SideEffectWrite);
+				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::Cachable);
 				currentPage.Sections[0].dataPtr = static_cast<IO_DEVICES::ResetROMDevice*>(device.get())->GetDataPtr();
 				currentPage.Sections.push_back(newSection);
 				currentPage.SortSections();
@@ -173,6 +174,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 				currentPage.Sections[0].size = static_cast<uint32_t>(sizeBytes);
 				currentPage.Sections[0].Flags = std::to_underlying(PageEntry::PageSection::Flags::DirectAccess);
 				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::SideEffectWrite);
+				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::Cachable);
 				currentPage.Sections[0].dataPtr = static_cast<IO_DEVICES::ResetROMDevice*>(device.get())->GetDataPtr();
 				currentPage.Sections.push_back(newSection);
 				currentPage.SortSections();
@@ -191,6 +193,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 				currentPage.Sections[0].size = static_cast<uint32_t>(sizeBytes);
 				currentPage.Sections[0].Flags = std::to_underlying(PageEntry::PageSection::Flags::DirectAccess);
 				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::SideEffectWrite);
+				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::Cachable);
 				currentPage.Sections[0].dataPtr = static_cast<IO_DEVICES::ResetROMDevice*>(device.get())->GetDataPtr();
 				currentPage.Sections.push_back(newSectionBefore);
 				currentPage.Sections.push_back(newSectionAfter);
@@ -235,6 +238,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 						section.size = static_cast<uint32_t>(sizeBytes);
 						section.Flags = std::to_underlying(PageEntry::PageSection::Flags::DirectAccess);
 						section.Flags |= std::to_underlying(PageEntry::PageSection::Flags::SideEffectWrite);
+						section.Flags |= std::to_underlying(PageEntry::PageSection::Flags::Cachable);
 						section.dataPtr = static_cast<IO_DEVICES::FirmwareRomDevice*>(device.get())->GetDataPtr();
 						//currentPage.Sections.push_back(newSectionBefore);
 						currentPage.Sections.push_back(newSectionAfter);
@@ -270,6 +274,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 			page.Sections[0].DeviceOffset = deviceOffset;
 			page.Sections[0].size = 4096;
 			page.Sections[0].Flags = std::to_underlying(PageEntry::PageSection::Flags::DirectAccess);
+			page.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::Cachable);
 			page.Sections[0].dataPtr = static_cast<IO_DEVICES::MainMemoryDevice*>(device.get())->GetDataPtr();
 			deviceOffset += page.Sections[0].size;
 		}
@@ -292,7 +297,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 			if (inPageOffset >= section.pageOffset && inPageOffset < (static_cast<uint64_t>(section.pageOffset) + section.size)) {
 				const uint64_t off = inPageOffset - section.pageOffset;
 
-				if (section.Flags & std::to_underlying(PageEntry::PageSection::Flags::DirectAccess) && !(section.Flags & std::to_underlying(PageEntry::PageSection::Flags::SideEffectRead))) [[likely]]{
+				if (section.Flags & std::to_underlying(PageEntry::PageSection::Flags::DirectAccess) && !(section.Flags & std::to_underlying(PageEntry::PageSection::Flags::SideEffectRead))) [[likely]] {
 #pragma warning(suppress:26481)
 					return section.dataPtr[off];//NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				}
@@ -332,9 +337,59 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 	}
 
+	bool MemoryBus::IsCachableLine(uint64_t baseAddress) const noexcept
+	{
+		constexpr uint64_t CacheLineSize = 64;
+
+		const uint64_t pageNumber = baseAddress >> 12U;
+		const uint64_t lineBegin = baseAddress & 0xFFFU;
+		const uint64_t lineEnd = lineBegin + CacheLineSize;
+
+		const auto& page = MemoryPages[pageNumber];
+
+		uint64_t coveredUntil = lineBegin;
+
+		for (const auto& section : page.Sections)
+		{
+			const uint64_t sectionBegin = section.pageOffset;
+			const uint64_t sectionEnd = sectionBegin + section.size;
+
+			if (sectionBegin >= lineEnd)
+			{
+				break;
+			}
+
+			if (sectionEnd <= coveredUntil)
+			{
+				continue;
+			}
+
+			if (sectionBegin > coveredUntil) { 
+
+				return false;
+			}
+
+			if ((section.Flags &
+				 std::to_underlying(PageEntry::PageSection::Flags::Cachable)) == 0)
+			{
+				return false;
+			}
+
+			coveredUntil = std::min(sectionEnd, lineEnd);
+
+			if (coveredUntil == lineEnd)
+			{
+				return true;
+			}
+		}
+
+		// Didn't cover the entire cache line.
+		return false;
+	}
+
 	void  MemoryBus::Write8(uint64_t address, uint8_t value) noexcept
 	{
-		const uint64_t PageNumber(address);
+		const uint64_t PageNumber = address >> 12ULL;
 		const uint64_t inPageOffset = address & 0xFFFULL;
 		auto& page = MemoryPages[PageNumber];
 		for (auto& section : page.Sections) {

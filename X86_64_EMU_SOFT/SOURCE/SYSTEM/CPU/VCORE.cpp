@@ -5,6 +5,8 @@
 #include <memory>
 #include <print>
 #include <sstream>
+#include <intrin.h>
+#include <immintrin.h>
 #include <stdexcept>
 #include <array>
 #include <utility>
@@ -261,10 +263,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	{
 		ZoneScoped;//NOLINT
 		switch (sizeBytes) {
-			[[likely]] case 1: return memoryBus->Read8(address);
-			case 2: return memoryBus->Read16(address);
-			case 4: return memoryBus->Read32(address);
-			case 8: return memoryBus->Read64(address);
+			[[likely]] case 1: return cache.Read8(address);
+			case 2: return cache.Read16(address);
+			case 4: return cache.Read32(address);
+			case 8: return cache.Read64(address);
 			default: NeverOrAssert("size Bytes in " __FUNCTION__ " can only be 1,2,4 or 8");
 		}
 		__assume(false);
@@ -358,9 +360,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	}
 	VirtualCore::VirtualCore(uint64_t resetVector, std::shared_ptr<MEMORY::MemoryBus> memBus, vCoreMode startupMode) noexcept :
-		RAX(), RBX(), RCX(), RDX(), RSI(), RDI(), RSP(), RBP(), R8(), R9(), R10(), R11(), R12(), R13(), R14(), R15(),
-		RIP(), EFER(), CR0(),
-		isRunning(false), hasShutdown(false), isEnabled(false), memoryBus(std::move(memBus))
+		cache(memoryBus.get()), RAX(), RBX(), RCX(), RDX(), RSI(), RDI(), RSP(), RBP(), R8(), R9(), R10(), R11(), R12(), R13(), R14(),
+		R15(), RIP(), EFER(),
+		CR0(), isRunning(false), hasShutdown(false), isEnabled(false), memoryBus(std::move(memBus))
 
 	{
 		DeepZoneScoped;
@@ -529,5 +531,51 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		__assume(false);
 	}
 #pragma warning(pop)
+
+
+
+	int16_t VirtualCore::Cache::findCacheLineIndex(uint64_t address) const noexcept
+	{
+		const uint64_t untaggedAddress = address & 0xFFFFFFFFFFFFFFC0ULL;
+		assert(tagedBases.size() <= std::numeric_limits<int16_t>::max());
+		for (uint64_t i = 0; i < tagedBases.size(); i+=4) {
+			//im lazzy lets do a scalar check for now
+			const uint64_t untaggedBase0 = tagedBases[i] & 0xFFFFFFFFFFFFFFC0ULL;
+			const uint64_t untaggedBase1 = tagedBases[i + 1] & 0xFFFFFFFFFFFFFFC0ULL;
+			const uint64_t untaggedBase2 = tagedBases[i + 2] & 0xFFFFFFFFFFFFFFC0ULL;
+			const uint64_t untaggedBase3 = tagedBases[i + 3] & 0xFFFFFFFFFFFFFFC0ULL;
+			if(untaggedAddress == untaggedBase0) {
+				return static_cast<int16_t>(i);
+			}
+			else if (untaggedAddress == untaggedBase1) {
+				return static_cast<int16_t>(i + 1);
+			}
+			else if (untaggedAddress == untaggedBase2) {
+				return static_cast<int16_t>(i + 2);
+			}
+			else if (untaggedAddress == untaggedBase3) {
+				return static_cast<int16_t>(i + 3);
+			}
+		}
+		return -1;
+	}
+
+	uint8_t VirtualCore::Cache::Read8(uint64_t address)  noexcept
+	{
+		const uint64_t allignedAddress = address & 0xFFFFFFFFFFFFFFC0ULL;
+		 int16_t cacheLineIndex = findCacheLineIndex(allignedAddress);
+		if (cacheLineIndex == -1) {
+			const bool Cachable = memoryBus->IsCachableLine(allignedAddress);
+			auto& line = cacheLines[nextRefresh];
+			for (int i = 0; i < 64; ++i) {
+				line[i] = memoryBus->Read8(allignedAddress + i);
+			}
+			cacheLineIndex = nextRefresh;
+			nextRefresh = (nextRefresh + 1) % 16;
+		}
+		auto& line = cacheLines[cacheLineIndex];
+		auto offset = address & 0x3F;
+		return line[offset];
+	}
 
 }// namespace X86_64_EMU_SOFT::SYSTEM::CPU

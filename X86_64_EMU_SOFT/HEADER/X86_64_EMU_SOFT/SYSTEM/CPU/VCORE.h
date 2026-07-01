@@ -15,7 +15,6 @@
 namespace X86_64_EMU_SOFT::SYSTEM::CPU
 {
 
-
 	enum class vCoreMode :uint8_t {
 		realMode,
 		protectedMode,
@@ -28,11 +27,46 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 			case 64: return vCoreMode::longMode;
 			default:__assume(false);
 		}
+		
 	}
+
 	class VirtualCore//NOSONAR
 	{
+	class Cache {
+	public:
+		enum class CacheLineFlags :uint8_t {
+			Valid = 0b00000001,
+			Dirty = 0b00000010,
+			Reserved1 = 0b00000100,
+			Reserved2 = 0b00001000,
+			Reserved3 = 0b00010000,
+			Reserved4 = 0b00100000
+		};
+	private:
+		MEMORY::MemoryBus* memoryBus;
+		std::array<std::array<uint8_t, 64>, 64> cacheLines;
+		std::array<uint64_t, 64> tagedBases;//lowest 6 bits are flags. bit 0 is valid. bit 1 is dirty. bits 2-5 are reserved. bits 6-63 are the base address of the cache line
+		uint16_t nextRefresh = 0;//the cache line that gets replaced the next time a adress from a not in cach line gets loaded. round robin replacement policy for now
+		void refetchDirtyLine(uint64_t address) noexcept;
+		int16_t findCacheLineIndex(uint64_t address)const noexcept;//-1 is not found
+	public:
+		explicit Cache(MEMORY::MemoryBus* memoryBus)noexcept : memoryBus(memoryBus) {
+
+		}
+		[[nodiscard]] uint8_t Read8(uint64_t address) noexcept;
+		[[nodiscard]] uint16_t Read16(uint64_t address) noexcept;
+		[[nodiscard]] uint32_t Read32(uint64_t address) noexcept;
+		[[nodiscard]] uint64_t Read64(uint64_t address) noexcept;
+		void Write8(uint64_t address, uint8_t value)noexcept;
+		void Write16(uint64_t address, uint16_t value)noexcept;
+		void Write32(uint64_t address, uint32_t value)noexcept;
+		void Write64(uint64_t address, uint64_t value)noexcept;
+		//no write  cache yet
+	};
+
 		friend class DecodingEngine;
 		friend class ExecutionEngine;
+		mutable Cache cache;
 		enum class RegisterID :uint8_t {
 			RAX = 0b000,
 			RCX = 0b001,

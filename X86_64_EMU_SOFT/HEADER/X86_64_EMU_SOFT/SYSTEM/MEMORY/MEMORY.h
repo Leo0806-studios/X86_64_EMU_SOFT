@@ -24,6 +24,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 					SideEffectRead = 1U << 0U,
 					SideEffectWrite = 1U << 1U,
 					DirectAccess = 1U << 2U,
+					Cachable = 1U << 3U,
 				};
 
 					IO_DEVICES::DeviceBase* device = nullptr;
@@ -50,7 +51,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 		{
 			std::shared_ptr<IO_DEVICES::DeviceBase> device;
 			uint64_t sizeBytes = 0;
-			uint64_t baseAdress = 0;//holds prefered base adress untill BuildPageTable is called. after that it holds the actual base adress of the device
+			uint64_t baseAdress = 0;
 		};
 		std::vector<DeviceInfos> RegisteredDevices;
 	public:
@@ -63,6 +64,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 		[[nodiscard]] uint16_t Read16(uint64_t address) const noexcept;
 		[[nodiscard]] uint32_t Read32(uint64_t address) const noexcept;
 		[[nodiscard]] uint64_t Read64(uint64_t address) const noexcept;
+		[[nodiscard]] bool IsCachableLine(uint64_t baseAddress) const noexcept;
 		void Write8(uint64_t address, uint8_t value) noexcept;
 		void Write16(uint64_t address, uint16_t value) noexcept;
 		void Write32(uint64_t address, uint32_t value) noexcept;
