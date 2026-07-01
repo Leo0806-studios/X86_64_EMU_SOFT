@@ -272,7 +272,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	void VirtualCore::PrintInstruction(const INSTRUCTIONS::Instruction& instruction) const
 	{
-		using namespace INSTRUCTIONS;
+		DeepZoneScoped;
+			using namespace INSTRUCTIONS;
 		using namespace OPERANDS;
 		std::print("Instruction {} {}, {}, {}, {} \n", InstrucionTypeToString(instruction.Type),OperandTypeToString(instruction.Operand0.Type),OperandTypeToString(instruction.Operand1.Type), OperandTypeToString(instruction.Operand2.Type), OperandTypeToString(instruction.Operand3.Type));
 		if (instruction.OpcodeSizeBytes == 1) {
@@ -497,6 +498,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 #pragma warning (disable:26487)//false positive. alanyzer thinks reference to this outlive function scope
 	REGISTERS::Register& VirtualCore::GetRegister(INSTRUCTIONS::TargetRegister reg) noexcept
 	{
+		DeepZoneScoped;
 		switch (reg) {
 			case INSTRUCTIONS::TargetRegister::RAX: return RAX;
 			case INSTRUCTIONS::TargetRegister::RBX: return RBX;

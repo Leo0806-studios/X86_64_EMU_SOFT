@@ -29,10 +29,10 @@ __pragma(warning(disable:26447))\
 ZoneScoped; ZoneColor(0xff00ff)\
 __pragma(warning(pop))
 #	else
-#		define DeepZoneScoped
+#		define DeepZoneScoped (void)0
 #	endif
 #else
-#	define DeepZoneScoped
+#	define DeepZoneScoped (void)0
 #endif
 #	pragma warning(pop)
 
