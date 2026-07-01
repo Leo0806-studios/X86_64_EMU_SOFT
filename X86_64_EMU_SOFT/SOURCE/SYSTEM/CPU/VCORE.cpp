@@ -339,9 +339,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		std::print("\tEBP: {:#X}, decimal {}, signed {}\n", 0xFFFFFFFFULL & RBP.GetValue(), 0xFFFFFFFFULL & RBP.GetValue(), static_cast<int32_t>(0xFFFFFFFFULL & RBP.GetValue()));
 		std::print("\tBP: {:#X}, decimal {}, signed {}\n", 0xFFFFULL & RBP.GetValue(), 0xFFFFULL & RBP.GetValue(), static_cast<int16_t>(0xFFFFULL & RBP.GetValue()));
 
-		std::print("R8: {:#X}, decimal {}, signed {}\n", R8.GetValue(), RBP.GetValue(), static_cast<int64_t>(R8.GetValue()));
+		std::print("R8: {:#X}, decimal {}, signed {}\n", R8.GetValue(), R8.GetValue(), static_cast<int64_t>(R8.GetValue()));
+		std::print("R8W: {:#X}, decimal {}, signed {}\n ", 0xFFFFFFFFULL & R8.GetValue(), 0xFFFFFFFFULL & R8.GetValue(), static_cast<int16_t>(0xFFFFFFFFULL & R8.GetValue()));
 
-		std::print("R9: {:#X}, decimal {}, signed {}\n", R9.GetValue(), RBP.GetValue(), static_cast<int64_t>(R9.GetValue()));
+		std::print("R9: {:#X}, decimal {}, signed {}\n", R9.GetValue(), R9.GetValue(), static_cast<int64_t>(R9.GetValue()));
 
 
 		std::print("R10: {:#X} \n", R10.GetValue());
