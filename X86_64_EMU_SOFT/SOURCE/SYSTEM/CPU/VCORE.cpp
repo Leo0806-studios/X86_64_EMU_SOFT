@@ -360,7 +360,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	}
 	VirtualCore::VirtualCore(uint64_t resetVector, std::shared_ptr<MEMORY::MemoryBus> memBus, vCoreMode startupMode) noexcept :
-		cache(memoryBus.get()), RAX(), RBX(), RCX(), RDX(), RSI(), RDI(), RSP(), RBP(), R8(), R9(), R10(), R11(), R12(), R13(), R14(),
+		cache(memBus.get()), RAX(), RBX(), RCX(), RDX(), RSI(), RDI(), RSP(), RBP(), R8(), R9(), R10(), R11(), R12(), R13(), R14(),
 		R15(), RIP(), EFER(),
 		CR0(), isRunning(false), hasShutdown(false), isEnabled(false), memoryBus(std::move(memBus))
 
@@ -383,7 +383,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 		RIP.SetValue(resetVector);
 	}
-	VirtualCore::VirtualCore(const VirtualCore& other)noexcept :
+	VirtualCore::VirtualCore(const VirtualCore& other)noexcept :cache(other.cache),
 		RAX(other.RAX), RBX(other.RBX), RCX(other.RCX), RDX(other.RDX), RSI(other.RDX), RDI(other.RDI), RSP(other.RSP), RBP(other.RBP),
 		R8(other.R8), R9(other.R9), R10(other.R10), R11(other.R11), R12(other.R12), R13(other.R13), R14(other.R14), R15(other.R15),
 		RIP(other.RIP), EFER(other.EFER), CR0(other.CR0),
@@ -397,6 +397,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		if (this == &other) {
 			return *this;
 		}
+		cache = other.cache;
 		RAX = other.RAX;
 		RBX = other.RBX;
 		RCX = other.RCX;
@@ -421,7 +422,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		return *this;
 
 	}
-	VirtualCore::VirtualCore(VirtualCore&& other)noexcept :
+	VirtualCore::VirtualCore(VirtualCore&& other)noexcept :cache(std::move(other.cache)),
 		RAX(std::move(other.RAX)), RBX(std::move(other.RBX)), RCX(std::move(other.RCX)), RDX(std::move(other.RDX)), RSI(std::move(other.RSI)), RDI(std::move(other.RDI)),
 		RSP(std::move(other.RSP)), RBP(std::move(other.RBP)), R8(std::move(other.R8)), R9(std::move(other.R9)), R10(std::move(other.R10)), R11(std::move(other.R11)),
 		R12(std::move(other.R12)), R13(std::move(other.R13)), R14(std::move(other.R14)), R15(std::move(other.R15)),
@@ -436,6 +437,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		if (this == &other) {
 			return *this;
 		}
+		cache = std::move(other.cache);
 		RAX = std::move(other.RAX);
 		RBX = std::move(other.RBX);
 		RCX = std::move(other.RCX);
@@ -534,26 +536,27 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 
-	int16_t VirtualCore::Cache::findCacheLineIndex(uint64_t address) const noexcept
+	 int16_t VirtualCore::Cache::findCacheLineIndex(uint64_t address) const noexcept
 	{
-		const uint64_t untaggedAddress = address & 0xFFFFFFFFFFFFFFC0ULL;
-		assert(tagedBases.size() <= std::numeric_limits<int16_t>::max());
-		for (uint64_t i = 0; i < tagedBases.size(); i+=4) {
+		DeepZoneScoped;
+		//const uint64_t untaggedAddress = address & 0xFFFFFFFFFFFFFFC0ULL;
+		assert(baseAddresses.size() <= static_cast<uint16_t>(std::numeric_limits<int16_t>::max()));
+		for (uint64_t i = 0; i < baseAddresses.size(); i+=4) {
 			//im lazzy lets do a scalar check for now
-			const uint64_t untaggedBase0 = tagedBases[i] & 0xFFFFFFFFFFFFFFC0ULL;
-			const uint64_t untaggedBase1 = tagedBases[i + 1] & 0xFFFFFFFFFFFFFFC0ULL;
-			const uint64_t untaggedBase2 = tagedBases[i + 2] & 0xFFFFFFFFFFFFFFC0ULL;
-			const uint64_t untaggedBase3 = tagedBases[i + 3] & 0xFFFFFFFFFFFFFFC0ULL;
-			if(untaggedAddress == untaggedBase0) {
+			const uint64_t untaggedBase0 = baseAddresses[i] & 0xFFFFFFFFFFFFFFC0ULL;
+			const uint64_t untaggedBase1 = baseAddresses[i + 1] & 0xFFFFFFFFFFFFFFC0ULL;
+			const uint64_t untaggedBase2 = baseAddresses[i + 2] & 0xFFFFFFFFFFFFFFC0ULL;
+			const uint64_t untaggedBase3 = baseAddresses[i + 3] & 0xFFFFFFFFFFFFFFC0ULL;
+			if(address == untaggedBase0) {
 				return static_cast<int16_t>(i);
 			}
-			else if (untaggedAddress == untaggedBase1) {
+			else if (address == untaggedBase1) {
 				return static_cast<int16_t>(i + 1);
 			}
-			else if (untaggedAddress == untaggedBase2) {
+			else if (address == untaggedBase2) {
 				return static_cast<int16_t>(i + 2);
 			}
-			else if (untaggedAddress == untaggedBase3) {
+			else if (address == untaggedBase3) {
 				return static_cast<int16_t>(i + 3);
 			}
 		}
@@ -562,20 +565,51 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	uint8_t VirtualCore::Cache::Read8(uint64_t address)  noexcept
 	{
+		ZoneScoped;
 		const uint64_t allignedAddress = address & 0xFFFFFFFFFFFFFFC0ULL;
 		 int16_t cacheLineIndex = findCacheLineIndex(allignedAddress);
-		if (cacheLineIndex == -1) {
+		if (cacheLineIndex == -1|| (flags[static_cast<size_t>(cacheLineIndex)] & static_cast<uint64_t>(CacheLineFlags::Dirty))) {
 			const bool Cachable = memoryBus->IsCachableLine(allignedAddress);
-			auto& line = cacheLines[nextRefresh];
-			for (int i = 0; i < 64; ++i) {
+			if (!Cachable) {
+				return memoryBus->Read8(address);
+			}
+			auto& line = cacheLines[static_cast<size_t>(nextRefresh)];
+			for (uint64_t i = 0; i < 64; ++i) {
 				line[i] = memoryBus->Read8(allignedAddress + i);
 			}
-			cacheLineIndex = nextRefresh;
-			nextRefresh = (nextRefresh + 1) % 16;
+			cacheLineIndex = static_cast<int16_t>(nextRefresh);
+			baseAddresses[static_cast<size_t>(nextRefresh)] = allignedAddress;
+			flags[static_cast<size_t>(nextRefresh)] |= std::to_underlying(CacheLineFlags::Valid);
+			flags[static_cast<size_t>(nextRefresh)] &= ~std::to_underlying(CacheLineFlags::Dirty);
+			nextRefresh = static_cast<uint16_t>((nextRefresh + 1) % 16);
 		}
-		auto& line = cacheLines[cacheLineIndex];
-		auto offset = address & 0x3F;
+		auto& line = cacheLines[static_cast<size_t>(cacheLineIndex)];
+		const auto offset = address & 0x3F;
 		return line[offset];
+	}
+
+	uint16_t VirtualCore::Cache::Read16(uint64_t address) noexcept
+	{
+		std::array<uint8_t, 2> bytes{Read8(address), Read8(address + 1)};
+		uint16_t value = 0;
+		memcpy(&value, bytes.data(), sizeof(uint16_t));
+		return value;
+	}
+
+	uint32_t VirtualCore::Cache::Read32(uint64_t address) noexcept
+	{
+		std::array<uint8_t, 4> bytes{Read8(address), Read8(address + 1), Read8(address + 2), Read8(address + 3)};
+		uint32_t value = 0;
+		memcpy(&value, bytes.data(), sizeof(uint32_t));
+		return value;
+	}
+
+	uint64_t VirtualCore::Cache::Read64(uint64_t address) noexcept
+	{
+		std::array<uint8_t, 8> bytes{Read8(address), Read8(address + 1), Read8(address + 2), Read8(address + 3), Read8(address + 4), Read8(address + 5), Read8(address + 6), Read8(address + 7)};
+		uint64_t value = 0;
+		memcpy(&value, bytes.data(), sizeof(uint64_t));
+		return value;
 	}
 
 }// namespace X86_64_EMU_SOFT::SYSTEM::CPU

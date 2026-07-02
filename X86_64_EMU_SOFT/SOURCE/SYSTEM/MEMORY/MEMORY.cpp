@@ -339,6 +339,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 	bool MemoryBus::IsCachableLine(uint64_t baseAddress) const noexcept
 	{
+		DeepZoneScoped;
+
 		constexpr uint64_t CacheLineSize = 64;
 
 		const uint64_t pageNumber = baseAddress >> 12U;
