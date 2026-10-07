@@ -59,6 +59,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HEADER\X86_64_EMU_SOFT\DEBUGGER\DEBUGGER.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\CMD_PARSE.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\GLOBALS.h" />
     <ClInclude Include="HEADER\X86_64_EMU_SOFT\HELPERS\MACROS.h" />
