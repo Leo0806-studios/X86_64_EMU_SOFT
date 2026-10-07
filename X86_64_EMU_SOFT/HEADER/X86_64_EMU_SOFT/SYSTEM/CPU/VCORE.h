@@ -4,6 +4,7 @@
 #include <HELPERS/MACROS.h>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <SYSTEM/CPU/REGISTERS/REGISTER_BASE.h>
 #include <tracy/Tracy.hpp>
 #include <utility>
@@ -38,29 +39,29 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 			enum class CacheLineFlags :uint8_t {
 				Valid = 0b00000001,
 				Dirty = 0b00000010,
-				Reserved1 = 0b00000100,
-				Reserved2 = 0b00001000,
+				Stale = 0b00000100,
+				Reserved2= 0b00001000,
 				Reserved3 = 0b00010000,
 				Reserved4 = 0b00100000
 			};
 		private:
+			uint64_t cacheClock = 0;//independend of the core clock. used to implement LRU cache replacement policy
 			MEMORY::MemoryBus* memoryBus;
-			std::array<std::array<uint8_t, 64>, 64> cacheLines;
-			std::array<uint64_t, 64> baseAddresses;
-			std::array<uint8_t, 64> flags;
+			struct CacheLine {
+				uint64_t baseAddress;
+				std::array<uint8_t, 64> data;
+				uint8_t flags;
+				uint64_t lastAccessed = 0;
+			};
+			std::vector< CacheLine> cacheLines;//key : base address of the cache line. value : the cache line itself
+			int32_t getCacheLineIndex(uint64_t allignedAddress) noexcept;
 			uint16_t nextRefresh = 0;//the cache line that gets replaced the next time a adress from a not in cach line gets loaded. round robin replacement policy for now
 			void refetchDirtyLine(uint64_t address) noexcept;
-			int16_t findCacheLineIndex(uint64_t address)const noexcept;//-1 is not found
+
+			void chooseAndEvictCacheLine() noexcept;
 		public:
-			explicit Cache(MEMORY::MemoryBus* memoryBus)noexcept : memoryBus(memoryBus), cacheLines(), baseAddresses(), flags() {
-				for (auto& base : baseAddresses) {
-					base = 0;
-				}
-				for (auto& flag : flags) {
-					flag = 0;
-					flag |= std::to_underlying(CacheLineFlags::Valid);
-					flag |= std::to_underlying(CacheLineFlags::Dirty);
-				}
+			explicit Cache(MEMORY::MemoryBus* memoryBus)noexcept : memoryBus(memoryBus) {
+
 			}
 			[[nodiscard]] uint8_t Read8(uint64_t address) noexcept;
 			[[nodiscard]] uint16_t Read16(uint64_t address) noexcept;

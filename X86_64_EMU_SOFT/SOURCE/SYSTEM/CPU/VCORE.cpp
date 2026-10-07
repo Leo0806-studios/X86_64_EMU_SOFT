@@ -1,32 +1,32 @@
+#include <array>
 #include <bit>
+#include <cstdarg>
 #include <cstdint>
 #include <cstring>
+#include <format>
+#include <HELPERS/MACROS.h>
+#include <immintrin.h>
+#include <intrin.h>
 #include <ios>
 #include <memory>
 #include <print>
-#include <sstream>
-#include <intrin.h>
-#include <immintrin.h>
-#include <stdexcept>
-#include <array>
-#include <utility>
-#include <format>
-#include <string>
 #include <source_location>
-#include <tracy/Tracy.hpp>
-#include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h"
-#include "SYSTEM/CPU/INSTRUCTIONS/OPCODE_BYTES.h"
-#include "SYSTEM/CPU/EXCEPTIONS/UNDEFINED_OPCODE.h"
-#include "SYSTEM/CPU/VCORE.h"
-#include "SYSTEM/CPU/DECODING_ENGINE/DECODING_ENGINE.h"
-#include "SYSTEM/CPU/EXECUTION_ENGINE/EXECUTION_ENGINE.h"
+#include <sstream>
+#include <stdexcept>
+#include <string>
 #include <SYSTEM/CPU/DECODING_ENGINE/DECODING_HANDLERS/HANDLERS_ALU.h>
 #include <SYSTEM/CPU/DECODING_ENGINE/DECODING_HANDLERS/HANDLERS_SPECIAL.h>
 #include <SYSTEM/CPU/DECODING_ENGINE/DECODING_HANDLERS/PREFIX_HANDLERS.h>
-#include "SYSTEM/MEMORY/MEMORY.h"
+#include <tracy/Tracy.hpp>
+#include <utility>
 #include "HELPERS/GLOBALS.h"
-#include <HELPERS/MACROS.h>
-#include <cstdarg>
+#include "SYSTEM/CPU/DECODING_ENGINE/DECODING_ENGINE.h"
+#include "SYSTEM/CPU/EXCEPTIONS/UNDEFINED_OPCODE.h"
+#include "SYSTEM/CPU/EXECUTION_ENGINE/EXECUTION_ENGINE.h"
+#include "SYSTEM/CPU/INSTRUCTIONS/INSTRUCTION.h"
+#include "SYSTEM/CPU/INSTRUCTIONS/OPCODE_BYTES.h"
+#include "SYSTEM/CPU/VCORE.h"
+#include "SYSTEM/MEMORY/MEMORY.h"
 
 namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	[[noreturn]] inline static bool ThrowUndefinedOpcode(VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, INSTRUCTIONS::Prefixes& prefixes, uint8_t byte) {//NOSONAR
@@ -40,7 +40,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		throw EXCEPTIONS::UNDEFINED_OPCODE(msg.str());
 	}
 	using HandlerFunc = bool(*)(VirtualCore& core, uint64_t& address, INSTRUCTIONS::Instruction& instruction, INSTRUCTIONS::Prefixes& prefixes, uint8_t byte);
-	constexpr  std::array<HandlerFunc, 256> HandlerFuncs =  []() consteval noexcept {
+	constexpr  std::array<HandlerFunc, 256> HandlerFuncs = []() consteval noexcept {
 		std::array<HandlerFunc, 256> arr{};
 		for (auto& func : arr) {
 			func = ThrowUndefinedOpcode;
@@ -166,74 +166,74 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				case 8:return "DL";	case 16: return "DX"; case 32:return "EDX";  case 64: default: return "RDX";
 			}
 		}
-		else if (registerPtr ==  &RSI) {
+		else if (registerPtr == &RSI) {
 			switch (bits) {
 				case 8: return "SIL"; case 16: return "SI"; case 32:return "ESI";  case 64: default: return "RSI";
 			}
 		}
-		else if (registerPtr ==  &RDI) {
+		else if (registerPtr == &RDI) {
 			switch (bits) {
 				case 8: return "DIL"; case 16: return "DI"; case 32:return "EDI";  case 64: default: return "RDI";
 			}
 		}
-		else if (registerPtr ==  &RSP) {
+		else if (registerPtr == &RSP) {
 			switch (bits) {
 				case 8: return "SPL"; case 16: return "SP"; case 32:return "ESP";  case 64: default: return "RSP";
 			}
 		}
-		else if (registerPtr ==  &RBP) {
+		else if (registerPtr == &RBP) {
 			switch (bits) {
 				case 8: return "BPL"; case 16: return "BP"; case 32:return "EBP";  case 64: default: return "RBP";
 			}
 		}
-		else if (registerPtr ==  &R8) {
+		else if (registerPtr == &R8) {
 			switch (bits)
 			{
 				case 8: return "R8B"; case 16: return "R8W"; case 32:return "R8D";  case 64: default: return "R8";
 			}
 		}
-		else if (registerPtr ==  &R9) {
+		else if (registerPtr == &R9) {
 			switch (bits)
 			{
 				case 8: return "R9B"; case 16: return "R9W"; case 32:return "R9D";  case 64: default: return "R9";
 			}
 		}
-		else if (registerPtr ==  &R10) {
+		else if (registerPtr == &R10) {
 			switch (bits)
 			{
 				case 8: return "R10B"; case 16: return "R10W"; case 32:return "R10D";  case 64: default: return "R10";
 			}
 		}
-		else if (registerPtr ==  &R11) {
+		else if (registerPtr == &R11) {
 			switch (bits)
 			{
 				case 8: return "R11B"; case 16: return "R11W"; case 32:return "R11D";  case 64: default: return "R11";
 			}
 		}
-		else if (registerPtr ==  &R12) {
+		else if (registerPtr == &R12) {
 			switch (bits) {
 				case 8: return "R12B"; case 16: return "R12W"; case 32:return "R12D";  case 64: default: return "R12";
 			}
 		}
-		else if (registerPtr ==  &R13) {
+		else if (registerPtr == &R13) {
 			switch (bits) {
 				case 8: return "R13B"; case 16: return "R13W"; case 32:return "R13D";  case 64: default: return "R13";
 			}
 		}
-		else if (registerPtr ==  &R14) {
+		else if (registerPtr == &R14) {
 			switch (bits) {
 				case 8: return "R14B"; case 16: return "R14W"; case 32:return "R14D";  case 64: default: return "R14";
 			}
 		}
-		else if (registerPtr ==  &R15) {
+		else if (registerPtr == &R15) {
 			switch (bits) {
 				case 8: return "R15B"; case 16: return "R15W"; case 32:return "R15D";  case 64: default: return "R15";
 			}
 		}
-		else if (registerPtr ==  &CR0) {
+		else if (registerPtr == &CR0) {
 			return "CR0";
 		}
-		else if (registerPtr ==  &EFER) {
+		else if (registerPtr == &EFER) {
 			return "EFER";
 		}
 
@@ -256,7 +256,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			default: NeverOrAssert("size Bytes in " __FUNCTION__ " can only be 1,2,4 or 8");
 
 		}
-		
+
 	}
 
 	inline	uint64_t  VirtualCore::FetchBytes(uint64_t address, uint8_t sizeBytes) const noexcept
@@ -275,9 +275,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	void VirtualCore::PrintInstruction(const INSTRUCTIONS::Instruction& instruction) const
 	{
 		DeepZoneScoped;
-			using namespace INSTRUCTIONS;
+		using namespace INSTRUCTIONS;
 		using namespace OPERANDS;
-		std::print("Instruction {} {}, {}, {}, {} \n", InstrucionTypeToString(instruction.Type),OperandTypeToString(instruction.Operand0.Type),OperandTypeToString(instruction.Operand1.Type), OperandTypeToString(instruction.Operand2.Type), OperandTypeToString(instruction.Operand3.Type));
+		std::print("Instruction {} {}, {}, {}, {} \n", InstrucionTypeToString(instruction.Type), OperandTypeToString(instruction.Operand0.Type), OperandTypeToString(instruction.Operand1.Type), OperandTypeToString(instruction.Operand2.Type), OperandTypeToString(instruction.Operand3.Type));
 		if (instruction.OpcodeSizeBytes == 1) {
 			std::print("Raw Opcode : {:#X}\n", instruction.OpcodeBytes[0]);
 		}
@@ -285,7 +285,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			std::print("Raw Opcode: {:#X} {:#X}\n", instruction.OpcodeBytes[0], instruction.OpcodeBytes[1]);
 		}
 		else {
-			std::print("Raw Opcode: {:#X} {:#X} {:#X}\n", instruction.OpcodeBytes[0], instruction.OpcodeBytes[1],instruction.OpcodeBytes[2]);
+			std::print("Raw Opcode: {:#X} {:#X} {:#X}\n", instruction.OpcodeBytes[0], instruction.OpcodeBytes[1], instruction.OpcodeBytes[2]);
 
 		}
 		std::print("Instructio Length: {}\n", instruction.InstructionLengthBytes);
@@ -475,13 +475,13 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		isRunning.store(true);
 		hasShutdown.store(false);
 		try {
-		std::print("Core started at reset vector: {:#X}\n", RIP.GetValue());
+			std::print("Core started at reset vector: {:#X}\n", RIP.GetValue());
 
 			while (true) {
 				FrameMark;
 				RunIfMinimalOrHigherTraceMode(std::print("\nDecoding instruction at RIP: {:#X}\n", RIP.GetValue()););
-				 INSTRUCTIONS::Instruction instruction;
-				 decodeInstruction(instruction);
+				INSTRUCTIONS::Instruction instruction;
+				decodeInstruction(instruction);
 				RunIfReducedOrHigherTraceMode(PrintInstruction(instruction));
 				RIP.Increment(instruction.InstructionLengthBytes);
 				executeInstruction(instruction);
@@ -536,61 +536,78 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 
 
-	 int16_t VirtualCore::Cache::findCacheLineIndex(uint64_t address) const noexcept
+#pragma warning(push)
+#pragma warning(disable: 26447)
+	int32_t VirtualCore::Cache::getCacheLineIndex(uint64_t allignedAddress) noexcept
 	{
-		DeepZoneScoped;
-		//const uint64_t untaggedAddress = address & 0xFFFFFFFFFFFFFFC0ULL;
-		assert(baseAddresses.size() <= static_cast<uint16_t>(std::numeric_limits<int16_t>::max()));
-		for (uint64_t i = 0; i < baseAddresses.size(); i+=4) {
-			//im lazzy lets do a scalar check for now
-			const uint64_t untaggedBase0 = baseAddresses[i] & 0xFFFFFFFFFFFFFFC0ULL;
-			const uint64_t untaggedBase1 = baseAddresses[i + 1] & 0xFFFFFFFFFFFFFFC0ULL;
-			const uint64_t untaggedBase2 = baseAddresses[i + 2] & 0xFFFFFFFFFFFFFFC0ULL;
-			const uint64_t untaggedBase3 = baseAddresses[i + 3] & 0xFFFFFFFFFFFFFFC0ULL;
-			if(address == untaggedBase0) {
-				return static_cast<int16_t>(i);
-			}
-			else if (address == untaggedBase1) {
-				return static_cast<int16_t>(i + 1);
-			}
-			else if (address == untaggedBase2) {
-				return static_cast<int16_t>(i + 2);
-			}
-			else if (address == untaggedBase3) {
-				return static_cast<int16_t>(i + 3);
+		int32_t ret = -1;
+		const uint64_t len = cacheLines.size();
+		for(uint64_t i = 0; i < len; ++i) {
+			const auto& line = cacheLines[i];
+			if (line.baseAddress == allignedAddress && line.flags & std::to_underlying(CacheLineFlags::Valid)) {
+				__assume(static_cast<int64_t>(i) < std::numeric_limits<int32_t>::max());
+				ret = static_cast<int32_t>(i);
+				break;
 			}
 		}
-		return -1;
+		return ret;
+	}
+	void VirtualCore::Cache::chooseAndEvictCacheLine() noexcept
+	{
+		uint64_t keyToEvict = 01;
+		uint64_t lowestLastAccessed = std::numeric_limits<uint64_t>::max();
+		for (auto&  line : cacheLines) {
+			if ( line.lastAccessed <= cacheLines[keyToEvict].lastAccessed) {
+				keyToEvict = line.baseAddress;
+			}
+			if (line.lastAccessed < lowestLastAccessed) {
+				lowestLastAccessed = line.lastAccessed;
+			}
+		}
+		cacheLines.erase(cacheLines.begin() + static_cast<int32_t>(keyToEvict));
+		//normalize last accesed if cacheClock is more than half of max value of uint64_t
+		if (cacheClock > std::numeric_limits<uint64_t>::max() / 2) {
+			for (auto&  line : cacheLines) {
+				line.lastAccessed -= lowestLastAccessed;
+			}
+			cacheClock -= lowestLastAccessed;
+		}
 	}
 
 	uint8_t VirtualCore::Cache::Read8(uint64_t address)  noexcept
 	{
+
 		ZoneScoped;
 		const uint64_t allignedAddress = address & 0xFFFFFFFFFFFFFFC0ULL;
-		 int16_t cacheLineIndex = findCacheLineIndex(allignedAddress);
-		if (cacheLineIndex == -1|| (flags[static_cast<size_t>(cacheLineIndex)] & static_cast<uint64_t>(CacheLineFlags::Dirty))) {
+		const int32_t it = getCacheLineIndex(allignedAddress);
+		if ((it == -1) || cacheLines[static_cast<size_t>(it)].flags & std::to_underlying(CacheLineFlags::Stale)) {
 			const bool Cachable = memoryBus->IsCachableLine(allignedAddress);
 			if (!Cachable) {
 				return memoryBus->Read8(address);
 			}
-			auto& line = cacheLines[static_cast<size_t>(nextRefresh)];
-			for (uint64_t i = 0; i < 64; ++i) {
-				line[i] = memoryBus->Read8(allignedAddress + i);
+			if (cacheLines.size() >= 64) {
+			chooseAndEvictCacheLine();
 			}
-			cacheLineIndex = static_cast<int16_t>(nextRefresh);
-			baseAddresses[static_cast<size_t>(nextRefresh)] = allignedAddress;
-			flags[static_cast<size_t>(nextRefresh)] |= std::to_underlying(CacheLineFlags::Valid);
-			flags[static_cast<size_t>(nextRefresh)] &= ~std::to_underlying(CacheLineFlags::Dirty);
-			nextRefresh = static_cast<uint16_t>((nextRefresh + 1) % 16);
+			auto& line = cacheLines[static_cast<size_t>(it)];
+			for (uint64_t i = 0; i < line.data.size(); ++i) {
+				line.data[i] = memoryBus->Read8(allignedAddress + i);
+			}
+			line.flags |= std::to_underlying(CacheLineFlags::Valid);
+			line.flags &= ~std::to_underlying(CacheLineFlags::Dirty);
+			line.flags &= ~std::to_underlying(CacheLineFlags::Stale);
+			//it = cacheLines.find(allignedAddress);
 		}
-		auto& line = cacheLines[static_cast<size_t>(cacheLineIndex)];
-		const auto offset = address & 0x3F;
-		return line[offset];
-	}
+		auto& line = cacheLines[static_cast<size_t>(it)];
+		line.lastAccessed = (cacheClock++);
+		return line.data[address & 0x3F];
 
+
+
+	}
+#pragma warning(pop)
 	uint16_t VirtualCore::Cache::Read16(uint64_t address) noexcept
 	{
-		std::array<uint8_t, 2> bytes{Read8(address), Read8(address + 1)};
+		std::array<uint8_t, 2> bytes{ Read8(address), Read8(address + 1) };
 		uint16_t value = 0;
 		memcpy(&value, bytes.data(), sizeof(uint16_t));
 		return value;
@@ -598,7 +615,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	uint32_t VirtualCore::Cache::Read32(uint64_t address) noexcept
 	{
-		std::array<uint8_t, 4> bytes{Read8(address), Read8(address + 1), Read8(address + 2), Read8(address + 3)};
+		std::array<uint8_t, 4> bytes{ Read8(address), Read8(address + 1), Read8(address + 2), Read8(address + 3) };
 		uint32_t value = 0;
 		memcpy(&value, bytes.data(), sizeof(uint32_t));
 		return value;
@@ -606,7 +623,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	uint64_t VirtualCore::Cache::Read64(uint64_t address) noexcept
 	{
-		std::array<uint8_t, 8> bytes{Read8(address), Read8(address + 1), Read8(address + 2), Read8(address + 3), Read8(address + 4), Read8(address + 5), Read8(address + 6), Read8(address + 7)};
+		std::array<uint8_t, 8> bytes{ Read8(address), Read8(address + 1), Read8(address + 2), Read8(address + 3), Read8(address + 4), Read8(address + 5), Read8(address + 6), Read8(address + 7) };
 		uint64_t value = 0;
 		memcpy(&value, bytes.data(), sizeof(uint64_t));
 		return value;
