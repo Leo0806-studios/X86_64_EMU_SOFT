@@ -554,17 +554,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	}
 	void VirtualCore::Cache::chooseAndEvictCacheLine() noexcept
 	{
-		uint64_t keyToEvict = 01;
-		uint64_t lowestLastAccessed = std::numeric_limits<uint64_t>::max();
-		for (auto&  line : cacheLines) {
-			if ( line.lastAccessed <= cacheLines[keyToEvict].lastAccessed) {
-				keyToEvict = line.baseAddress;
-			}
-			if (line.lastAccessed < lowestLastAccessed) {
-				lowestLastAccessed = line.lastAccessed;
-			}
-		}
-		cacheLines.erase(cacheLines.begin() + static_cast<int32_t>(keyToEvict));
+		;
 		//normalize last accesed if cacheClock is more than half of max value of uint64_t
 		if (cacheClock > std::numeric_limits<uint64_t>::max() / 2) {
 			for (auto&  line : cacheLines) {
@@ -587,6 +577,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 			}
 			if (cacheLines.size() >= 64) {
 			chooseAndEvictCacheLine();
+			}
+			else {
+
 			}
 			auto& line = cacheLines[static_cast<size_t>(it)];
 			for (uint64_t i = 0; i < line.data.size(); ++i) {

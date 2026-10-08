@@ -48,19 +48,29 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 			uint64_t cacheClock = 0;//independend of the core clock. used to implement LRU cache replacement policy
 			MEMORY::MemoryBus* memoryBus;
 			struct CacheLine {
-				uint64_t baseAddress;
-				std::array<uint8_t, 64> data;
-				uint8_t flags;
+				uint64_t baseAddress=0;
+				std::array<uint8_t, 64> data={{0}};
+				uint8_t flags = 0u | std::to_underlying(CacheLineFlags::Stale);
 				uint64_t lastAccessed = 0;
 			};
-			std::vector< CacheLine> cacheLines;//key : base address of the cache line. value : the cache line itself
+			std::array< CacheLine, 64> cacheLines;
 			int32_t getCacheLineIndex(uint64_t allignedAddress) noexcept;
 			uint16_t nextRefresh = 0;//the cache line that gets replaced the next time a adress from a not in cach line gets loaded. round robin replacement policy for now
-			void refetchDirtyLine(uint64_t address) noexcept;
-
+			
+			/// <summary>
+			/// seletchts the aproriate cache line and if noe is present evicts one and returns the index of a valid line. returns -1 if the address is not cachable
+			/// </summary>
+			/// <param name="address"></param>
+			/// <returns></returns>
+			int64_t selectCachLine(uint64_t address) noexcept;
 			void chooseAndEvictCacheLine() noexcept;
 		public:
-			explicit Cache(MEMORY::MemoryBus* memoryBus)noexcept : memoryBus(memoryBus) {
+			explicit Cache(MEMORY::MemoryBus* memoryBus)noexcept : memoryBus(memoryBus), cacheLines(64) {//TODO : make cache size configurable
+				for (auto& line : cacheLines) {
+					line.baseAddress = 0;
+					line.flags = 0;
+					line.lastAccessed = 0;
+				}
 
 			}
 			[[nodiscard]] uint8_t Read8(uint64_t address) noexcept;
