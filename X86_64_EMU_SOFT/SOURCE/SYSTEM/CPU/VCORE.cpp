@@ -542,6 +542,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 #pragma warning(disable: 26447)
 	int32_t VirtualCore::Cache::getCacheLineIndex(uint64_t allignedAddress) noexcept
 	{
+		DeepZoneScoped;
 		int32_t ret = -1;
 		const uint64_t len = cacheLines.size();
 		for(uint64_t i = 0; i < len; ++i) {
@@ -557,35 +558,48 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 	int64_t VirtualCore::Cache::selectCacheLine(uint64_t allignedAddress) noexcept
 	{
+		DeepZoneScoped;
 		uint64_t lowestLastAccessed = std::numeric_limits<uint64_t>::max();
 		int64_t choosenIndex = -1;
 		choosenIndex = static_cast<int64_t>(getCacheLineIndex(allignedAddress));
 		if (choosenIndex != static_cast<int64_t>(-1)) {
 			return static_cast<int64_t>(choosenIndex);
 		}
-		for (uint64_t i = 0; i < this->cacheLines.size(); i++) {
-			const CacheLine& line = this->cacheLines[i];
-			if (line.lastAccessed < lowestLastAccessed) {
-				lowestLastAccessed = line.lastAccessed;
-				choosenIndex = static_cast<int64_t>(i);
-			}
-
+		if (!memoryBus->IsCachableLine(allignedAddress)) {
+			return -1;
 		}
-		NeverOrAssert(lowestLastAccessed != std::numeric_limits<uint64_t>::max());
-		NeverOrAssert(choosenIndex != -1);
-		NeverOrAssert(static_cast<size_t>(choosenIndex) < cacheLines.size());
+		{
+				DeepZoneScopedN("Cache::selectCacheLine loop iteration");
+			for (uint64_t i = 0; i < this->cacheLines.size(); i++) {
+				const CacheLine& line = this->cacheLines[i];
+				if (line.lastAccessed < lowestLastAccessed) {
+					lowestLastAccessed = line.lastAccessed;
+					choosenIndex = static_cast<int64_t>(i);
+				}
+
+			}
+		}
+		assert(lowestLastAccessed != std::numeric_limits<uint64_t>::max());
+		assert(choosenIndex != -1);
+		assert(static_cast<size_t>(choosenIndex) < cacheLines.size());
 
 
 		CacheLine& lineToEvict = cacheLines[static_cast<size_t>(choosenIndex)];
-
+		std::array<uint8_t, 64>& dataToEvict = this->dataLines[static_cast<size_t>(choosenIndex)];
 		if (lineToEvict.flags & std::to_underlying(CacheLineFlags::Dirty)) {
-			for (uint64_t i = 0; i < lineToEvict.data.size(); ++i) {
-				memoryBus->Write8(lineToEvict.baseAddress + i, lineToEvict.data[i]);
-			lineToEvict.data[i] = memoryBus->Read8(lineToEvict.baseAddress + i);
+			{
+					DeepZoneScopedN("Cache::selectCacheLine writing back dirty line");
+				for (uint64_t i = 0; i < dataToEvict.size(); ++i) {
+					memoryBus->Write8(lineToEvict.baseAddress + i, dataToEvict[i]);
+					//lineToEvict.data[i] = memoryBus->Read8(lineToEvict.baseAddress + i);
+				}
 			}
 		}
-		for (uint64_t i = 0; i < lineToEvict.data.size(); ++i) {
-			lineToEvict.data[i] = memoryBus->Read8(allignedAddress + i);
+		{
+				DeepZoneScopedN("Cache::selectCacheLine reading new line from memory");
+			for (uint64_t i = 0; i < dataToEvict.size(); ++i) {
+				dataToEvict[i] = memoryBus->Read8(allignedAddress + i);
+			}
 		}
 		lineToEvict.flags |= std::to_underlying(CacheLineFlags::Valid);
 		lineToEvict.flags &= ~std::to_underlying(CacheLineFlags::Dirty);
@@ -594,8 +608,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		lineToEvict.lastAccessed = (cacheClock++);
 		//normalize last accessed if cacheClock is more than half of max value of uint64_t
 		if (cacheClock > std::numeric_limits<uint64_t>::max() / 2) {
-			for (auto&  line : cacheLines) {
-				line.lastAccessed -= lowestLastAccessed;
+			{
+					DeepZoneScopedN("Cache::selectCacheLine normalizing last accessed");
+				for (auto& line : cacheLines) {
+					line.lastAccessed -= lowestLastAccessed;
+				}
 			}
 			cacheClock -= lowestLastAccessed;
 		}
@@ -607,18 +624,18 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 		ZoneScoped;
 		const uint64_t allignedAddress = address & 0xFFFFFFFFFFFFFFC0ULL;
-		const bool Cachable = memoryBus->IsCachableLine(allignedAddress);
-		if (!Cachable) {
+	
+		const int64_t it = selectCacheLine(allignedAddress);
+		if (it == -1) {
 			return memoryBus->Read8(address);
 		}
-		const int64_t it = selectCacheLine(allignedAddress);
-		NeverOrAssert(it != -1);
 		auto& line = cacheLines[static_cast<size_t>(it)];
+		auto& dataLine = dataLines[static_cast<size_t>(it)];
 		line.lastAccessed = (cacheClock++);
-		NeverOrAssert(line.baseAddress == allignedAddress);
-		NeverOrAssert(static_cast<size_t>(it) < cacheLines.size());
-		NeverOrAssert((address & 0x3F) < line.data.size());
-		return line.data[address & 0x3F];
+		assert(line.baseAddress == allignedAddress);
+		assert(static_cast<size_t>(it) < cacheLines.size());
+		assert((address & 0x3F) < line.data.size());
+		return dataLine[address & 0x3F];
 
 
 
@@ -658,7 +675,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 				<< ", Flags: 0x" << std::hex << static_cast<int>(line.flags)
 				<< ", Last Accessed: " << std::dec << line.lastAccessed
 				<< "\nData: [";
-			for (const auto& byte : line.data) {
+			for (const auto& byte : dataLines[i]) {
 				ss << std::hex << static_cast<int>(byte) << " ";
 			}
 			ss << "]\n";

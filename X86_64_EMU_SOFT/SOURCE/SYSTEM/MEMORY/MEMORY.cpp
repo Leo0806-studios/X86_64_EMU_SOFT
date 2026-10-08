@@ -126,13 +126,12 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 	void  MemoryBus::PageEntry::PruneEmptySections()noexcept
 	{
-#pragma warning(suppress:26486)
-		for (auto section = Sections.rbegin(); section != Sections.rend(); section++) {
-			if ((*section).size == 0) {
-				Sections.erase(section.base());
-
+		for (size_t i = Sections.size() ; i >0; i--) {
+			if (Sections[i-1].size == 0) {
+				Sections.erase(Sections.begin() + static_cast<int64_t>(i-1));
 			}
 		}
+
 	}
 
 	bool  MemoryBus::MapResetRom(std::shared_ptr<IO_DEVICES::DeviceBase> device, uint64_t sizeBytes, uint64_t resetVector)//NOLINT(performance-unnecessary-value-param)
@@ -292,6 +291,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 		const uint64_t PageNumber = address >> 12ULL;
 		const uint64_t inPageOffset = address & 0xFFFULL;
+		if (PageNumber*4096 >= MemoryPages.size()*4096) [[unlikely]]{
+			return 0xFF;
+		}
 		const auto& page = MemoryPages[PageNumber];
 		for (const auto& section : page.Sections) {
 			if (inPageOffset >= section.pageOffset && inPageOffset < (static_cast<uint64_t>(section.pageOffset) + section.size)) {
@@ -346,6 +348,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 		const uint64_t pageNumber = baseAddress >> 12U;
 		const uint64_t lineBegin = baseAddress & 0xFFFU;
 		const uint64_t lineEnd = lineBegin + CacheLineSize;
+		if (pageNumber * 4096 >= MemoryPages.size() * 4096) [[unlikely]] {
+			return false;
+		}
 
 		const auto& page = MemoryPages[pageNumber];
 
@@ -393,6 +398,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 	{
 		const uint64_t PageNumber = address >> 12ULL;
 		const uint64_t inPageOffset = address & 0xFFFULL;
+		if (PageNumber * 4096 >= MemoryPages.size() * 4096) [[unlikely]] {
+			return;
+		}
 		auto& page = MemoryPages[PageNumber];
 		for (auto& section : page.Sections) {
 			if (inPageOffset >= section.pageOffset && inPageOffset < (static_cast<uint64_t>(section.pageOffset) + section.size)) {

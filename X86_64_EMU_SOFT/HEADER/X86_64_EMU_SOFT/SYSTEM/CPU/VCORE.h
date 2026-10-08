@@ -49,16 +49,16 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 			MEMORY::MemoryBus* memoryBus;
 			struct CacheLine {
 				uint64_t baseAddress=0;
-				std::array<uint8_t, 64> data={{0}};
 				uint8_t flags = 0u | std::to_underlying(CacheLineFlags::Stale);
 				uint64_t lastAccessed = 0;
 			};
 			std::array< CacheLine, 64> cacheLines;
+			std::array<std::array<uint8_t, 64>, 64> dataLines;
 			int32_t getCacheLineIndex(uint64_t allignedAddress) noexcept;
 			uint16_t nextRefresh = 0;//the cache line that gets replaced the next time a adress from a not in cach line gets loaded. round robin replacement policy for now
 			
 			/// <summary>
-			/// selects the line to be used for further cache operations. returns the cache line index that was selected. if no cache line was selected returns -1
+			/// selects the line to be used for further cache operations. returns the cache line index that was selected. returns -1 when the line isnt cachable
 			/// it transparently fetches bytes from the memory bus if the line is not in cache or stale. if the cache is full it evicts a line according to the replacement policy
 			/// </summary>
 			/// <returns></returns>

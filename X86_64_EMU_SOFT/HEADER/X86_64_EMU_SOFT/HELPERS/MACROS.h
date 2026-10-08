@@ -28,11 +28,19 @@ __pragma(warning(push,0))\
 __pragma(warning(disable:26447))\
 ZoneScoped; ZoneColor(0xff00ff)\
 __pragma(warning(pop))
+#define DeepZoneScopedN(name)  \
+__pragma(warning(push,0))\
+__pragma(warning(disable:26447))\
+ZoneNamed( ___tracy_scoped_zone, true ); ZoneColor(0xff00ff);\
+__pragma(warning(pop))
+
 #	else
 #		define DeepZoneScoped (void)0
+#define DeepZoneScopedN(name) (void)0
 #	endif
 #else
 #	define DeepZoneScoped (void)0
+#		define DeepZoneScopedN(name) (void)0
 #endif
 #	pragma warning(pop)
 
