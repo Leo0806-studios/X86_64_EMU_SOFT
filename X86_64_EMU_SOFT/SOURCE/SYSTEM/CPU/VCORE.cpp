@@ -355,9 +355,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		std::print("R15: {:#X} \n", R15.GetValue());
 		std::print("CR0: {:#X}, decimal {}, binary {:#B}\n", CR0.GetValue(), CR0.GetValue(), CR0.GetValue());
 		std::print("EFER: {:#X}, decimal {}, binary {:#B}\n", EFER.GetValue(), EFER.GetValue(), EFER.GetValue());
+		
 
 		std::print("*****************************************************************\n");
-
+		std::print("Cache:");
+		std::print("{}", cache.ToString());
 	}
 	VirtualCore::VirtualCore(uint64_t resetVector, std::shared_ptr<MEMORY::MemoryBus> memBus, vCoreMode startupMode) noexcept :
 		cache(memBus.get()), RAX(), RBX(), RCX(), RDX(), RSI(), RDI(), RSP(), RBP(), R8(), R9(), R10(), R11(), R12(), R13(), R14(),
@@ -552,16 +554,52 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 		return ret;
 	}
-	void VirtualCore::Cache::chooseAndEvictCacheLine() noexcept
+
+	int64_t VirtualCore::Cache::selectCacheLine(uint64_t allignedAddress) noexcept
 	{
-		;
-		//normalize last accesed if cacheClock is more than half of max value of uint64_t
+		uint64_t lowestLastAccessed = std::numeric_limits<uint64_t>::max();
+		int64_t choosenIndex = -1;
+		choosenIndex = static_cast<int64_t>(getCacheLineIndex(allignedAddress));
+		if (choosenIndex != static_cast<int64_t>(-1)) {
+			return static_cast<int64_t>(choosenIndex);
+		}
+		for (uint64_t i = 0; i < this->cacheLines.size(); i++) {
+			const CacheLine& line = this->cacheLines[i];
+			if (line.lastAccessed < lowestLastAccessed) {
+				lowestLastAccessed = line.lastAccessed;
+				choosenIndex = static_cast<int64_t>(i);
+			}
+
+		}
+		NeverOrAssert(lowestLastAccessed != std::numeric_limits<uint64_t>::max());
+		NeverOrAssert(choosenIndex != -1);
+		NeverOrAssert(static_cast<size_t>(choosenIndex) < cacheLines.size());
+
+
+		CacheLine& lineToEvict = cacheLines[static_cast<size_t>(choosenIndex)];
+
+		if (lineToEvict.flags & std::to_underlying(CacheLineFlags::Dirty)) {
+			for (uint64_t i = 0; i < lineToEvict.data.size(); ++i) {
+				memoryBus->Write8(lineToEvict.baseAddress + i, lineToEvict.data[i]);
+			lineToEvict.data[i] = memoryBus->Read8(lineToEvict.baseAddress + i);
+			}
+		}
+		for (uint64_t i = 0; i < lineToEvict.data.size(); ++i) {
+			lineToEvict.data[i] = memoryBus->Read8(allignedAddress + i);
+		}
+		lineToEvict.flags |= std::to_underlying(CacheLineFlags::Valid);
+		lineToEvict.flags &= ~std::to_underlying(CacheLineFlags::Dirty);
+		lineToEvict.flags &= ~std::to_underlying(CacheLineFlags::Stale);
+		lineToEvict.baseAddress = allignedAddress;
+		lineToEvict.lastAccessed = (cacheClock++);
+		//normalize last accessed if cacheClock is more than half of max value of uint64_t
 		if (cacheClock > std::numeric_limits<uint64_t>::max() / 2) {
 			for (auto&  line : cacheLines) {
 				line.lastAccessed -= lowestLastAccessed;
 			}
 			cacheClock -= lowestLastAccessed;
 		}
+		return choosenIndex;
 	}
 
 	uint8_t VirtualCore::Cache::Read8(uint64_t address)  noexcept
@@ -569,29 +607,17 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 		ZoneScoped;
 		const uint64_t allignedAddress = address & 0xFFFFFFFFFFFFFFC0ULL;
-		const int32_t it = getCacheLineIndex(allignedAddress);
-		if ((it == -1) || cacheLines[static_cast<size_t>(it)].flags & std::to_underlying(CacheLineFlags::Stale)) {
-			const bool Cachable = memoryBus->IsCachableLine(allignedAddress);
-			if (!Cachable) {
-				return memoryBus->Read8(address);
-			}
-			if (cacheLines.size() >= 64) {
-			chooseAndEvictCacheLine();
-			}
-			else {
-
-			}
-			auto& line = cacheLines[static_cast<size_t>(it)];
-			for (uint64_t i = 0; i < line.data.size(); ++i) {
-				line.data[i] = memoryBus->Read8(allignedAddress + i);
-			}
-			line.flags |= std::to_underlying(CacheLineFlags::Valid);
-			line.flags &= ~std::to_underlying(CacheLineFlags::Dirty);
-			line.flags &= ~std::to_underlying(CacheLineFlags::Stale);
-			//it = cacheLines.find(allignedAddress);
+		const bool Cachable = memoryBus->IsCachableLine(allignedAddress);
+		if (!Cachable) {
+			return memoryBus->Read8(address);
 		}
+		const int64_t it = selectCacheLine(allignedAddress);
+		NeverOrAssert(it != -1);
 		auto& line = cacheLines[static_cast<size_t>(it)];
 		line.lastAccessed = (cacheClock++);
+		NeverOrAssert(line.baseAddress == allignedAddress);
+		NeverOrAssert(static_cast<size_t>(it) < cacheLines.size());
+		NeverOrAssert((address & 0x3F) < line.data.size());
 		return line.data[address & 0x3F];
 
 
@@ -620,6 +646,24 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		uint64_t value = 0;
 		memcpy(&value, bytes.data(), sizeof(uint64_t));
 		return value;
+	}
+
+	std::string VirtualCore::Cache::ToString() const
+	{
+		std::stringstream ss;
+		ss << "Cache state:\n";
+		for (size_t i = 0; i < cacheLines.size(); ++i) {
+			const auto& line = cacheLines[i];
+			ss << "Line " << i << ": Base Address: 0x" << std::hex << line.baseAddress
+				<< ", Flags: 0x" << std::hex << static_cast<int>(line.flags)
+				<< ", Last Accessed: " << std::dec << line.lastAccessed
+				<< "\nData: [";
+			for (const auto& byte : line.data) {
+				ss << std::hex << static_cast<int>(byte) << " ";
+			}
+			ss << "]\n";
+		}
+		return ss.str();
 	}
 
 }// namespace X86_64_EMU_SOFT::SYSTEM::CPU

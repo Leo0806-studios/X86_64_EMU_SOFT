@@ -58,14 +58,14 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 			uint16_t nextRefresh = 0;//the cache line that gets replaced the next time a adress from a not in cach line gets loaded. round robin replacement policy for now
 			
 			/// <summary>
-			/// seletchts the aproriate cache line and if noe is present evicts one and returns the index of a valid line. returns -1 if the address is not cachable
+			/// selects the line to be used for further cache operations. returns the cache line index that was selected. if no cache line was selected returns -1
+			/// it transparently fetches bytes from the memory bus if the line is not in cache or stale. if the cache is full it evicts a line according to the replacement policy
 			/// </summary>
-			/// <param name="address"></param>
 			/// <returns></returns>
-			int64_t selectCachLine(uint64_t address) noexcept;
-			void chooseAndEvictCacheLine() noexcept;
+			int64_t selectCacheLine(uint64_t allignedAddress) noexcept;
 		public:
-			explicit Cache(MEMORY::MemoryBus* memoryBus)noexcept : memoryBus(memoryBus), cacheLines(64) {//TODO : make cache size configurable
+			explicit Cache(MEMORY::MemoryBus* memoryBus)noexcept : memoryBus(memoryBus), cacheLines() {//TODO : make cache size configurable
+				
 				for (auto& line : cacheLines) {
 					line.baseAddress = 0;
 					line.flags = 0;
@@ -82,6 +82,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 			void Write32(uint64_t address, uint32_t value)noexcept;
 			void Write64(uint64_t address, uint64_t value)noexcept;
 			//no write  cache yet
+
+
+			std::string ToString()const;
 		};
 
 		friend class DecodingEngine;
