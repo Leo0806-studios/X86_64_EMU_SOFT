@@ -634,7 +634,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		line.lastAccessed = (cacheClock++);
 		assert(line.baseAddress == allignedAddress);
 		assert(static_cast<size_t>(it) < cacheLines.size());
-		assert((address & 0x3F) < line.data.size());
+		assert((address & 0x3F) < dataLine.size());
 		return dataLine[address & 0x3F];
 
 

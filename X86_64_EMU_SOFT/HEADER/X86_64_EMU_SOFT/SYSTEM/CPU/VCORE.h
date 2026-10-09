@@ -64,7 +64,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 			/// <returns></returns>
 			int64_t selectCacheLine(uint64_t allignedAddress) noexcept;
 		public:
-			explicit Cache(MEMORY::MemoryBus* memoryBus)noexcept : memoryBus(memoryBus), cacheLines() {//TODO : make cache size configurable
+			explicit Cache(MEMORY::MemoryBus* memoryBus)noexcept : memoryBus(memoryBus), cacheLines() ,dataLines(){//TODO : make cache size configurable
 				
 				for (auto& line : cacheLines) {
 					line.baseAddress = 0;
