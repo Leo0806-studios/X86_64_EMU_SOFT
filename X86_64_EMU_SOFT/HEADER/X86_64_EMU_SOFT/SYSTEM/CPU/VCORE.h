@@ -73,6 +73,23 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 				}
 
 			}
+			explicit Cache(const Cache& other) = delete;
+			explicit  Cache(Cache&& other) noexcept : memoryBus(other.memoryBus), cacheLines(std::move(other.cacheLines)), dataLines(std::move(other.dataLines)), cacheClock(other.cacheClock), nextRefresh(other.nextRefresh) {
+				other.memoryBus = nullptr;
+				other.cacheClock = 0;
+				other.nextRefresh = 0;
+			}
+			Cache& operator=(const Cache& other) = delete;
+			Cache& operator=(Cache&& other) {
+				if (this != &other) {
+					memoryBus = other.memoryBus;
+					cacheLines = std::move(other.cacheLines);
+					dataLines = std::move(other.dataLines);
+					cacheClock = other.cacheClock;
+					nextRefresh = other.nextRefresh;
+				}
+				return *this;
+			}
 			[[nodiscard]] uint8_t Read8(uint64_t address) noexcept;
 			[[nodiscard]] uint16_t Read16(uint64_t address) noexcept;
 			[[nodiscard]] uint32_t Read32(uint64_t address) noexcept;
@@ -89,7 +106,6 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 
 		friend class DecodingEngine;
 		friend class ExecutionEngine;
-		mutable Cache cache;
 		enum class RegisterID :uint8_t {
 			RAX = 0b000,
 			RCX = 0b001,
@@ -130,6 +146,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		static const uint64_t EFER_MSR_NUMBER = 0xC0000080ULL;
 
 		std::shared_ptr<MEMORY::MemoryBus> memoryBus;
+		mutable Cache cache;
+
 		void decodeInstruction(INSTRUCTIONS::Instruction& instruction);
 		void executeInstruction(const INSTRUCTIONS::Instruction& instruction);
 		void PrintCoreState()const;

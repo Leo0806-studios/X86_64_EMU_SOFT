@@ -362,11 +362,12 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		std::print("{}", cache.ToString());
 	}
 	VirtualCore::VirtualCore(uint64_t resetVector, std::shared_ptr<MEMORY::MemoryBus> memBus, vCoreMode startupMode) noexcept :
-		cache(memBus.get()), RAX(), RBX(), RCX(), RDX(), RSI(), RDI(), RSP(), RBP(), R8(), R9(), R10(), R11(), R12(), R13(), R14(),
-		R15(), RIP(), EFER(),
-		CR0(), isRunning(false), hasShutdown(false), isEnabled(false), memoryBus(std::move(memBus))
+		RAX(), RBX(), RCX(), RDX(), RSI(), RDI(), RSP(), RBP(), R8(), R9(), R10(), R11(), R12(), R13(), R14(), R15(),
+		RIP(), EFER(), CR0(),
+		isRunning(false), hasShutdown(false), isEnabled(false), memoryBus(std::move(memBus)), cache(nullptr)
 
 	{
+		cache = Cache(memoryBus.get());
 		DeepZoneScoped;
 		if (startupMode == vCoreMode::realMode) {
 			CR0.SetPE(false);
@@ -385,11 +386,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 		RIP.SetValue(resetVector);
 	}
-	VirtualCore::VirtualCore(const VirtualCore& other)noexcept :cache(other.cache),
-		RAX(other.RAX), RBX(other.RBX), RCX(other.RCX), RDX(other.RDX), RSI(other.RDX), RDI(other.RDI), RSP(other.RSP), RBP(other.RBP),
-		R8(other.R8), R9(other.R9), R10(other.R10), R11(other.R11), R12(other.R12), R13(other.R13), R14(other.R14), R15(other.R15),
-		RIP(other.RIP), EFER(other.EFER), CR0(other.CR0),
-		isRunning(other.isRunning.load()), hasShutdown(other.hasShutdown.load()), isEnabled(other.isEnabled.load()), memoryBus(other.memoryBus)
+	VirtualCore::VirtualCore(const VirtualCore& other)noexcept :RAX(other.RAX),
+		RBX(other.RBX), RCX(other.RCX), RDX(other.RDX), RSI(other.RDX), RDI(other.RDI), RSP(other.RSP), RBP(other.RBP), R8(other.R8),
+		R9(other.R9), R10(other.R10), R11(other.R11), R12(other.R12), R13(other.R13), R14(other.R14), R15(other.R15), RIP(other.RIP),
+		EFER(other.EFER), CR0(other.CR0), isRunning(other.isRunning.load()),
+		hasShutdown(other.hasShutdown.load()), isEnabled(other.isEnabled.load()), memoryBus(other.memoryBus), cache(std::move(other.cache))
 	{
 		DeepZoneScoped;
 	}
@@ -399,7 +400,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		if (this == &other) {
 			return *this;
 		}
-		cache = other.cache;
+		cache = Cache(other.memoryBus.get());
 		RAX = other.RAX;
 		RBX = other.RBX;
 		RCX = other.RCX;
@@ -424,12 +425,12 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		return *this;
 
 	}
-	VirtualCore::VirtualCore(VirtualCore&& other)noexcept :cache(std::move(other.cache)),
-		RAX(std::move(other.RAX)), RBX(std::move(other.RBX)), RCX(std::move(other.RCX)), RDX(std::move(other.RDX)), RSI(std::move(other.RSI)), RDI(std::move(other.RDI)),
-		RSP(std::move(other.RSP)), RBP(std::move(other.RBP)), R8(std::move(other.R8)), R9(std::move(other.R9)), R10(std::move(other.R10)), R11(std::move(other.R11)),
-		R12(std::move(other.R12)), R13(std::move(other.R13)), R14(std::move(other.R14)), R15(std::move(other.R15)),
-		RIP(std::move(other.RIP)), EFER(std::move(other.EFER)), CR0(std::move(other.CR0)),
-		isRunning(other.isRunning.load()), hasShutdown(other.hasShutdown.load()), isEnabled(other.isEnabled.load()), memoryBus(std::move(other.memoryBus))
+	VirtualCore::VirtualCore(VirtualCore&& other)noexcept :RAX(std::move(other.RAX)),
+		RBX(std::move(other.RBX)), RCX(std::move(other.RCX)), RDX(std::move(other.RDX)), RSI(std::move(other.RSI)), RDI(std::move(other.RDI)), RSP(std::move(other.RSP)),
+		RBP(std::move(other.RBP)), R8(std::move(other.R8)), R9(std::move(other.R9)), R10(std::move(other.R10)), R11(std::move(other.R11)), R12(std::move(other.R12)),
+		R13(std::move(other.R13)), R14(std::move(other.R14)), R15(std::move(other.R15)), RIP(std::move(other.RIP)),
+		EFER(std::move(other.EFER)), CR0(std::move(other.CR0)), isRunning(other.isRunning.load()),
+		hasShutdown(other.hasShutdown.load()), isEnabled(other.isEnabled.load()), memoryBus(std::move(other.memoryBus)), cache(std::move(other.cache))
 	{
 		DeepZoneScoped;
 	}
