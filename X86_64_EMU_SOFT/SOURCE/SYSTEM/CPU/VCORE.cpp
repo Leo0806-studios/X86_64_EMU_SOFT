@@ -386,45 +386,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		}
 		RIP.SetValue(resetVector);
 	}
-	VirtualCore::VirtualCore(const VirtualCore& other)noexcept :RAX(other.RAX),
-		RBX(other.RBX), RCX(other.RCX), RDX(other.RDX), RSI(other.RDX), RDI(other.RDI), RSP(other.RSP), RBP(other.RBP), R8(other.R8),
-		R9(other.R9), R10(other.R10), R11(other.R11), R12(other.R12), R13(other.R13), R14(other.R14), R15(other.R15), RIP(other.RIP),
-		EFER(other.EFER), CR0(other.CR0), isRunning(other.isRunning.load()),
-		hasShutdown(other.hasShutdown.load()), isEnabled(other.isEnabled.load()), memoryBus(other.memoryBus), cache(std::move(other.cache))
-	{
-		DeepZoneScoped;
-	}
-	VirtualCore& VirtualCore::operator=(const VirtualCore& other)noexcept
-	{
-		DeepZoneScoped;
-		if (this == &other) {
-			return *this;
-		}
-		cache = Cache(other.memoryBus.get());
-		RAX = other.RAX;
-		RBX = other.RBX;
-		RCX = other.RCX;
-		RDX = other.RDX;
-		RSI = other.RSI;
-		RDI = other.RDI;
-		RSP = other.RSP;
-		RBP = other.RBP;
-		R8 = other.R8;
-		R9 = other.R9;
-		R10 = other.R10;
-		R11 = other.R11;
-		R12 = other.R12;
-		R13 = other.R13;
-		R14 = other.R14;
-		R15 = other.R15;
-		RIP = other.RIP;
-		isRunning = other.isRunning.load();
-		hasShutdown = other.hasShutdown.load();
-		isEnabled = other.isEnabled.load();
-		memoryBus = other.memoryBus;
-		return *this;
 
-	}
+	
 	VirtualCore::VirtualCore(VirtualCore&& other)noexcept :RAX(std::move(other.RAX)),
 		RBX(std::move(other.RBX)), RCX(std::move(other.RCX)), RDX(std::move(other.RDX)), RSI(std::move(other.RSI)), RDI(std::move(other.RDI)), RSP(std::move(other.RSP)),
 		RBP(std::move(other.RBP)), R8(std::move(other.R8)), R9(std::move(other.R9)), R10(std::move(other.R10)), R11(std::move(other.R11)), R12(std::move(other.R12)),
@@ -560,7 +523,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	int64_t VirtualCore::Cache::selectCacheLine(uint64_t allignedAddress) noexcept
 	{
 		DeepZoneScoped;
-		uint64_t lowestLastAccessed = std::numeric_limits<uint64_t>::max();
+		uint32_t lowestLastAccessed = std::numeric_limits<uint32_t>::max();
 		int64_t choosenIndex = -1;
 		choosenIndex = static_cast<int64_t>(getCacheLineIndex(allignedAddress));
 		if (choosenIndex != static_cast<int64_t>(-1)) {
@@ -580,7 +543,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 
 			}
 		}
-		assert(lowestLastAccessed != std::numeric_limits<uint64_t>::max());
+		assert(lowestLastAccessed != std::numeric_limits<uint32_t>::max());
 		assert(choosenIndex != -1);
 		assert(static_cast<size_t>(choosenIndex) < cacheLines.size());
 
@@ -608,7 +571,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		lineToEvict.baseAddress = allignedAddress;
 		lineToEvict.lastAccessed = (cacheClock++);
 		//normalize last accessed if cacheClock is more than half of max value of uint64_t
-		if (cacheClock > std::numeric_limits<uint64_t>::max() / 2) {
+		if (cacheClock > std::numeric_limits<uint32_t>::max() / 2) {
 			{
 					DeepZoneScopedN("Cache::selectCacheLine normalizing last accessed");
 				for (auto& line : cacheLines) {

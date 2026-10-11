@@ -29,10 +29,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY
 
 					IO_DEVICES::DeviceBase* device = nullptr;
 					uint8_t* dataPtr = nullptr;
-				uint8_t Flags = 0;
 				uint64_t DeviceOffset = 0;
 				uint32_t pageOffset = 0;
-				uint32_t size = 4096;
+				uint16_t size = 4096;
+				uint8_t Flags = 0;
 
 			};
 			std::vector<PageSection> Sections = std::vector<PageSection>(1);//NOLINT(misc-non-private-member-variables-in-classes)

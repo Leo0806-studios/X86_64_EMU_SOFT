@@ -36,6 +36,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 	{
 		class Cache {
 		public:
+			uint32_t cacheClock = 0;//independend of the core clock. used to implement LRU cache replacement policy
 			enum class CacheLineFlags :uint8_t {
 				Valid = 0b00000001,
 				Dirty = 0b00000010,
@@ -45,12 +46,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 				Reserved4 = 0b00100000
 			};
 		private:
-			uint64_t cacheClock = 0;//independend of the core clock. used to implement LRU cache replacement policy
 			MEMORY::MemoryBus* memoryBus;
 			struct CacheLine {
 				uint64_t baseAddress=0;
 				uint8_t flags = 0u | std::to_underlying(CacheLineFlags::Stale);
-				uint64_t lastAccessed = 0;
+				uint32_t lastAccessed = 0;
 			};
 			std::array< CacheLine, 64> cacheLines;
 			std::array<std::array<uint8_t, 64>, 64> dataLines;
@@ -74,13 +74,13 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 
 			}
 			explicit Cache(const Cache& other) = delete;
-			explicit  Cache(Cache&& other) noexcept : memoryBus(other.memoryBus), cacheLines(std::move(other.cacheLines)), dataLines(std::move(other.dataLines)), cacheClock(other.cacheClock), nextRefresh(other.nextRefresh) {
+			explicit  Cache(Cache&& other) noexcept : cacheClock(other.cacheClock), memoryBus(other.memoryBus), cacheLines(std::move(other.cacheLines)), dataLines(std::move(other.dataLines)), nextRefresh(other.nextRefresh) {
 				other.memoryBus = nullptr;
 				other.cacheClock = 0;
 				other.nextRefresh = 0;
 			}
 			Cache& operator=(const Cache& other) = delete;
-			Cache& operator=(Cache&& other) {
+			Cache& operator=(Cache&& other)noexcept {
 				if (this != &other) {
 					memoryBus = other.memoryBus;
 					cacheLines = std::move(other.cacheLines);
@@ -90,6 +90,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 				}
 				return *this;
 			}
+			~Cache() = default;
 			[[nodiscard]] uint8_t Read8(uint64_t address) noexcept;
 			[[nodiscard]] uint16_t Read16(uint64_t address) noexcept;
 			[[nodiscard]] uint32_t Read32(uint64_t address) noexcept;
@@ -153,8 +154,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU
 		void PrintCoreState()const;
 	public:
 		explicit VirtualCore(uint64_t resetVector, std::shared_ptr<MEMORY::MemoryBus> memoryBus, vCoreMode startupMode)noexcept;
-		VirtualCore(const VirtualCore& other)noexcept;
-		VirtualCore& operator=(const VirtualCore& other)noexcept;
+		VirtualCore(const VirtualCore& other)noexcept = delete;
+		VirtualCore& operator=(const VirtualCore& other)noexcept = delete;
 		VirtualCore(VirtualCore&& other)noexcept;
 		VirtualCore& operator=(VirtualCore&& other)noexcept;
 		~VirtualCore();

@@ -150,11 +150,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 			PageEntry& currentPage = MemoryPages[page];
 			if (inPageOffet == 0) {
 
-				const PageEntry::PageSection newSection{ .device = currentPage.Sections[0].device,.DeviceOffset = 0,.pageOffset = static_cast<uint32_t>(sizeBytes),.size = static_cast<uint32_t>(4096 - sizeBytes) };
+				const PageEntry::PageSection newSection{ .device = currentPage.Sections[0].device,.DeviceOffset = 0,.pageOffset = static_cast<uint32_t>(sizeBytes),.size = static_cast<uint16_t>(4096 - sizeBytes) };
 				currentPage.Sections[0].device = device.get();
 				currentPage.Sections[0].DeviceOffset = 0;
 				currentPage.Sections[0].pageOffset = 0;
-				currentPage.Sections[0].size = static_cast<uint32_t>(sizeBytes);
+				currentPage.Sections[0].size = static_cast<uint16_t>(sizeBytes);
 				currentPage.Sections[0].Flags = std::to_underlying(PageEntry::PageSection::Flags::DirectAccess);
 				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::SideEffectWrite);
 				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::Cachable);
@@ -166,11 +166,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 			}
 			else if (inPageOffet + sizeBytes == 4096) {
-				const PageEntry::PageSection newSection{ .device = currentPage.Sections[0].device,.DeviceOffset = 0,.pageOffset = 0,.size = static_cast<uint32_t>(4096 - sizeBytes) };
+				const PageEntry::PageSection newSection{ .device = currentPage.Sections[0].device,.DeviceOffset = 0,.pageOffset = 0,.size = static_cast<uint16_t>(4096 - sizeBytes) };
 				currentPage.Sections[0].device = device.get();
 				currentPage.Sections[0].DeviceOffset = 0;
 				currentPage.Sections[0].pageOffset = static_cast<uint32_t>(inPageOffet);
-				currentPage.Sections[0].size = static_cast<uint32_t>(sizeBytes);
+				currentPage.Sections[0].size = static_cast<uint16_t>(sizeBytes);
 				currentPage.Sections[0].Flags = std::to_underlying(PageEntry::PageSection::Flags::DirectAccess);
 				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::SideEffectWrite);
 				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::Cachable);
@@ -184,12 +184,12 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 
 
-				const PageEntry::PageSection newSectionBefore{ .device = currentPage.Sections[0].device,.DeviceOffset = 0,.pageOffset = 0,.size = static_cast<uint32_t>(4096ULL - inPageOffet) };
-				const PageEntry::PageSection newSectionAfter{ .device = currentPage.Sections[0].device,.DeviceOffset = 0,.pageOffset = static_cast<uint32_t>(inPageOffet + sizeBytes + 1),.size = static_cast<uint32_t>(4096ULL - (inPageOffet + sizeBytes)) };
+				const PageEntry::PageSection newSectionBefore{ .device = currentPage.Sections[0].device,.DeviceOffset = 0,.pageOffset = 0,.size = static_cast<uint16_t>(4096ULL - inPageOffet) };
+				const PageEntry::PageSection newSectionAfter{ .device = currentPage.Sections[0].device,.DeviceOffset = 0,.pageOffset = static_cast<uint32_t>(inPageOffet + sizeBytes + 1),.size = static_cast<uint16_t>(4096ULL - (inPageOffet + sizeBytes)) };
 				currentPage.Sections[0].device = device.get();
 				currentPage.Sections[0].DeviceOffset = 0;
 				currentPage.Sections[0].pageOffset = static_cast<uint32_t>(inPageOffet);
-				currentPage.Sections[0].size = static_cast<uint32_t>(sizeBytes);
+				currentPage.Sections[0].size = static_cast<uint16_t>(sizeBytes);
 				currentPage.Sections[0].Flags = std::to_underlying(PageEntry::PageSection::Flags::DirectAccess);
 				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::SideEffectWrite);
 				currentPage.Sections[0].Flags |= std::to_underlying(PageEntry::PageSection::Flags::Cachable);
@@ -230,11 +230,11 @@ namespace X86_64_EMU_SOFT::SYSTEM::MEMORY {
 
 
 						//PageEntry::PageSection newSectionBefore{ .device = section.device,.DeviceOffset = 0,.pageOffset = 0,.size = static_cast<uint32_t>(4096ULL - inPageOffet) };
-						const PageEntry::PageSection newSectionAfter{ .device = section.device,.DeviceOffset = 0,.pageOffset = static_cast<uint32_t>(inPageOffet + sizeBytes),.size = static_cast<uint32_t>(4096ULL - (inPageOffet + sizeBytes)) };
+						const PageEntry::PageSection newSectionAfter{ .device = section.device,.DeviceOffset = 0,.pageOffset = static_cast<uint32_t>(inPageOffet + sizeBytes),.size = static_cast<uint16_t>(4096ULL - (inPageOffet + sizeBytes)) };
 						section.device = device.get();
 						section.DeviceOffset = 0;
 						section.pageOffset = static_cast<uint32_t>(inPageOffet);
-						section.size = static_cast<uint32_t>(sizeBytes);
+						section.size = static_cast<uint16_t>(sizeBytes);
 						section.Flags = std::to_underlying(PageEntry::PageSection::Flags::DirectAccess);
 						section.Flags |= std::to_underlying(PageEntry::PageSection::Flags::SideEffectWrite);
 						section.Flags |= std::to_underlying(PageEntry::PageSection::Flags::Cachable);
