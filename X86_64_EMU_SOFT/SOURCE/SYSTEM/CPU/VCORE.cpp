@@ -511,10 +511,9 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		const uint64_t len = cacheLines.size();
 		for(uint64_t i = 0; i < len; ++i) {
 			const auto& line = cacheLines[i];
-			if (line.baseAddress == allignedAddress && line.flags & std::to_underlying(CacheLineFlags::Valid)) {
+			if (line.baseAddress == allignedAddress && line.flags & std::to_underlying(CacheLineFlags::Valid))[[likely]] {
 				__assume(static_cast<int64_t>(i) < std::numeric_limits<int32_t>::max());
-				ret = static_cast<int32_t>(i);
-				break;
+				return static_cast<int32_t>(i);
 			}
 		}
 		return ret;
@@ -526,8 +525,8 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		uint32_t lowestLastAccessed = std::numeric_limits<uint32_t>::max();
 		int64_t choosenIndex = -1;
 		choosenIndex = static_cast<int64_t>(getCacheLineIndex(allignedAddress));
-		if (choosenIndex != static_cast<int64_t>(-1)) {
-			return static_cast<int64_t>(choosenIndex);
+		if (choosenIndex != static_cast<int64_t>(-1))[[likely]] {
+			return choosenIndex;
 		}
 		if (!memoryBus->IsCachableLine(allignedAddress)) {
 			return -1;
