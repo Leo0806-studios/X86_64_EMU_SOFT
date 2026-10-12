@@ -48,6 +48,13 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS
 		OR_AL_imm8_0xC,//handled partialy
 		OR_AxEaxRax_imm16imm32_0xD,//handled partialy
 
+		AND_rm8_r8_0x20=0x20,//handled partial
+		AND_rm16rm32_r16r32_0x21=0x21,//handled partial
+		AND_r8_rm8_0x22=0x22,//handled partial
+		AND_r16r32_rm16rm32_0x23=0x23,//handled partial
+		AND_AL_imm8_0x24 = 0x24,//handled partial
+		AND_AxEaxRax_imm16imm32_0x25 = 0x25,//handled partial
+
 		SUB_rm8_r8_0x28 = 0x28,//handled partial
 		SUB_rm16rm32_r16r32_0X29 = 0x29,//handled partial
 		SUB_r8_rm8_0x2A,//handled partial

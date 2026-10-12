@@ -9,38 +9,38 @@
 
 #pragma warning(push)
 #pragma warning(disable:4005)
-#ifdef TRACY_ENABLE	
+#if defined(TRACY_ENABLE) 	&& !defined(TRACY_ONLY_MIP)
 #	define ZoneNamed( varname, active ) \
-__pragma(warning(push,0))\
-__pragma(warning(disable:26447 6246))\
-static constexpr tracy::SourceLocationData __tracy_source_location { nullptr, TracyFunction,  TracyFile, (uint32_t)std::source_location::current().line(), 0 }; tracy::ScopedZone varname( &__tracy_source_location, active )\
-__pragma(warning(pop))
+	__pragma(warning(push,0))\
+	__pragma(warning(disable:26447 6246))\
+	static constexpr tracy::SourceLocationData __tracy_source_location { nullptr, TracyFunction,  TracyFile, (uint32_t)std::source_location::current().line(), 0 }; tracy::ScopedZone varname( &__tracy_source_location, active )\
+	__pragma(warning(pop))
 #	define ZoneScoped \
-__pragma(warning(push,0))\
-__pragma(warning(disable:26447 6246))\
- ZoneNamed( ___tracy_scoped_zone, true )\
-__pragma(warning(pop))
-
-
+	__pragma(warning(push,0))\
+	__pragma(warning(disable:26447 6246))\
+	ZoneNamed( ___tracy_scoped_zone, true )\
+	__pragma(warning(pop))
 #	ifdef DEEP_PROFILING
 #		define DeepZoneScoped  \
-__pragma(warning(push,0))\
-__pragma(warning(disable:26447 6246))\
-ZoneScoped; ZoneColor(0xff00ff)\
-__pragma(warning(pop))
-#define DeepZoneScopedN(name)  \
-__pragma(warning(push,0))\
-__pragma(warning(disable:26447 6246))\
-ZoneNamed( ___tracy_scoped_zone, true ); ZoneColor(0xff00ff);\
-__pragma(warning(pop))
+		__pragma(warning(push,0))\
+		__pragma(warning(disable:26447 6246))\
+		ZoneScoped; ZoneColor(0xff00ff)\
+		__pragma(warning(pop))
+#		define DeepZoneScopedN(name)  \
+		__pragma(warning(push,0))\
+		__pragma(warning(disable:26447 6246))\
+		ZoneNamed( ___tracy_scoped_zone, true ); ZoneColor(0xff00ff);\
+		__pragma(warning(pop))
 
 #	else
 #		define DeepZoneScoped (void)0
-#define DeepZoneScopedN(name) (void)0
+#		define DeepZoneScopedN(name) (void)0
 #	endif
 #else
 #	define DeepZoneScoped (void)0
-#		define DeepZoneScopedN(name) (void)0
+#	define DeepZoneScopedN(name) (void)0
+#	define ZoneScoped (void)0
+#	define ZoneNamed( varname, active ) (void)0
 #endif
 #	pragma warning(pop)
 

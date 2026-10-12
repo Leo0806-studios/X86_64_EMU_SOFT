@@ -175,8 +175,10 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 		}
 	}
 
+#pragma warning(push)
+#pragma warning(disable:4324)
 
-	struct  Instruction {
+	struct alignas(64) Instruction {
 		uint8_t InstructionLengthBytes = 0;
 		PrefixGroup1 Prefix1 = PrefixGroup1::NONE;
 		PrefixGroup2 Prefix2 = PrefixGroup2::NONE;
@@ -194,5 +196,5 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSTRUCTIONS {
 
 	};
 
-
+#pragma warning(pop)
 }//namespace X86_64_EMU_SOFT::SYSTEM::CPU::INSRUCTIONS

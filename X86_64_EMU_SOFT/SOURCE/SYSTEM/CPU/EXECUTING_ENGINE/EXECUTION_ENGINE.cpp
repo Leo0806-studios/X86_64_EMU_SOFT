@@ -35,7 +35,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU{
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::InstructionType::ADD)] = Handle_ADD;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::InstructionType::SUB)] = Handle_SUB;
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::InstructionType::OR)] = Handle_OR;
-
+			HandlerFuncs[std::to_underlying(INSTRUCTIONS::InstructionType::AND)] = Handle_AND;
 
 
 			HandlerFuncs[std::to_underlying(INSTRUCTIONS::InstructionType::MOV)] = Handle_MOV;

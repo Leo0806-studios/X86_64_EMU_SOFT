@@ -72,6 +72,13 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_AL_imm8_0xC)] = Handle_AL_imm8<INSTRUCTIONS::InstructionType::OR>;
 		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::OR_AxEaxRax_imm16imm32_0xD)] = Handle_AxEaxRax_imm16imm32<INSTRUCTIONS::InstructionType::OR>;
 
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::AND_rm8_r8_0x20)] = Handler_rm8_r8<INSTRUCTIONS::InstructionType::AND>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::AND_rm16rm32_r16r32_0x21)] = Handler_rm16rm32rm64_r16r32r64<INSTRUCTIONS::InstructionType::AND>; 
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::AND_r8_rm8_0x22)] = Handle_r8_rm8<INSTRUCTIONS::InstructionType::AND>; 
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::AND_r16r32_rm16rm32_0x23)] = Handle_r16r32r64_rm16rm32rm64<INSTRUCTIONS::InstructionType::AND>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::AND_AL_imm8_0x24)] = Handle_AL_imm8<INSTRUCTIONS::InstructionType::AND>;
+		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::AND_AxEaxRax_imm16imm32_0x25)] = Handle_AxEaxRax_imm16imm32<INSTRUCTIONS::InstructionType::AND>;
+
 		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_rm8_r8_0x28)] = Handler_rm8_r8<INSTRUCTIONS::InstructionType::SUB>;
 		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_rm16rm32_r16r32_0X29)] = Handler_rm16rm32rm64_r16r32r64<INSTRUCTIONS::InstructionType::SUB>;
 		arr[std::to_underlying(INSTRUCTIONS::PrimaryOpcodeByteValue::SUB_r8_rm8_0x2A)] = Handle_r8_rm8<INSTRUCTIONS::InstructionType::SUB>;
@@ -111,13 +118,20 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	{
 		ZoneScoped;//NOLINT
 		uint64_t address = RIP.GetValue();
+		[[maybe_unused]]const uint64_t instructionStartAddress = address;
 
 		auto instructionByte = static_cast<uint8_t>(FetchBytes(address, 1));
 		address++;
 		INSTRUCTIONS::Prefixes prefixes = {};
+//		for (int i = 0; i <= 15; i++) {
+//			if (HandlerFuncs[instructionByte](*this, address, instruction, prefixes, instructionByte)) {
+//				break;
+//			}
+//			instructionByte = static_cast<uint8_t>(FetchBytes(address++, 1));
+//		}
 		while (!HandlerFuncs[instructionByte](*this, address, instruction, prefixes, instructionByte)) {
 			instructionByte = static_cast<uint8_t>(FetchBytes(address++, 1));
-			//address++;
+			__assume(address - instructionStartAddress <= 15);
 		}
 
 
@@ -507,16 +521,17 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	int32_t VirtualCore::Cache::getCacheLineIndex(uint64_t allignedAddress) noexcept
 	{
 		DeepZoneScoped;
-		int32_t ret = -1;
+		
 		const uint64_t len = cacheLines.size();
 		for(uint64_t i = 0; i < len; ++i) {
+			__assume(i < cacheLines.size());
 			const auto& line = cacheLines[i];
 			if (line.baseAddress == allignedAddress && line.flags & std::to_underlying(CacheLineFlags::Valid))[[likely]] {
 				__assume(static_cast<int64_t>(i) < std::numeric_limits<int32_t>::max());
 				return static_cast<int32_t>(i);
 			}
 		}
-		return ret;
+		return -1;
 	}
 
 	int64_t VirtualCore::Cache::selectCacheLine(uint64_t allignedAddress) noexcept
@@ -585,7 +600,7 @@ namespace X86_64_EMU_SOFT::SYSTEM::CPU {
 	uint8_t VirtualCore::Cache::Read8(uint64_t address)  noexcept
 	{
 
-		ZoneScoped;
+		DeepZoneScoped;
 		const uint64_t allignedAddress = address & 0xFFFFFFFFFFFFFFC0ULL;
 	
 		const int64_t it = selectCacheLine(allignedAddress);

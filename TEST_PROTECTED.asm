@@ -49,3 +49,4 @@ shl eax, 1
 shl ebx, 1
 shl ecx, 1
 shl edx, 1
+UD1
